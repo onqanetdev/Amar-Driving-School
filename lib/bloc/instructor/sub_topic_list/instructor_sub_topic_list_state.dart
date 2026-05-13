@@ -12,7 +12,7 @@ class InstructorSubTopicListLoading
 class InstructorSubTopicListSuccess
     extends InstructorSubTopicListState {
 
-  final InstructorSubTopicListModel
+  final  InstructorSubTopicListModel
   subTopicListResponse;
 
   InstructorSubTopicListSuccess({

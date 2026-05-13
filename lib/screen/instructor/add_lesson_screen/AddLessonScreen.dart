@@ -34,24 +34,6 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
   TopicData? selectedCategory;
   List<TopicData> selectedCategories = [];
 
-  // List<CategoryModel> allCategories = [
-  //   CategoryModel(
-  //     name: "Pre-Drive Checks",
-  //     subCategories: [
-  //       SubCategoryModel(name: "Vehicle approach"),
-  //       SubCategoryModel(name: "Start-up drill"),
-  //       SubCategoryModel(name: "Vehicle approachsssss"),
-  //       SubCategoryModel(name: "Start-up drillssss"),
-  //     ],
-  //   ),
-  //   CategoryModel(
-  //     name: "Basic Control",
-  //     subCategories: [
-  //       SubCategoryModel(name: "Braking"),
-  //       SubCategoryModel(name: "Steering"),
-  //     ],
-  //   ),
-  // ];
 
   List<TopicData> allCategories = [
 
