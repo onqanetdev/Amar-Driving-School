@@ -1,3 +1,4 @@
+import 'package:amar_driving_school/bloc/instructor/sub_topic_list/instructor_sub_topic_list_bloc.dart';
 import 'package:amar_driving_school/screen/instructor/add_lesson_screen/AddLessonScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,14 +45,24 @@ class LessonScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                 // builder: (_) => AddLessonScreen(),
-                    builder: (_) => BlocProvider(
 
-                      create: (_) =>
-                          InstructorTopicListBloc(),
+                    builder: (_) =>
+                        MultiBlocProvider(providers: [
+                          BlocProvider(
+                            create: (context) => InstructorTopicListBloc(),
+                          ),
 
-                      child: AddLessonScreen(),
-                    )
+                          BlocProvider(
+                            create: (_) => InstructorSubTopicListBloc(),
+                          ),
+                        ],
+                            child: AddLessonScreen()
+                        )
+                    //     BlocProvider(
+                    //   create: (_) =>
+                    //       InstructorTopicListBloc(),
+                    //   child: AddLessonScreen(),
+                    // )
                 ),
               );
             },

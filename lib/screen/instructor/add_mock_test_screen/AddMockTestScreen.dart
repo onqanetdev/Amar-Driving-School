@@ -1,16 +1,11 @@
 import 'package:amar_driving_school/helper/app_button_animation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../bloc/instructor/topic_list/instructor_topic_list_bloc.dart';
-import '../../../bloc/instructor/topic_list/instructor_topic_list_event.dart';
-import '../../../bloc/instructor/topic_list/instructor_topic_list_state.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../model/CategoryModel.dart';
 import '../../../model/LessonModel.dart';
 import '../../../model/SubCategoryModel.dart';
-import '../../../model/instructor_topic/instructor_topic_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../../../widgets/app_input_textfield.dart';
@@ -31,39 +26,31 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
   final hourController = TextEditingController();
   final minController = TextEditingController();
 
-  TopicData? selectedCategory;
-  List<TopicData> selectedCategories = [];
+  CategoryModel? selectedCategory;
+  List<CategoryModel> selectedCategories = [];
 
-  // List<CategoryModel> allCategories = [
-  //   CategoryModel(
-  //     name: "Pre-Drive Checks",
-  //     subCategories: [
-  //       SubCategoryModel(name: "Vehicle approach"),
-  //       SubCategoryModel(name: "Start-up drill"),
-  //       SubCategoryModel(name: "Vehicle approachsssss"),
-  //       SubCategoryModel(name: "Start-up drillssss"),
-  //     ],
-  //   ),
-  //   CategoryModel(
-  //     name: "Basic Control",
-  //     subCategories: [
-  //       SubCategoryModel(name: "Braking"),
-  //       SubCategoryModel(name: "Steering"),
-  //     ],
-  //   ),
-  // ];
-
-  List<TopicData> allCategories = [
-
+  List<CategoryModel> allCategories = [
+    CategoryModel(
+      name: "Pre-Drive Checks",
+      subCategories: [
+        SubCategoryModel(name: "Vehicle approach"),
+        SubCategoryModel(name: "Start-up drill"),
+        SubCategoryModel(name: "Vehicle approachsssss"),
+        SubCategoryModel(name: "Start-up drillssss"),
+      ],
+    ),
+    CategoryModel(
+      name: "Basic Control",
+      subCategories: [
+        SubCategoryModel(name: "Braking"),
+        SubCategoryModel(name: "Steering"),
+      ],
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
-
-    context.read<InstructorTopicListBloc>().add(
-      FetchInstructorTopicList(),
-    );
 
     if (widget.lesson != null) {
       /// 👉 EDIT MODE
@@ -76,339 +63,321 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFE9E9E9),
 
-    return BlocListener<InstructorTopicListBloc, InstructorTopicListState> (
-      listener: (context, state) {
+      body: Column(
+        children: [
 
-        if(state is InstructorTopicListSuccess) {
+          /// HEADER
+          AppHeader(
+            title: "Create Mock Test",
+            showBack: true,
+          ),
 
-          setState(() {
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(12),
+              children: [
 
-            allCategories =
-                state.topicListResponse.data;
-            print(allCategories);
-          });
-        }
-      },
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    children: [
 
-      child: Scaffold(
-        backgroundColor: const Color(0xFFE9E9E9),
+                      /// 🔹 TITLE
+                      AppInputField(
+                        controller: titleController,
+                        hintText: "Advance Car Drive",
+                        fillColor: AppColor.colorInputBg,
+                        borderColor: AppColor.colorInputBorder,
+                        focusedBorderColor: AppColor.colorInputFocusBorder,
+                        hintColor: AppColor.colorInputHint,
+                        borderRadius: 10,
+                        obscureText: false,
+                        keyboardType: TextInputType.text,
+                      ),
 
-        body: Column(
-          children: [
+                      const SizedBox(height: 10),
 
-            /// HEADER
-            AppHeader(
-              title: "Create Mock Test",
-              showBack: true,
-            ),
+                      /// 🔹 DATE + TIME
+                      Row(
+                        children: [
 
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(12),
-                children: [
+                          Expanded(
+                            child: AppInputField(
+                              controller: dateController,
+                              hintText: "Start Date",
+                              fillColor: AppColor.colorInputBg,
+                              borderColor: AppColor.colorInputBorder,
+                              focusedBorderColor:
+                              AppColor.colorInputFocusBorder,
+                              hintColor: AppColor.colorInputHint,
+                              borderRadius: 10,
+                              obscureText: false,
+                              readOnly: true,
+                              onTap: pickDate,
+                            ),
+                          ),
 
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      children: [
+                          const SizedBox(width: 10),
 
-                        /// 🔹 TITLE
-                        AppInputField(
-                          controller: titleController,
-                          hintText: "Advance Car Drive",
-                          fillColor: AppColor.colorInputBg,
-                          borderColor: AppColor.colorInputBorder,
-                          focusedBorderColor: AppColor.colorInputFocusBorder,
-                          hintColor: AppColor.colorInputHint,
-                          borderRadius: 10,
-                          obscureText: false,
-                          keyboardType: TextInputType.text,
-                        ),
+                          Expanded(
+                            child: AppInputField(
+                              controller: timeController,
+                              hintText: "Start Time",
+                              fillColor: AppColor.colorInputBg,
+                              borderColor: AppColor.colorInputBorder,
+                              focusedBorderColor:
+                              AppColor.colorInputFocusBorder,
+                              hintColor: AppColor.colorInputHint,
+                              borderRadius: 10,
+                              obscureText: false,
+                              readOnly: true,
+                              onTap: pickTime,
+                            ),
+                          ),
+                        ],
+                      ),
 
-                        const SizedBox(height: 10),
+                      const SizedBox(height: 10),
 
-                        /// 🔹 DATE + TIME
-                        Row(
-                          children: [
+                      /// 🔹 DURATION
+                      Row(
+                        children: [
 
-                            Expanded(
-                              child: AppInputField(
-                                controller: dateController,
-                                hintText: "Start Date",
-                                fillColor: AppColor.colorInputBg,
-                                borderColor: AppColor.colorInputBorder,
-                                focusedBorderColor:
-                                AppColor.colorInputFocusBorder,
-                                hintColor: AppColor.colorInputHint,
-                                borderRadius: 10,
-                                obscureText: false,
-                                readOnly: true,
-                                onTap: pickDate,
+                          const Text(
+                            "Duration:",
+                            style: TextStyle(fontFamily: "InterMedium"),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: AppInputField(
+                              controller: hourController,
+                              hintText: "1hr",
+                              fillColor: AppColor.colorInputBg,
+                              borderColor: AppColor.colorInputBorder,
+                              focusedBorderColor:
+                              AppColor.colorInputFocusBorder,
+                              hintColor: AppColor.colorInputHint,
+                              borderRadius: 10,
+                              obscureText: false,
+                            ),
+                          ),
+
+                          const SizedBox(width: 6),
+                          const Text(":"),
+                          const SizedBox(width: 6),
+
+                          Expanded(
+                            child: AppInputField(
+                              controller: minController,
+                              hintText: "30Min",
+                              fillColor: AppColor.colorInputBg,
+                              borderColor: AppColor.colorInputBorder,
+                              focusedBorderColor:
+                              AppColor.colorInputFocusBorder,
+                              hintColor: AppColor.colorInputHint,
+                              borderRadius: 10,
+                              obscureText: false,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 10),
+                      Divider(),
+
+                      const SizedBox(height: 10),
+
+                      /// 🔹 CATEGORY + ADD
+                      Row(
+                        children: [
+
+                          Expanded(child: dropdownBox()),
+
+                          const SizedBox(width: 10),
+
+                          AppButtonAnimation(
+                            onTap: addCategory,
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                color: Color.fromARGB(255, 54, 113, 232),
+                                shape: BoxShape.circle,
                               ),
+                              child: const Icon(Icons.add,
+                                  color: Colors.white),
                             ),
+                          ),
+                        ],
+                      ),
 
-                            const SizedBox(width: 10),
+                      const SizedBox(height: 10),
 
-                            Expanded(
-                              child: AppInputField(
-                                controller: timeController,
-                                hintText: "Start Time",
-                                fillColor: AppColor.colorInputBg,
-                                borderColor: AppColor.colorInputBorder,
-                                focusedBorderColor:
-                                AppColor.colorInputFocusBorder,
-                                hintColor: AppColor.colorInputHint,
-                                borderRadius: 10,
-                                obscureText: false,
-                                readOnly: true,
-                                onTap: pickTime,
+                      /// 🔥 SELECTED CATEGORY
+                      /// 🔥 SELECTED CATEGORY (PRO UI)
+                      ...selectedCategories.map((cat) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF5F5F5),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: Offset(0, 3),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
 
-                        const SizedBox(height: 10),
-
-                        /// 🔹 DURATION
-                        Row(
-                          children: [
-
-                            const Text(
-                              "Duration:",
-                              style: TextStyle(fontFamily: "InterMedium"),
-                            ),
-
-                            const SizedBox(width: 10),
-
-                            Expanded(
-                              child: AppInputField(
-                                controller: hourController,
-                                hintText: "1hr",
-                                fillColor: AppColor.colorInputBg,
-                                borderColor: AppColor.colorInputBorder,
-                                focusedBorderColor:
-                                AppColor.colorInputFocusBorder,
-                                hintColor: AppColor.colorInputHint,
-                                borderRadius: 10,
-                                obscureText: false,
-                              ),
-                            ),
-
-                            const SizedBox(width: 6),
-                            const Text(":"),
-                            const SizedBox(width: 6),
-
-                            Expanded(
-                              child: AppInputField(
-                                controller: minController,
-                                hintText: "30Min",
-                                fillColor: AppColor.colorInputBg,
-                                borderColor: AppColor.colorInputBorder,
-                                focusedBorderColor:
-                                AppColor.colorInputFocusBorder,
-                                hintColor: AppColor.colorInputHint,
-                                borderRadius: 10,
-                                obscureText: false,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 10),
-                        Divider(),
-
-                        const SizedBox(height: 10),
-
-                        /// 🔹 CATEGORY + ADD
-                        Row(
-                          children: [
-
-                            Expanded(child: dropdownBox()),
-
-                            const SizedBox(width: 10),
-
-                            AppButtonAnimation(
-                              onTap: addCategory,
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: const BoxDecoration(
-                                  color: Color.fromARGB(255, 54, 113, 232),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.add,
-                                    color: Colors.white),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        /// 🔥 SELECTED CATEGORY
-                        /// 🔥 SELECTED CATEGORY (PRO UI)
-                        ...selectedCategories.map((cat) {
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF5F5F5),
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 8,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-
-                                /// 🔹 CATEGORY HEADER
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        cat.name,
-                                        style: TextStyle(
-                                          fontFamily: "InterBold",
-                                          fontSize: 14,
-                                          color: Color(0xFF002248),
-                                        ),
-                                      ),
-                                    ),
-
-                                    /// ❌ REMOVE BUTTON
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          selectedCategories.remove(cat);
-                                        });
-                                      },
-                                      child: Icon(Icons.close, size: 18, color: Colors.red),
-                                    )
-                                  ],
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                /// 🔹 SUBCATEGORY CHIPS
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-
-                                    /// 🔹 TITLE
-                                    Text(
-                                      "Sub Categories",
+                              /// 🔹 CATEGORY HEADER
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      cat.name,
                                       style: TextStyle(
                                         fontFamily: "InterBold",
-                                        fontSize: 13,
+                                        fontSize: 14,
                                         color: Color(0xFF002248),
                                       ),
                                     ),
+                                  ),
 
-                                    const SizedBox(height: 8),
+                                  /// ❌ REMOVE BUTTON
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedCategories.remove(cat);
+                                      });
+                                    },
+                                    child: Icon(Icons.close, size: 18, color: Colors.red),
+                                  )
+                                ],
+                              ),
 
-                                    // ...List.generate(cat.subCategories.length, (index) {
-                                    //   final sub = cat.subCategories[index];
-                                    //   final isSelected = sub.isSelected;
-                                    //
-                                    //   return GestureDetector(
-                                    //     onTap: () {
-                                    //       setState(() {
-                                    //         sub.isSelected = !sub.isSelected;
-                                    //       });
-                                    //     },
-                                    //     child: Container(
-                                    //       margin: const EdgeInsets.only(bottom: 6),
-                                    //       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                    //       decoration: BoxDecoration(
-                                    //         color: isSelected
-                                    //             ? const Color.fromARGB(255, 54, 113, 232).withOpacity(0.1)
-                                    //             : Colors.white,
-                                    //         borderRadius: BorderRadius.circular(10),
-                                    //         border: Border.all(
-                                    //           color: isSelected
-                                    //               ? const Color.fromARGB(255, 54, 113, 232)
-                                    //               : Colors.grey.shade300,
-                                    //         ),
-                                    //       ),
-                                    //       child: Row(
-                                    //         children: [
-                                    //
-                                    //           /// 🔹 NUMBER
-                                    //           Text(
-                                    //             "${index + 1}.",
-                                    //             style: TextStyle(
-                                    //               fontFamily: "InterBold",
-                                    //               color: isSelected
-                                    //                   ? const Color.fromARGB(255, 54, 113, 232)
-                                    //                   : Colors.black,
-                                    //             ),
-                                    //           ),
-                                    //
-                                    //           const SizedBox(width: 8),
-                                    //
-                                    //           /// 🔹 NAME
-                                    //           Expanded(
-                                    //             child: Text(
-                                    //               sub.name,
-                                    //               style: TextStyle(
-                                    //                 fontFamily: "InterMedium",
-                                    //                 fontSize: 12,
-                                    //                 color: Colors.black87,
-                                    //               ),
-                                    //             ),
-                                    //           ),
-                                    //
-                                    //           /// 🔹 CHECK ICON (optional)
-                                    //           if (isSelected)
-                                    //             Icon(Icons.check_circle,
-                                    //                 color: Color.fromARGB(255, 54, 113, 232), size: 18),
-                                    //         ],
-                                    //       ),
-                                    //     ),
-                                    //   );
-                                    // }
-                                    // ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          );
-                        }),
+                              const SizedBox(height: 10),
 
-                        const SizedBox(height: 10),
+                              /// 🔹 SUBCATEGORY CHIPS
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
 
-                        /// SUBMIT
-                        AppButton(
-                          text: "SUBMIT",
-                          onTap: onSubmit,
-                          textStyle: const TextStyle(
-                            fontFamily: "InterBold",
-                            fontSize: 12,
-                            color: Colors.white,
+                                  /// 🔹 TITLE
+                                  Text(
+                                    "Sub Categories",
+                                    style: TextStyle(
+                                      fontFamily: "InterBold",
+                                      fontSize: 13,
+                                      color: Color(0xFF002248),
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 8),
+
+                                  ...List.generate(cat.subCategories.length, (index) {
+                                    final sub = cat.subCategories[index];
+                                    final isSelected = sub.isSelected;
+
+                                    return GestureDetector(
+                                      onTap: () {
+
+                                        setState(() {
+                                          sub.isSelected = !sub.isSelected;
+                                        });
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.only(bottom: 6),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? const Color.fromARGB(255, 54, 113, 232).withOpacity(0.1)
+                                              : Colors.white,
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? const Color.fromARGB(255, 54, 113, 232)
+                                                : Colors.grey.shade300,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+
+                                            /// 🔹 NUMBER
+                                            Text(
+                                              "${index + 1}.",
+                                              style: TextStyle(
+                                                fontFamily: "InterBold",
+                                                color: isSelected
+                                                    ? const Color.fromARGB(255, 54, 113, 232)
+                                                    : Colors.black,
+                                              ),
+                                            ),
+
+                                            const SizedBox(width: 8),
+
+                                            /// 🔹 NAME
+                                            Expanded(
+                                              child: Text(
+                                                sub.name,
+                                                style: TextStyle(
+                                                  fontFamily: "InterMedium",
+                                                  fontSize: 12,
+                                                  color: Colors.black87,
+                                                ),
+                                              ),
+                                            ),
+
+                                            /// 🔹 CHECK ICON (optional)
+                                            if (isSelected)
+                                              Icon(Icons.check_circle,
+                                                  color: Color.fromARGB(255, 54, 113, 232), size: 18),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              )
+                            ],
                           ),
+                        );
+                      }),
+
+                      const SizedBox(height: 10),
+
+                      /// SUBMIT
+                      AppButton(
+                        text: "SUBMIT",
+                        onTap: onSubmit,
+                        textStyle: const TextStyle(
+                          fontFamily: "InterBold",
+                          fontSize: 12,
+                          color: Colors.white,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      )
+          ),
+        ],
+      ),
     );
-
-
   }
 
   Widget dropdownBox() {
@@ -599,14 +568,12 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
     setState(() {
       selectedCategories.add(
-        // CategoryModel(
-        //   name: selectedCategory!.name,
-        //   subCategories: selectedCategory!.subCategories
-        //       .map((e) => SubCategoryModel(name: e.name))
-        //       .toList(),
-        // ),
-
-        TopicData(id: selectedCategory!.id, name: selectedCategory!.name, slug: selectedCategory!.slug, status: selectedCategory!.status)
+        CategoryModel(
+          name: selectedCategory!.name,
+          subCategories: selectedCategory!.subCategories
+              .map((e) => SubCategoryModel(name: e.name))
+              .toList(),
+        ),
       );
     });
   }
@@ -622,11 +589,11 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
     for (var cat in selectedCategories) {
       List<String> selectedSubs = [];
 
-      // for (var sub in cat.subCategories) {
-      //   if (sub.isSelected) {
-      //     selectedSubs.add(sub.name);
-      //   }
-      // }
+      for (var sub in cat.subCategories) {
+        if (sub.isSelected) {
+          selectedSubs.add(sub.name);
+        }
+      }
 
       if (selectedSubs.isNotEmpty) {
         result[cat.name] = selectedSubs;
@@ -660,3 +627,4 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
     }
   }
 }
+

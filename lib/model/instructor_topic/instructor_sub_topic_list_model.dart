@@ -39,6 +39,7 @@ class SubTopicData {
   final String slug;
   final String topicId;
   final String status;
+  bool isSelected;
 
   SubTopicData({
 
@@ -47,7 +48,9 @@ class SubTopicData {
     required this.slug,
     required this.topicId,
     required this.status,
-  });
+    this.isSelected = false
+  }
+  );
 
   factory SubTopicData.fromJson(
       Map<String, dynamic> json) {
