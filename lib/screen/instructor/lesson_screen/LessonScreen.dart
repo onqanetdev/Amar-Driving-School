@@ -3,6 +3,8 @@ import 'package:amar_driving_school/screen/instructor/add_lesson_screen/AddLesso
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/instructor/create_lesson/instructor_create_lesson_bloc.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/topic_list/instructor_topic_list_bloc.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
@@ -55,14 +57,19 @@ class LessonScreen extends StatelessWidget {
                           BlocProvider(
                             create: (_) => InstructorSubTopicListBloc(),
                           ),
+
+                          BlocProvider(
+                            create: (_) =>
+                                InstructorStudentListBloc(),
+                          ),
+
+                          BlocProvider(
+                            create: (_) =>
+                                InstructorCreateLessonBloc(),
+                          ),
                         ],
                             child: AddLessonScreen()
                         )
-                    //     BlocProvider(
-                    //   create: (_) =>
-                    //       InstructorTopicListBloc(),
-                    //   child: AddLessonScreen(),
-                    // )
                 ),
               );
             },

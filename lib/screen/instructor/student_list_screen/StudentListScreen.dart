@@ -103,19 +103,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
               },
             ),
 
-            // Expanded(
-            //   child: ListView.separated(
-            //     padding: EdgeInsets.all(10),
-            //     itemCount: students.length,
-            //     separatorBuilder: (_, __) =>
-            //         SizedBox(height: 12),
-            //     itemBuilder: (context, index) {
-            //       return StudentCard(
-            //         data: students[index],
-            //       );
-            //     },
-            //   ),
-            // )
+
 
             Expanded(
 

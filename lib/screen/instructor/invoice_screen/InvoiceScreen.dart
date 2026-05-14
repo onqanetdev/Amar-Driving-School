@@ -90,29 +90,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                         ),
                       ),
 
-                      /*const SizedBox(height: 10),
-
-                      /// 🔹 FILE UPLOAD FIELD (FIXED)
-                      AppInputField(
-                        controller: fileController,
-                        hintText: "Upload Training Report",
-                        readOnly: true,            // 🔥 no typing
-                        onTap: pickFile,           // 🔥 open picker
-
-                        fillColor: AppColor.colorInputBg,
-                        borderColor: AppColor.colorInputBorder,
-                        focusedBorderColor: AppColor.colorInputFocusBorder,
-                        hintColor: AppColor.colorInputHint,
-
-                        suffixWidget: GestureDetector(
-                          onTap: pickFile,
-                          child: const Icon(
-                            Icons.upload_outlined,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),*/
-
                       const SizedBox(height: 15),
 
                       /// 🔹 SUBMIT BUTTON

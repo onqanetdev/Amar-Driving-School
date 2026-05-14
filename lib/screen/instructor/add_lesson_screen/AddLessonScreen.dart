@@ -6,6 +6,12 @@ import 'package:amar_driving_school/model/instructor_topic/instructor_topic_list
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/instructor/create_lesson/instructor_create_lesson_bloc.dart';
+import '../../../bloc/instructor/create_lesson/instructor_create_lesson_event.dart';
+import '../../../bloc/instructor/create_lesson/instructor_create_lesson_state.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_event.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_state.dart';
 import '../../../bloc/instructor/topic_list/instructor_topic_list_bloc.dart';
 import '../../../bloc/instructor/topic_list/instructor_topic_list_event.dart';
 import '../../../common/app_color.dart';
@@ -14,11 +20,14 @@ import '../../../helper/app_button_animation.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../model/CategoryModel.dart';
 import '../../../model/LessonModel.dart';
+import '../../../model/StudentModel.dart';
 import '../../../model/SubCategoryModel.dart';
+import '../../../model/instructor_student_list/instructor_student_list_model.dart';
 import '../../../model/instructor_topic/instructor_sub_topic_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../../../widgets/app_input_textfield.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddLessonScreen extends StatefulWidget {
   final LessonModel? lesson;
@@ -35,6 +44,9 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
   final timeController = TextEditingController();
   final hourController = TextEditingController();
   final minController = TextEditingController();
+  final studentListController = TextEditingController();
+
+  final durationController = TextEditingController();
 
   TopicData? selectedCategory;
   List<TopicData> selectedCategories = [];
@@ -51,14 +63,15 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
   //List<String> allSelectedSubTopic = [ ];
   Set<String> allSelectedSubTopic = {};
 
+  StudentData? selectedStudent;
+
+  List<StudentData> students = [];
+  String studentUserId = '';
   @override
-  void initState() {
+  initState(){
     super.initState();
 
-    context.read<InstructorTopicListBloc>().add(
-      FetchInstructorTopicList(),
-    );
-
+    loadInitialData();
     if (widget.lesson != null) {
       /// 👉 EDIT MODE
       titleController.text = widget.lesson!.name;
@@ -109,7 +122,73 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
             }
 
           },
-        )
+        ),
+        //Bloc Lister for  Student List
+        BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
+
+          listener: (context, state) {
+
+            /// LOADING
+            if(state is InstructorStudentListLoading) {
+              LoaderHelper.show(context);
+            }
+
+            /// SUCCESS
+            if(state is InstructorStudentListSuccess) {
+              LoaderHelper.hide(context);
+              students = state.studentListResponse.data;
+
+            }
+
+            /// FAILURE
+            if(state is InstructorStudentListFailure) {
+
+            }
+          },
+        ),
+        // Bloc Lister for Add Lesson
+        BlocListener<InstructorCreateLessonBloc, InstructorCreateLessonState>(
+
+          listener: (context, state) async {
+
+            /// 🔥 LOADING
+            if(state is InstructorCreateLessonLoading) {
+
+              LoaderHelper.show(context);
+            }
+
+            /// 🔥 SUCCESS
+            if(state is InstructorCreateLessonSuccess) {
+
+              LoaderHelper.hide(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+
+                SnackBar(
+                  content: Text(
+                    state.createLessonResponse.message,
+                  ),
+                ),
+              );
+
+              Navigator.pop(context);
+            }
+
+            /// 🔥 FAILURE
+            if(state is InstructorCreateLessonFailure) {
+
+              LoaderHelper.hide(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+
+                SnackBar(
+                  content: Text(state.error),
+                ),
+              );
+            }
+          },
+        ),
+
       ],
           child: Scaffold(
             backgroundColor: const Color(0xFFE9E9E9),
@@ -304,6 +383,24 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
                             const SizedBox(height: 10),
 
+                            AppInputField(
+                              controller: studentListController,
+                              hintText: "Student Name",
+                              readOnly: true,            // 🔥 disable typing
+                              onTap: showStudentList,    // 🔥 open dialog
+
+                              fillColor: AppColor.colorInputBg,
+                              borderColor: AppColor.colorInputBorder,
+                              focusedBorderColor: AppColor.colorInputFocusBorder,
+                              hintColor: AppColor.colorInputHint,
+
+                              suffixWidget: const Icon(
+                                Icons.keyboard_arrow_down,
+                                color: Colors.grey,
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
                             /// 🔹 DATE + TIME
                             Row(
                               children: [
@@ -359,8 +456,10 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
                                 Expanded(
                                   child: AppInputField(
-                                    controller: hourController,
-                                    hintText: "1hr",
+                                    controller: durationController,
+                                    hintText: "Select Duration",
+                                    readOnly: true,
+                                    onTap: pickDuration,
                                     fillColor: AppColor.colorInputBg,
                                     borderColor: AppColor.colorInputBorder,
                                     focusedBorderColor:
@@ -371,23 +470,6 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                                   ),
                                 ),
 
-                                const SizedBox(width: 6),
-                                const Text(":"),
-                                const SizedBox(width: 6),
-
-                                Expanded(
-                                  child: AppInputField(
-                                    controller: minController,
-                                    hintText: "30Min",
-                                    fillColor: AppColor.colorInputBg,
-                                    borderColor: AppColor.colorInputBorder,
-                                    focusedBorderColor:
-                                    AppColor.colorInputFocusBorder,
-                                    hintColor: AppColor.colorInputHint,
-                                    borderRadius: 10,
-                                    obscureText: false,
-                                  ),
-                                ),
                               ],
                             ),
 
@@ -660,16 +742,159 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
     });
   }
 
-  void onSubmit() {
-    final json = generateJson();
+  // Future<void> onSubmit() async {
+  //   final json = generateJson();
+  //   final prefs =
+  //       await SharedPreferences.getInstance();
+  //
+  //   final userId =
+  //   prefs.getString('user_id');
+  //
+  //   print('The selected Ids are : ${allSelectedSubTopic}, '
+  //       'topic id is  ${selectedCategory?.id}, '
+  //       'the title is ${titleController.text} , '
+  //       'date is ${dateController.text}, '
+  //       'Start Time is ${timeController.text} , '
+  //       'Selected duration is ${durationController.text}, '
+  //       'Selected Minutes is ${minController.text}, '
+  //       'Student User id is ${studentUserId}, '
+  //       'Teacher id is ${userId}',
+  //
+  //   );
+  // }
 
-    print('The selected Ids are : ${allSelectedSubTopic}, '
-        'topic id is  ${selectedCategory?.id}, '
-        'the title is ${titleController.text} , '
-        'date is ${dateController.text}, '
-        'Start Time is ${timeController.text} , Selected Hour is ${hourController.text}, '
-        'Selected Minutes is ${minController.text}',
+  Future<void> onSubmit() async {
 
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+    prefs.getString('user_id');
+
+    /// 🔥 VALIDATIONS
+
+    if(selectedCategory == null) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select category"),
+        ),
+      );
+
+      return;
+    }
+
+    if(allSelectedSubTopic.isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select sub topic"),
+        ),
+      );
+
+      return;
+    }
+
+    if(titleController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter lesson title"),
+        ),
+      );
+
+      return;
+    }
+
+    if(studentListController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select student"),
+        ),
+      );
+
+      return;
+    }
+
+    if(dateController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select date"),
+        ),
+      );
+
+      return;
+    }
+
+    if(timeController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select start time"),
+        ),
+      );
+
+      return;
+    }
+
+    if(durationController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select duration"),
+        ),
+      );
+
+      return;
+    }
+
+    if(studentUserId == null) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select student"),
+        ),
+      );
+
+      return;
+    }
+
+    print(
+      'The selected Ids are : $allSelectedSubTopic, '
+          'topic id is ${selectedCategory?.id}, '
+          'the title is ${titleController.text}, '
+          'date is ${dateController.text}, '
+          'Start Time is ${timeController.text}, '
+          'Selected duration is ${durationController.text}, '
+          'Student User id is $studentUserId, '
+          'Teacher id is $userId',
+    );
+
+    /// 🔥 API CALL
+    context.read<InstructorCreateLessonBloc>().add(
+
+      InstructorCreateLessonTapped(
+
+        userid: studentUserId.toString(),
+
+        instructorid: userId.toString(),
+
+        name: titleController.text.trim(),
+
+        startDate: dateController.text.trim(),
+
+        startTime: timeController.text.trim(),
+
+        duration: durationController.text.trim(),
+
+        topicId: selectedCategory!.id,
+
+        subtopicId:
+        allSelectedSubTopic.join(","),
+
+      ),
     );
   }
 
@@ -715,5 +940,201 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
     if (time != null) {
       timeController.text = time.format(context);
     }
+  }
+
+
+  Future<void> pickDuration() async {
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialEntryMode: TimePickerEntryMode.dial,
+      initialTime: TimeOfDay.now(),
+
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat: true,
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+
+      setState(() {
+
+        durationController.text =
+        "${picked.hour.toString().padLeft(2, '0')}:"
+            "${picked.minute.toString().padLeft(2, '0')}";
+
+      });
+    }
+  }
+
+  Future<void> loadInitialData() async {
+
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+    prefs.getString('user_id');
+
+    context.read<InstructorTopicListBloc>().add(
+      FetchInstructorTopicList(),
+    );
+
+    context.read<InstructorStudentListBloc>().add(
+      FetchInstructorStudentList(
+        instructureId: userId!,
+      ),
+    );
+  }
+  /// 🔥 STUDENT BOTTOM SHEET
+  void showStudentList() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.5,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius:
+            BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+
+              /// 🔹 HANDLE + CLOSE
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  children: [
+
+                    Expanded(
+                      child: Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(Icons.close),
+                    )
+                  ],
+                ),
+              ),
+
+              /// 🔹 TITLE
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Select Student",
+                    style: TextStyle(
+                      fontFamily: "InterBold",
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// 🔹 STUDENT LIST
+              Expanded(
+                child: ListView.builder(
+                  itemCount: students.length,
+                  itemBuilder: (context, index) {
+                    final student = students[index];
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedStudent = student;
+                          studentListController.text = student.name;
+                          studentUserId = student.userId ;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+
+                            /// 🔹 AVATAR
+                            const CircleAvatar(
+                              radius: 18,
+                              child: Icon(Icons.person, size: 18),
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            /// 🔹 DETAILS
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+
+                                  Text(
+                                    student.name,
+                                    style: const TextStyle(
+                                      fontFamily: "InterBold",
+                                      fontSize: 14,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 2),
+
+                                  Text(
+                                    student.phone,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            /// 🔹 AMOUNT
+                            Text(
+                              "₹${student.amount}",
+                              style: const TextStyle(
+                                fontFamily: "InterBold",
+                                color: Color.fromARGB(
+                                    255, 54, 113, 232),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
