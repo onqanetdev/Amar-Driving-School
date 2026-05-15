@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bloc/instructor/add_student/instructor_add_student_bloc.dart';
 import '../../../bloc/instructor/instructor_register_bloc.dart';
+import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../common/app_color.dart';
@@ -49,7 +50,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Expanded(child: bodyContent()),
       ],
     ),
-    LessonScreen(),
+    //LessonScreen(),
+    BlocProvider(
+
+      create: (_) =>
+          InstructorLessonListBloc(),
+
+      child: LessonScreen(),
+    ),
     MockTestScreen(),
     ProfileScreen(),
   ];
@@ -840,7 +848,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => LessonScreen(showBack: true,),
+                  //builder: (_) => LessonScreen(showBack: true,),
+                  builder: (_) => BlocProvider(
+
+                    create: (_) =>
+                        InstructorLessonListBloc(),
+
+                    child: LessonScreen(
+                      showBack: true,
+                    ),
+                  ),
                 ),
               );
             }else{

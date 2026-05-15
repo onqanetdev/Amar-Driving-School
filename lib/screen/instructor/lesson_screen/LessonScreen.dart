@@ -4,34 +4,98 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bloc/instructor/create_lesson/instructor_create_lesson_bloc.dart';
+import '../../../bloc/instructor/lesson_list/instructor_Lesson_List_Event.dart';
+import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
+import '../../../bloc/instructor/lesson_list/instructor_lesson_list_state.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/topic_list/instructor_topic_list_bloc.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../helper/helper.dart';
+import '../../../helper/loader_helper.dart';
 import '../../../model/LessonModel.dart';
+import '../../../model/instructor_create_lesson_model/instructor_Lesson_List_Model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../lesson_give_rating_screen/LessonGiveRatingScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class LessonScreen extends StatelessWidget {
+class LessonScreen extends StatefulWidget {
   final bool showBack;
   LessonScreen({super.key,this.showBack = false});
 
-  final List<LessonModel> lessons = List.generate(
-    5,
-    (index) => LessonModel(
-      name: "Pre-Drive Checks",
-      topic: "Vehicle approach",
-      duration: "1hr",
-      date: "18.04.2026",
-      time: "10:30AM",
-    ),
-  );
+  @override
+  State<LessonScreen> createState() => _LessonScreenState();
+}
+
+class _LessonScreenState extends State<LessonScreen> {
+
+  List<LessonData> lessons = [];
+
+  final ScrollController _scrollController = ScrollController();
+
+  int offset = 0;
+  final int limit = 30;
+
+  bool isLoadingMore = false;
+  bool hasMore = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchLessonList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+
+    return BlocListener<
+        InstructorLessonListBloc,
+        InstructorLessonListState>(
+
+        listener: (context, state) {
+
+          /// 🔥 LOADING
+          if(state is InstructorLessonListLoading) {
+
+            LoaderHelper.show(context);
+          }
+
+          /// 🔥 SUCCESS
+          if(state is InstructorLessonListSuccess) {
+
+            LoaderHelper.hide(context);
+
+            setState(() {
+
+              lessons.clear();
+
+              lessons.addAll(
+                state.lessonListResponse.data,
+              );
+
+            });
+
+            Helper.showToast(
+              context,
+              state.lessonListResponse.message,
+            );
+          }
+
+          /// 🔥 FAILURE
+          if(state is InstructorLessonListFailure) {
+
+            LoaderHelper.hide(context);
+
+            Helper.showToast(
+              context,
+              state.error,
+            );
+          }
+        },
+
+    child:  Scaffold(
       backgroundColor: Color(0xFFE9E9E9),
 
       body: Column(
@@ -39,7 +103,7 @@ class LessonScreen extends StatelessWidget {
           /// HEADER
           AppHeader(
             title: "Lesson",
-            showBack: showBack,
+            showBack: widget.showBack,
             showAddButton: true,
             addButtonText: "Add Lesson",
             onAdd: () {
@@ -88,12 +152,36 @@ class LessonScreen extends StatelessWidget {
           ),
         ],
       ),
+    )
+    );
+  }
+  Future<void> fetchLessonList() async {
+
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+    prefs.getString('user_id');
+
+    print("🔥 Instructor Id: $userId");
+
+    context.read<InstructorLessonListBloc>().add(
+
+      FetchInstructorLessonList(
+
+        instructorId:
+        userId.toString(),
+
+        limit: "30",
+
+        offset: "0",
+      ),
     );
   }
 }
 
 class LessonCard extends StatelessWidget {
-  final LessonModel data;
+  final LessonData data;
 
   const LessonCard({super.key, required this.data});
 
@@ -150,7 +238,7 @@ class LessonCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          data.duration.toString(),
+                          data.lessonDuration.toString(),
                           style: TextStyle(
                             fontSize: 12,
                             fontFamily: "InterSemiBold",
@@ -171,7 +259,7 @@ class LessonCard extends StatelessWidget {
                                 color: HexColor(AppColor.colorAppGray)),
                             SizedBox(width: 2),
                             Text(
-                              data.date,
+                              data.classDate,
                               overflow: TextOverflow.fade,
                               style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
                                 fontFamily: "InterSemiBold",),
@@ -185,7 +273,8 @@ class LessonCard extends StatelessWidget {
                                 color: HexColor(AppColor.colorAppGray)),
                             SizedBox(width: 2),
                             Text(
-                              data.time.toString(),
+                              //data.time.toString(),
+                              data.lessonStart.toString(),
                               overflow: TextOverflow.fade,
                               style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
                                 fontFamily: "InterSemiBold",),

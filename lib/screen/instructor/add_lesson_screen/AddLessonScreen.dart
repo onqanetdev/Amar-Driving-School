@@ -22,6 +22,7 @@ import '../../../model/CategoryModel.dart';
 import '../../../model/LessonModel.dart';
 import '../../../model/StudentModel.dart';
 import '../../../model/SubCategoryModel.dart';
+import '../../../model/instructor_create_lesson_model/instructor_Lesson_List_Model.dart';
 import '../../../model/instructor_student_list/instructor_student_list_model.dart';
 import '../../../model/instructor_topic/instructor_sub_topic_list_model.dart';
 import '../../../widgets/app_button.dart';
@@ -30,7 +31,7 @@ import '../../../widgets/app_input_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddLessonScreen extends StatefulWidget {
-  final LessonModel? lesson;
+  final LessonData? lesson;
   const AddLessonScreen({super.key,this.lesson});
 
   @override
@@ -75,9 +76,9 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
     if (widget.lesson != null) {
       /// 👉 EDIT MODE
       titleController.text = widget.lesson!.name;
-      dateController.text = widget.lesson!.date;
-      timeController.text = widget.lesson!.time!;
-      hourController.text = widget.lesson!.duration!;
+      dateController.text = widget.lesson!.classDate;
+      timeController.text = widget.lesson!.lessonStart!;
+      hourController.text = widget.lesson!.lessonDuration!;
     }
   }
 
