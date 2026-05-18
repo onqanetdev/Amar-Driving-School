@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:amar_driving_school/bloc/instructor/instructor_revenue/instructor_total_revenue_bloc.dart';
 import 'package:amar_driving_school/bloc/student/student_login/student_login_bloc.dart';
 import 'package:amar_driving_school/screen/Student/dashboard_screen/StudentDashboardScreen.dart';
 import 'package:amar_driving_school/screen/instructor/dashboard_screen/DashboardScreen.dart';
@@ -170,7 +171,11 @@ class _SplashScreenState extends State<SplashScreen> {
                     create: (_) =>
                         InstructorLessonListBloc(),
                   ),
-
+                  //Total Revenue Bloc Provider
+                  BlocProvider(
+                    create: (_) =>
+                        InstructorTotalRevenueBloc(),
+                  ),
                 ],
 
                 child: const DashboardScreen(),
@@ -211,6 +216,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
                 BlocProvider(
                   create: (_) => StudentLoginBloc(),
+                ),
+
+                //Total Revenue Bloc Provider
+                BlocProvider(
+                  create: (_) =>
+                      InstructorTotalRevenueBloc(),
                 ),
 
               ],

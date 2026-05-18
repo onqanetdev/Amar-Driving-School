@@ -1,79 +1,264 @@
+import 'package:amar_driving_school/bloc/instructor/create_mocktest/instructor_create_mocktest_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_event.dart';
+import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_state.dart';
 import 'package:amar_driving_school/helper/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/instructor/lesson_list/instructor_lesson_list_state.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_bloc.dart';
 import '../../../bloc/instructor/topic_list/instructor_topic_list_bloc.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
+import '../../../helper/loader_helper.dart';
 import '../../../model/LessonModel.dart';
+import '../../../model/instructor_create_mocktest/instructor_mocktest_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../add_mock_test_screen/AddMockTestScreen.dart';
 import '../mock_test_give_rating_screen/MockTestGiveRatingScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class MockTestScreen extends StatelessWidget {
+class MockTestScreen extends StatefulWidget {
   final bool showBack;
   MockTestScreen({super.key,this.showBack = false});
 
-  final List<LessonModel> lessons = List.generate(
-    5,
-    (index) => LessonModel(
-      name: "Car Drive Mocktest",
-      duration: "1hr",
-      date: "18.04.2026",
-      time: "10:30AM",
-    ),
-  );
+  @override
+  State<MockTestScreen> createState() => _MockTestScreenState();
+}
+
+class _MockTestScreenState extends State<MockTestScreen> {
+  final List<MocktestData> allMocktests = [
+
+  ];
+
+  //This Section is for Load more
+  final ScrollController _scrollController = ScrollController();
+
+  int offset = 0;
+
+  int limit = 30;
+
+  bool isLoadingMore = false;
+
+  bool hasMore = true;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchLessonList();
+
+    //This Section is also for scrollView
+    _scrollController.addListener(() {
+
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200 &&
+          !isLoadingMore &&
+          hasMore) {
+
+        loadMoreLessons();
+      }
+    });
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFE9E9E9),
+    //bloc and state parameter
+    return BlocListener<InstructorMocktestListBloc, InstructorMocktestListState>(
 
-      body: Column(
-        children: [
-          /// HEADER
-          AppHeader(
-            title: "Mocktest",
-            showBack: showBack,
-            showAddButton: true,
-            addButtonText: "Add Mocktest",
-            onAdd: () {
-              // Create lesson dialog
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                //  builder: (_) => AddMockTestScreen(),
-                  builder: (_) => BlocProvider(
+        listener: (context, state) {
 
-                    create: (_) => InstructorTopicListBloc(),
+          /// 🔥 LOADING
+          if(state is InstructorMocktestListLoading
+              && offset == 0) {
 
-                    child: AddMockTestScreen(),
-                  ),
-                ),
-              );
-            },
-          ),
+            LoaderHelper.show(context);
+          }
 
-          /// LIST
-          Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.all(10),
-              itemCount: lessons.length,
-              separatorBuilder: (_, __) => SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                return LessonCard(data: lessons[index]);
-              },
-            ),
-          ),
-        ],
+          /// 🔥 SUCCESS
+          if(state is InstructorMocktestListSuccess) {
+
+            LoaderHelper.hide(context);
+
+            setState(() {
+
+              if(offset == 0) {
+                allMocktests.clear();
+              }
+
+              allMocktests.addAll(state.mocktestListResponse.data);
+
+              isLoadingMore = false;
+
+              if(state.mocktestListResponse.data.length < limit) {
+                hasMore = false;
+              }
+            });
+
+            Helper.showToast(
+              context,
+              state.mocktestListResponse.message,
+            );
+          }
+
+          /// 🔥 FAILURE
+          if(state is InstructorMocktestListFailure) {
+
+            LoaderHelper.hide(context);
+
+            Helper.showToast(
+              context,
+              state.error,
+            );
+          }
+        },
+
+      child:  Scaffold(
+           backgroundColor: Color(0xFFE9E9E9),
+
+           body: Column(
+             children: [
+               /// HEADER
+               AppHeader(
+                 title: "Mocktest",
+                 showBack: widget.showBack,
+                 showAddButton: true,
+                 addButtonText: "Add Mocktest",
+                 onAdd: () {
+                   // Create lesson dialog
+                   Navigator.push(
+                     context,
+                     MaterialPageRoute(
+                     //  builder: (_) => AddMockTestScreen(),
+                       builder: (_) => MultiBlocProvider(
+
+                         providers: [
+
+                           BlocProvider(
+                             create: (_) =>
+                                 InstructorTopicListBloc(),
+                           ),
+
+                           BlocProvider(
+                             create: (_) =>
+                                 InstructorSubTopicListBloc(),
+                           ),
+
+                           BlocProvider(
+                             create: (_) =>
+                                 InstructorStudentListBloc(),
+                           ),
+
+                           BlocProvider(
+                             create: (_) =>
+                                 InstructorCreateMocktestBloc(),
+                           ),
+
+                         ],
+
+                         child: AddMockTestScreen(),
+                       ),
+                     ),
+                   );
+                 },
+               ),
+
+               /// LIST
+               Expanded(
+                 child: ListView.separated(
+                   controller: _scrollController,
+                   padding: EdgeInsets.all(10),
+                   itemCount: hasMore ? allMocktests.length + 1 : allMocktests.length,
+                   separatorBuilder: (_, __) => SizedBox(height: 12),
+                   itemBuilder: (context, index) {
+                     if(index == allMocktests.length) {
+
+                       return const Padding(
+
+                         padding: EdgeInsets.all(16),
+
+                         child: Center(
+                           child:
+                           CircularProgressIndicator(),
+                         ),
+                       );
+                     }
+
+                     return LessonCard(data: allMocktests[index]);
+                   },
+                 ),
+               ),
+             ],
+           ),
+         ),
+    );
+  }
+
+
+
+  Future<void> fetchLessonList() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final userId = prefs.getString('user_id');
+
+    offset = 0;
+    hasMore = true;
+
+    //bloc
+    context.read<InstructorMocktestListBloc>().add(
+
+      FetchInstructorMocktestList(
+
+        instructorId: userId.toString(),
+
+        limit: limit.toString(),
+
+        offset: offset.toString(),
       ),
     );
   }
+
+  Future<void> loadMoreLessons() async {
+
+    if(isLoadingMore) return;
+
+    setState(() {
+      isLoadingMore = true;
+    });
+
+    offset += 1;
+    limit += 30;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final userId = prefs.getString('user_id');
+
+    //bloc
+    context.read<InstructorMocktestListBloc>().add(
+
+      FetchInstructorMocktestList(
+
+        instructorId: userId.toString(),
+
+        limit: limit.toString(),
+
+        offset: offset.toString(),
+      ),
+    );
+  }
+
 }
 
 class LessonCard extends StatelessWidget {
-  final LessonModel data;
+  final MocktestData data;
 
   const LessonCard({super.key, required this.data});
 
@@ -151,7 +336,7 @@ class LessonCard extends StatelessWidget {
                                 color: HexColor(AppColor.colorAppGray)),
                             SizedBox(width: 2),
                             Text(
-                              data.date,
+                              data.classDate,
                               overflow: TextOverflow.fade,
                               style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
                                 fontFamily: "InterSemiBold",),
@@ -165,7 +350,7 @@ class LessonCard extends StatelessWidget {
                                 color: HexColor(AppColor.colorAppGray)),
                             SizedBox(width: 2),
                             Text(
-                              data.time.toString(),
+                              data.lessonStart.toString(),
                               overflow: TextOverflow.fade,
                               style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
                                 fontFamily: "InterSemiBold",),
@@ -195,17 +380,37 @@ class LessonCard extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              // builder: (_) => AddMockTestScreen(
-                              //   lesson: data,
-                              // ),
 
-                              builder: (_) => BlocProvider(
-                                create: (_) =>
-                                    InstructorTopicListBloc(),
+                              builder: (_) => MultiBlocProvider(
+
+                                providers: [
+
+                                  BlocProvider(
+                                    create: (_) =>
+                                        InstructorTopicListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) =>
+                                        InstructorSubTopicListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) =>
+                                        InstructorStudentListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) =>
+                                        InstructorCreateMocktestBloc(),
+                                  ),
+
+                                ],
 
                                 child: AddMockTestScreen(),
                               ),
                             ),
+
                           );
                         },
                         child: Text(

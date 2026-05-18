@@ -1,4 +1,5 @@
 import 'package:amar_driving_school/bloc/instructor/instructor_register_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/instructor_revenue/instructor_total_revenue_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/login_instructor/instructor_login_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/login_instructor/instructor_login_event.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
@@ -107,7 +108,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         create: (_) =>
                             InstructorLessonListBloc(),
                       ),
-
+                      //Revenue Bloc Provider
+                      BlocProvider(
+                        create: (_) =>
+                            InstructorTotalRevenueBloc(),
+                      ),
                     ],
 
                     child: const DashboardScreen(),

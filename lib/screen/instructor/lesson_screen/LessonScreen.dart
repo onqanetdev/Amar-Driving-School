@@ -88,16 +88,6 @@ class _LessonScreenState extends State<LessonScreen> {
 
             LoaderHelper.hide(context);
 
-            // setState(() {
-            //
-            //   lessons.clear();
-            //
-            //   lessons.addAll(
-            //     state.lessonListResponse.data,
-            //   );
-            //
-            // });
-
             setState(() {
 
               if(offset == 0) {

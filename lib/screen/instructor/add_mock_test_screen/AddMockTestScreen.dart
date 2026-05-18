@@ -1,14 +1,32 @@
+import 'package:amar_driving_school/bloc/instructor/create_mocktest/instructor_create_mocktest_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/create_mocktest/instructor_create_mocktest_state.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/instructor/create_mocktest/instructor_create_mocktestEvent.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_event.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_state.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_bloc.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_event.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_state.dart';
+import '../../../bloc/instructor/topic_list/instructor_topic_list_bloc.dart';
+import '../../../bloc/instructor/topic_list/instructor_topic_list_event.dart';
+import '../../../bloc/instructor/topic_list/instructor_topic_list_state.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
+import '../../../helper/loader_helper.dart';
 import '../../../model/CategoryModel.dart';
 import '../../../model/LessonModel.dart';
 import '../../../model/SubCategoryModel.dart';
+import '../../../model/instructor_student_list/instructor_student_list_model.dart';
+import '../../../model/instructor_topic/instructor_sub_topic_list_model.dart';
+import '../../../model/instructor_topic/instructor_topic_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../../../widgets/app_input_textfield.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddMockTestScreen extends StatefulWidget {
   final LessonModel? lesson;
@@ -25,348 +43,450 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
   final timeController = TextEditingController();
   final hourController = TextEditingController();
   final minController = TextEditingController();
+  final studentListController = TextEditingController();
 
-  CategoryModel? selectedCategory;
-  List<CategoryModel> selectedCategories = [];
+  final durationController = TextEditingController();
 
-  List<CategoryModel> allCategories = [
-    CategoryModel(
-      name: "Pre-Drive Checks",
-      subCategories: [
-        SubCategoryModel(name: "Vehicle approach"),
-        SubCategoryModel(name: "Start-up drill"),
-        SubCategoryModel(name: "Vehicle approachsssss"),
-        SubCategoryModel(name: "Start-up drillssss"),
-      ],
-    ),
-    CategoryModel(
-      name: "Basic Control",
-      subCategories: [
-        SubCategoryModel(name: "Braking"),
-        SubCategoryModel(name: "Steering"),
-      ],
-    ),
+  TopicData? selectedCategory;
+  List<TopicData> selectedCategories = [];
+
+
+  List<TopicData> allCategories = [
+
   ];
 
+  List<SubTopicData> allSubCategories = [
+
+  ];
+
+  //List<String> allSelectedSubTopic = [ ];
+  Set<String> allSelectedSubTopic = {};
+
+  StudentData? selectedStudent;
+
+  List<StudentData> students = [];
+  String studentUserId = '';
+
   @override
-  void initState() {
+  initState(){
     super.initState();
 
-    if (widget.lesson != null) {
-      /// 👉 EDIT MODE
-      titleController.text = widget.lesson!.name;
-      dateController.text = widget.lesson!.date;
-      timeController.text = widget.lesson!.time!;
-      hourController.text = widget.lesson!.duration!;
-    }
+    loadInitialData();
+    // if (widget.lesson != null) {
+    //   /// 👉 EDIT MODE
+    //   titleController.text = widget.lesson!.name;
+    //   dateController.text = widget.lesson!.classDate;
+    //   timeController.text = widget.lesson!.lessonStart!;
+    //   hourController.text = widget.lesson!.lessonDuration!;
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
+    return
+      MultiBlocListener(listeners: [
+        //Bloc Listener for Sub Category section
+        BlocListener<InstructorSubTopicListBloc, InstructorSubTopicListState>(
+          listener: (context, state) async {
 
-      body: Column(
-        children: [
+            if(state is InstructorSubTopicListLoading) {
+              LoaderHelper.show(context);
+            }
 
-          /// HEADER
-          AppHeader(
-            title: "Create Mock Test",
-            showBack: true,
-          ),
+            if(state is InstructorSubTopicListSuccess)  {
+              LoaderHelper.hide(context);
+              setState(() {
+                allSubCategories = state.subTopicListResponse.data;
+              });
 
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(12),
+            }
+
+            if(state is InstructorSubTopicListFailure) {
+              LoaderHelper.hide(context);
+            }
+          },
+        ),
+        //Bloc Listener for category section
+        BlocListener<InstructorTopicListBloc, InstructorTopicListState>(
+          listener: (context, state) async {
+
+
+            if(state is InstructorTopicListSuccess)  {
+              // LoaderHelper.hide(context);
+              //allSubCategories = state.subTopicListResponse.data;
+              setState(() {
+
+                allCategories =
+                    state.topicListResponse.data;
+              });
+            }
+
+          },
+        ),
+        //Bloc Lister for  Student List
+        BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
+
+          listener: (context, state) {
+
+            /// LOADING
+            if(state is InstructorStudentListLoading) {
+              LoaderHelper.show(context);
+            }
+
+            /// SUCCESS
+            if(state is InstructorStudentListSuccess) {
+              LoaderHelper.hide(context);
+              students = state.studentListResponse.data;
+
+            }
+
+            /// FAILURE
+            if(state is InstructorStudentListFailure) {
+
+            }
+          },
+        ),
+        // Bloc Lister for Add Lesson
+        BlocListener<InstructorCreateMocktestBloc, InstructorCreateMocktestState>(
+
+          listener: (context, state) async {
+
+            /// 🔥 LOADING
+            if(state is InstructorCreateMocktestLoading) {
+
+              LoaderHelper.show(context);
+            }
+
+            /// 🔥 SUCCESS
+            if(state is InstructorCreateMocktestSuccess) {
+
+              LoaderHelper.hide(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+
+                SnackBar(
+                  content: Text(
+                    state.createMocktestResponse.message,
+                  ),
+                ),
+              );
+
+              Navigator.pop(context);
+            }
+
+            /// 🔥 FAILURE
+            if(state is InstructorCreateMocktestFailure) {
+
+              LoaderHelper.hide(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+
+                SnackBar(
+                  content: Text(state.error),
+                ),
+              );
+            }
+          },
+        ),
+
+      ],
+          child: Scaffold(
+            backgroundColor: const Color(0xFFE9E9E9),
+
+            body: Column(
               children: [
 
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
+                /// HEADER
+                AppHeader(
+                  title: "Create Lesson",
+                  showBack: true,
+                ),
+
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(12),
                     children: [
 
-                      /// 🔹 TITLE
-                      AppInputField(
-                        controller: titleController,
-                        hintText: "Advance Car Drive",
-                        fillColor: AppColor.colorInputBg,
-                        borderColor: AppColor.colorInputBorder,
-                        focusedBorderColor: AppColor.colorInputFocusBorder,
-                        hintColor: AppColor.colorInputHint,
-                        borderRadius: 10,
-                        obscureText: false,
-                        keyboardType: TextInputType.text,
-                      ),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Column(
+                          children: [
 
-                      const SizedBox(height: 10),
+                            dropdownBox(),
+                            const SizedBox(height: 10),
 
-                      /// 🔹 DATE + TIME
-                      Row(
-                        children: [
-
-                          Expanded(
-                            child: AppInputField(
-                              controller: dateController,
-                              hintText: "Start Date",
-                              fillColor: AppColor.colorInputBg,
-                              borderColor: AppColor.colorInputBorder,
-                              focusedBorderColor:
-                              AppColor.colorInputFocusBorder,
-                              hintColor: AppColor.colorInputHint,
-                              borderRadius: 10,
-                              obscureText: false,
-                              readOnly: true,
-                              onTap: pickDate,
+                            selectedCategory?.name == null?
+                            Visibility(
+                              child: subcategoryBox(),
+                              visible: false,
+                            ): Visibility(
+                              child: subcategoryBox(),
+                              visible: true,
                             ),
-                          ),
 
-                          const SizedBox(width: 10),
+                            const SizedBox(height: 10),
 
-                          Expanded(
-                            child: AppInputField(
-                              controller: timeController,
-                              hintText: "Start Time",
-                              fillColor: AppColor.colorInputBg,
-                              borderColor: AppColor.colorInputBorder,
-                              focusedBorderColor:
-                              AppColor.colorInputFocusBorder,
-                              hintColor: AppColor.colorInputHint,
-                              borderRadius: 10,
-                              obscureText: false,
-                              readOnly: true,
-                              onTap: pickTime,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      /// 🔹 DURATION
-                      Row(
-                        children: [
-
-                          const Text(
-                            "Duration:",
-                            style: TextStyle(fontFamily: "InterMedium"),
-                          ),
-
-                          const SizedBox(width: 10),
-
-                          Expanded(
-                            child: AppInputField(
-                              controller: hourController,
-                              hintText: "1hr",
-                              fillColor: AppColor.colorInputBg,
-                              borderColor: AppColor.colorInputBorder,
-                              focusedBorderColor:
-                              AppColor.colorInputFocusBorder,
-                              hintColor: AppColor.colorInputHint,
-                              borderRadius: 10,
-                              obscureText: false,
-                            ),
-                          ),
-
-                          const SizedBox(width: 6),
-                          const Text(":"),
-                          const SizedBox(width: 6),
-
-                          Expanded(
-                            child: AppInputField(
-                              controller: minController,
-                              hintText: "30Min",
-                              fillColor: AppColor.colorInputBg,
-                              borderColor: AppColor.colorInputBorder,
-                              focusedBorderColor:
-                              AppColor.colorInputFocusBorder,
-                              hintColor: AppColor.colorInputHint,
-                              borderRadius: 10,
-                              obscureText: false,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 10),
-                      Divider(),
-
-                      const SizedBox(height: 10),
-
-                      /// 🔹 CATEGORY + ADD
-                      Row(
-                        children: [
-
-                          Expanded(child: dropdownBox()),
-
-                          const SizedBox(width: 10),
-
-                          AppButtonAnimation(
-                            onTap: addCategory,
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: const BoxDecoration(
-                                color: Color.fromARGB(255, 54, 113, 232),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.add,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      /// 🔥 SELECTED CATEGORY
-                      /// 🔥 SELECTED CATEGORY (PRO UI)
-                      ...selectedCategories.map((cat) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF5F5F5),
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 8,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-
-                              /// 🔹 CATEGORY HEADER
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      cat.name,
-                                      style: TextStyle(
-                                        fontFamily: "InterBold",
-                                        fontSize: 14,
-                                        color: Color(0xFF002248),
-                                      ),
+                            ...selectedCategories.map((cat) {
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF5F5F5),
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 3),
                                     ),
-                                  ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
 
-                                  /// ❌ REMOVE BUTTON
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        selectedCategories.remove(cat);
-                                      });
-                                    },
-                                    child: Icon(Icons.close, size: 18, color: Colors.red),
-                                  )
-                                ],
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              /// 🔹 SUBCATEGORY CHIPS
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-
-                                  /// 🔹 TITLE
-                                  Text(
-                                    "Sub Categories",
-                                    style: TextStyle(
-                                      fontFamily: "InterBold",
-                                      fontSize: 13,
-                                      color: Color(0xFF002248),
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 8),
-
-                                  ...List.generate(cat.subCategories.length, (index) {
-                                    final sub = cat.subCategories[index];
-                                    final isSelected = sub.isSelected;
-
-                                    return GestureDetector(
-                                      onTap: () {
-
-                                        setState(() {
-                                          sub.isSelected = !sub.isSelected;
-                                        });
-                                      },
-                                      child: Container(
-                                        margin: const EdgeInsets.only(bottom: 6),
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? const Color.fromARGB(255, 54, 113, 232).withOpacity(0.1)
-                                              : Colors.white,
-                                          borderRadius: BorderRadius.circular(10),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? const Color.fromARGB(255, 54, 113, 232)
-                                                : Colors.grey.shade300,
+                                    /// 🔹 CATEGORY HEADER
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            cat.name,
+                                            style: TextStyle(
+                                              fontFamily: "InterBold",
+                                              fontSize: 14,
+                                              color: Color(0xFF002248),
+                                            ),
                                           ),
                                         ),
-                                        child: Row(
-                                          children: [
 
-                                            /// 🔹 NUMBER
-                                            Text(
-                                              "${index + 1}.",
-                                              style: TextStyle(
-                                                fontFamily: "InterBold",
-                                                color: isSelected
-                                                    ? const Color.fromARGB(255, 54, 113, 232)
-                                                    : Colors.black,
-                                              ),
-                                            ),
+                                        /// ❌ REMOVE BUTTON
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              selectedCategories.remove(cat);
+                                            });
+                                          },
+                                          child: Icon(Icons.close, size: 18, color: Colors.red),
+                                        )
+                                      ],
+                                    ),
 
-                                            const SizedBox(width: 8),
+                                    const SizedBox(height: 10),
 
-                                            /// 🔹 NAME
-                                            Expanded(
-                                              child: Text(
-                                                sub.name,
-                                                style: TextStyle(
-                                                  fontFamily: "InterMedium",
-                                                  fontSize: 12,
-                                                  color: Colors.black87,
+                                    /// 🔹 SUBCATEGORY CHIPS
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+
+                                        /// 🔹 TITLE
+                                        Text(
+                                          "Sub Categories",
+                                          style: TextStyle(
+                                            fontFamily: "InterBold",
+                                            fontSize: 13,
+                                            color: Color(0xFF002248),
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 8),
+
+                                        ...List.generate(allSubCategories.length, (index) {
+                                          //final sub = cat.subCategories[index];
+                                          final sub = allSubCategories[index];
+                                          final isSelected = sub.isSelected;
+
+                                          return GestureDetector(
+                                            onTap: () {
+                                              print('the sub topic id is ${sub.id}, and the topic id is ${sub.topicId}');
+                                              if (sub.isSelected == false) {
+                                                allSelectedSubTopic.add(sub.id);
+                                              } else {
+                                                allSelectedSubTopic.remove(sub.id);
+                                              }
+                                              print(allSelectedSubTopic);
+                                              setState(() {
+                                                sub.isSelected = !sub.isSelected;
+                                              });
+                                            },
+                                            child: Container(
+                                              margin: const EdgeInsets.only(bottom: 6),
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                              decoration: BoxDecoration(
+                                                color: isSelected ? const Color.fromARGB(255, 54, 113, 232).withOpacity(0.1) : Colors.white,
+                                                borderRadius: BorderRadius.circular(10),
+                                                border: Border.all(
+                                                  color: isSelected
+                                                      ? const Color.fromARGB(255, 54, 113, 232)
+                                                      : Colors.grey.shade300,
                                                 ),
                                               ),
+                                              child: Row(
+                                                children: [
+
+                                                  /// 🔹 NUMBER
+                                                  Text(
+                                                    "${index + 1}.",
+                                                    style: TextStyle(
+                                                      fontFamily: "InterBold",
+                                                      color: isSelected ? const Color.fromARGB(255, 54, 113, 232) : Colors.black,
+                                                    ),
+                                                  ),
+
+                                                  const SizedBox(width: 8),
+
+                                                  /// 🔹 NAME
+                                                  Expanded(
+                                                    child: Text(
+                                                      sub.name,
+                                                      style: TextStyle(
+                                                        fontFamily: "InterMedium",
+                                                        fontSize: 12,
+                                                        color: Colors.black87,
+                                                      ),
+                                                    ),
+                                                  ),
+
+                                                  /// 🔹 CHECK ICON (optional)
+                                                  if (isSelected)
+                                                    Icon(Icons.check_circle,
+                                                        color: Color.fromARGB(255, 54, 113, 232), size: 18),
+                                                ],
+                                              ),
                                             ),
+                                          );
+                                        }),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              );
+                            }),
 
-                                            /// 🔹 CHECK ICON (optional)
-                                            if (isSelected)
-                                              Icon(Icons.check_circle,
-                                                  color: Color.fromARGB(255, 54, 113, 232), size: 18),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }),
-                                ],
-                              )
-                            ],
-                          ),
-                        );
-                      }),
 
-                      const SizedBox(height: 10),
 
-                      /// SUBMIT
-                      AppButton(
-                        text: "SUBMIT",
-                        onTap: onSubmit,
-                        textStyle: const TextStyle(
-                          fontFamily: "InterBold",
-                          fontSize: 12,
-                          color: Colors.white,
+                            /// 🔹 TITLE
+                            AppInputField(
+                              controller: titleController,
+                              hintText: "Advance Car Drive",
+                              fillColor: AppColor.colorInputBg,
+                              borderColor: AppColor.colorInputBorder,
+                              focusedBorderColor: AppColor.colorInputFocusBorder,
+                              hintColor: AppColor.colorInputHint,
+                              borderRadius: 10,
+                              obscureText: false,
+                              keyboardType: TextInputType.text,
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            AppInputField(
+                              controller: studentListController,
+                              hintText: "Student Name",
+                              readOnly: true,            // 🔥 disable typing
+                              onTap: showStudentList,    // 🔥 open dialog
+
+                              fillColor: AppColor.colorInputBg,
+                              borderColor: AppColor.colorInputBorder,
+                              focusedBorderColor: AppColor.colorInputFocusBorder,
+                              hintColor: AppColor.colorInputHint,
+
+                              suffixWidget: const Icon(
+                                Icons.keyboard_arrow_down,
+                                color: Colors.grey,
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
+                            /// 🔹 DATE + TIME
+                            Row(
+                              children: [
+
+                                Expanded(
+                                  child: AppInputField(
+                                    controller: dateController,
+                                    hintText: "Start Date",
+                                    fillColor: AppColor.colorInputBg,
+                                    borderColor: AppColor.colorInputBorder,
+                                    focusedBorderColor:
+                                    AppColor.colorInputFocusBorder,
+                                    hintColor: AppColor.colorInputHint,
+                                    borderRadius: 10,
+                                    obscureText: false,
+                                    readOnly: true,
+                                    onTap: pickDate,
+                                  ),
+                                ),
+
+                                const SizedBox(width: 10),
+
+                                Expanded(
+                                  child: AppInputField(
+                                    controller: timeController,
+                                    hintText: "Start Time",
+                                    fillColor: AppColor.colorInputBg,
+                                    borderColor: AppColor.colorInputBorder,
+                                    focusedBorderColor:
+                                    AppColor.colorInputFocusBorder,
+                                    hintColor: AppColor.colorInputHint,
+                                    borderRadius: 10,
+                                    obscureText: false,
+                                    readOnly: true,
+                                    onTap: pickTime,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            /// 🔹 DURATION
+                            Row(
+                              children: [
+
+                                const Text(
+                                  "Duration:",
+                                  style: TextStyle(fontFamily: "InterMedium"),
+                                ),
+
+                                const SizedBox(width: 10),
+
+                                Expanded(
+                                  child: AppInputField(
+                                    controller: durationController,
+                                    hintText: "Select Duration",
+                                    readOnly: true,
+                                    onTap: pickDuration,
+                                    fillColor: AppColor.colorInputBg,
+                                    borderColor: AppColor.colorInputBorder,
+                                    focusedBorderColor:
+                                    AppColor.colorInputFocusBorder,
+                                    hintColor: AppColor.colorInputHint,
+                                    borderRadius: 10,
+                                    obscureText: false,
+                                  ),
+                                ),
+
+                              ],
+                            ),
+
+                            const SizedBox(height: 10),
+                            /// 🔥 SELECTED CATEGORY
+                            /// 🔥 SELECTED CATEGORY (PRO UI)
+                            /// SUBMIT
+                            AppButton(
+                              text: "SUBMIT",
+                              onTap: onSubmit,
+                              textStyle: const TextStyle(
+                                fontFamily: "InterBold",
+                                fontSize: 12,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -374,10 +494,9 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          )
+      );
+
   }
 
   Widget dropdownBox() {
@@ -423,6 +542,50 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
   }
 
 
+  /// Sub category Dropdown
+
+  Widget subcategoryBox() {
+    return GestureDetector(
+      onTap: () {
+        addCategory();
+      },
+      child: Container(
+        height: 45,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: HexColor(AppColor.colorInputBg), // same as input
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: HexColor(AppColor.colorInputBorder),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+
+            /// TEXT
+            Expanded(
+              child: Text(
+                "Select Sub Category",
+                style: TextStyle(
+                  fontFamily: "InterRegular",
+                  fontSize: 14,
+                  color: selectedCategory == null
+                      ? HexColor(AppColor.colorInputHint)
+                      : Colors.black,
+                ),
+              ),
+            ),
+
+            /// DROPDOWN ICON
+            Icon(Icons.keyboard_arrow_down,
+                color: HexColor(AppColor.colorInputBorder)),
+          ],
+        ),
+      ),
+    );
+  }
+
   void showCategoryBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -435,6 +598,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
           clipBehavior: Clip.hardEdge, // 🔥 remove border line
           decoration: const BoxDecoration(
             color: Colors.white,
+            //color: Colors.pink,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -567,20 +731,171 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
     }
 
     setState(() {
+      context.read<InstructorSubTopicListBloc>().add(
+          FetchInstructorSubTopicList(topicId: selectedCategory!.id)
+      );
+
       selectedCategories.add(
-        CategoryModel(
-          name: selectedCategory!.name,
-          subCategories: selectedCategory!.subCategories
-              .map((e) => SubCategoryModel(name: e.name))
-              .toList(),
-        ),
+          TopicData(id: selectedCategory!.id, name: selectedCategory!.name, slug: selectedCategory!.slug, status: selectedCategory!.status)
+
       );
     });
   }
 
-  void onSubmit() {
-    final json = generateJson();
-    print(json);
+  // Future<void> onSubmit() async {
+  //   final json = generateJson();
+  //   final prefs =
+  //       await SharedPreferences.getInstance();
+  //
+  //   final userId =
+  //   prefs.getString('user_id');
+  //
+  //   print('The selected Ids are : ${allSelectedSubTopic}, '
+  //       'topic id is  ${selectedCategory?.id}, '
+  //       'the title is ${titleController.text} , '
+  //       'date is ${dateController.text}, '
+  //       'Start Time is ${timeController.text} , '
+  //       'Selected duration is ${durationController.text}, '
+  //       'Selected Minutes is ${minController.text}, '
+  //       'Student User id is ${studentUserId}, '
+  //       'Teacher id is ${userId}',
+  //
+  //   );
+  // }
+
+  Future<void> onSubmit() async {
+
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+    prefs.getString('user_id');
+
+    /// 🔥 VALIDATIONS
+
+    if(selectedCategory == null) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select category"),
+        ),
+      );
+
+      return;
+    }
+
+    if(allSelectedSubTopic.isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select sub topic"),
+        ),
+      );
+
+      return;
+    }
+
+    if(titleController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter lesson title"),
+        ),
+      );
+
+      return;
+    }
+
+    if(studentListController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select student"),
+        ),
+      );
+
+      return;
+    }
+
+    if(dateController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select date"),
+        ),
+      );
+
+      return;
+    }
+
+    if(timeController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select start time"),
+        ),
+      );
+
+      return;
+    }
+
+    if(durationController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select duration"),
+        ),
+      );
+
+      return;
+    }
+
+    if(studentUserId == null) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select student"),
+        ),
+      );
+
+      return;
+    }
+
+    print(
+      'The selected Ids are : $allSelectedSubTopic, '
+          'topic id is ${selectedCategory?.id}, '
+          'the title is ${titleController.text}, '
+          'date is ${dateController.text}, '
+          'Start Time is ${timeController.text}, '
+          'Selected duration is ${durationController.text}, '
+          'Student User id is $studentUserId, '
+          'Teacher id is $userId',
+    );
+
+    /// 🔥 API CALL
+    context.read<InstructorCreateMocktestBloc>().add(
+
+      InstructorCreateMocktestTapped(
+
+        userid: studentUserId.toString(),
+
+        instructorid: userId.toString(),
+
+        name: titleController.text.trim(),
+
+        startDate: dateController.text.trim(),
+
+        startTime: timeController.text.trim(),
+
+        duration: durationController.text.trim(),
+
+        topicId: selectedCategory!.id,
+
+        subtopicId:
+        allSelectedSubTopic.join(","),
+
+      ),
+    );
   }
 
   Map<String, dynamic> generateJson() {
@@ -589,11 +904,11 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
     for (var cat in selectedCategories) {
       List<String> selectedSubs = [];
 
-      for (var sub in cat.subCategories) {
-        if (sub.isSelected) {
-          selectedSubs.add(sub.name);
-        }
-      }
+      // for (var sub in cat.subCategories) {
+      //   if (sub.isSelected) {
+      //     selectedSubs.add(sub.name);
+      //   }
+      // }
 
       if (selectedSubs.isNotEmpty) {
         result[cat.name] = selectedSubs;
@@ -625,6 +940,202 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
     if (time != null) {
       timeController.text = time.format(context);
     }
+  }
+
+
+  Future<void> pickDuration() async {
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialEntryMode: TimePickerEntryMode.dial,
+      initialTime: TimeOfDay.now(),
+
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat: true,
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+
+      setState(() {
+
+        durationController.text =
+        "${picked.hour.toString().padLeft(2, '0')}:"
+            "${picked.minute.toString().padLeft(2, '0')}";
+
+      });
+    }
+  }
+
+  Future<void> loadInitialData() async {
+
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+    prefs.getString('user_id');
+
+    context.read<InstructorTopicListBloc>().add(
+      FetchInstructorTopicList(),
+    );
+
+    context.read<InstructorStudentListBloc>().add(
+      FetchInstructorStudentList(
+        instructureId: userId!,
+      ),
+    );
+  }
+  /// 🔥 STUDENT BOTTOM SHEET
+  void showStudentList() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.5,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius:
+            BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+
+              /// 🔹 HANDLE + CLOSE
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  children: [
+
+                    Expanded(
+                      child: Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(Icons.close),
+                    )
+                  ],
+                ),
+              ),
+
+              /// 🔹 TITLE
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Select Student",
+                    style: TextStyle(
+                      fontFamily: "InterBold",
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// 🔹 STUDENT LIST
+              Expanded(
+                child: ListView.builder(
+                  itemCount: students.length,
+                  itemBuilder: (context, index) {
+                    final student = students[index];
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedStudent = student;
+                          studentListController.text = student.name;
+                          studentUserId = student.userId ;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+
+                            /// 🔹 AVATAR
+                            const CircleAvatar(
+                              radius: 18,
+                              child: Icon(Icons.person, size: 18),
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            /// 🔹 DETAILS
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+
+                                  Text(
+                                    student.name,
+                                    style: const TextStyle(
+                                      fontFamily: "InterBold",
+                                      fontSize: 14,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 2),
+
+                                  Text(
+                                    student.phone,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            /// 🔹 AMOUNT
+                            Text(
+                              "₹${student.amount}",
+                              style: const TextStyle(
+                                fontFamily: "InterBold",
+                                color: Color.fromARGB(
+                                    255, 54, 113, 232),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 
