@@ -11,7 +11,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../bloc/instructor/instructor_register_bloc.dart';
+import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
+import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
 import '../../../helper/ApiService.dart';
 import '../../../helper/helper.dart';
 import '../login_screen/LoginScreen.dart';
@@ -150,8 +152,31 @@ class _SplashScreenState extends State<SplashScreen> {
           );
         } else {
           Navigator.pushAndRemoveUntil(
+
             context,
-            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+
+            MaterialPageRoute(
+
+              builder: (_) => MultiBlocProvider(
+
+                providers: [
+
+                  BlocProvider(
+                    create: (_) =>
+                        InstructorStudentCountBloc(),
+                  ),
+
+                  BlocProvider(
+                    create: (_) =>
+                        InstructorLessonListBloc(),
+                  ),
+
+                ],
+
+                child: const DashboardScreen(),
+              ),
+            ),
+
                 (route) => false,
           );
         }

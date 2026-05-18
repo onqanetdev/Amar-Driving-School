@@ -11,7 +11,9 @@ import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import '../../../bloc/instructor/instructor_register_event.dart';
 import '../../../bloc/instructor/instructor_register_state.dart';
+import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_state.dart';
+import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
 import '../../../bloc/student/student_login/student_login_bloc.dart';
 import '../../../bloc/student/student_login/student_login_event.dart';
 import '../../../bloc/student/student_login/student_login_state.dart';
@@ -91,7 +93,25 @@ class _LoginScreenState extends State<LoginScreen> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const DashboardScreen(),
+                 // builder: (_) => const DashboardScreen(),
+                  builder: (_) => MultiBlocProvider(
+
+                    providers: [
+
+                      BlocProvider(
+                        create: (_) =>
+                            InstructorStudentCountBloc(),
+                      ),
+
+                      BlocProvider(
+                        create: (_) =>
+                            InstructorLessonListBloc(),
+                      ),
+
+                    ],
+
+                    child: const DashboardScreen(),
+                  ),
                 ),
                     (route) => false,
               );
@@ -127,7 +147,25 @@ class _LoginScreenState extends State<LoginScreen> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const DashboardScreen(),
+                  //builder: (_) => const DashboardScreen(),
+                  builder: (_) => MultiBlocProvider(
+
+                    providers: [
+
+                      BlocProvider(
+                        create: (_) =>
+                            InstructorStudentCountBloc(),
+                      ),
+
+                      BlocProvider(
+                        create: (_) =>
+                            InstructorLessonListBloc(),
+                      ),
+
+                    ],
+
+                    child: const DashboardScreen(),
+                  ),
                 ),
                     (route) => false,
               );
@@ -165,6 +203,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => const StudentDashboardScreen(),
+
                 ),
                     (route) => false,
               );
@@ -726,19 +765,6 @@ class _LoginScreenState extends State<LoginScreen> {
         _showMsg("Enter valid 6 digit code");
         return;
       }
-
-
-      // final prefs = await SharedPreferences.getInstance();
-      // await prefs.setBool('loggedIn', true);
-      // await prefs.setInt('userId', 1127);
-      // await prefs.setString('user_name', 'Example');
-      // await prefs.setString('selected_role', selectedRole);
-      //
-      // Navigator.pushAndRemoveUntil(
-      //   context,
-      //   MaterialPageRoute(builder: (_) => const StudentDashboardScreen()),
-      //       (route) => false,
-      // );
 
       context.read<StudentLoginBloc>().add(
         StudentLoggedInTapped(loggedInId: code),

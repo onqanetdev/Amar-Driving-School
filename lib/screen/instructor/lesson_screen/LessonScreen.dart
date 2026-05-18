@@ -32,10 +32,12 @@ class _LessonScreenState extends State<LessonScreen> {
 
   List<LessonData> lessons = [];
 
+
+  //This Section is for Load more
   final ScrollController _scrollController = ScrollController();
 
   int offset = 0;
-  final int limit = 30;
+  int limit = 30;
 
   bool isLoadingMore = false;
   bool hasMore = true;
@@ -45,6 +47,25 @@ class _LessonScreenState extends State<LessonScreen> {
     super.initState();
 
     fetchLessonList();
+
+    //This Section is also for scrollView
+    _scrollController.addListener(() {
+
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200 &&
+          !isLoadingMore &&
+          hasMore) {
+
+        loadMoreLessons();
+      }
+    });
+
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -67,14 +88,29 @@ class _LessonScreenState extends State<LessonScreen> {
 
             LoaderHelper.hide(context);
 
+            // setState(() {
+            //
+            //   lessons.clear();
+            //
+            //   lessons.addAll(
+            //     state.lessonListResponse.data,
+            //   );
+            //
+            // });
+
             setState(() {
 
-              lessons.clear();
+              if(offset == 0) {
+                lessons.clear();
+              }
 
-              lessons.addAll(
-                state.lessonListResponse.data,
-              );
+              lessons.addAll(state.lessonListResponse.data);
 
+              isLoadingMore = false;
+
+              if(state.lessonListResponse.data.length < limit) {
+                hasMore = false;
+              }
             });
 
             Helper.showToast(
@@ -140,12 +176,40 @@ class _LessonScreenState extends State<LessonScreen> {
           ),
 
           /// LIST
+          // Expanded(
+          //   child: ListView.separated(
+          //     padding: EdgeInsets.all(10),
+          //     itemCount: lessons.length,
+          //     separatorBuilder: (_, __) => SizedBox(height: 12),
+          //     itemBuilder: (context, index) {
+          //       return LessonCard(data: lessons[index]);
+          //     },
+          //   ),
+          // ),
+
           Expanded(
             child: ListView.separated(
+
+              controller: _scrollController,
+
               padding: EdgeInsets.all(10),
-              itemCount: lessons.length,
+
+              itemCount: lessons.length + (hasMore ? 1 : 0),
+
               separatorBuilder: (_, __) => SizedBox(height: 12),
+
               itemBuilder: (context, index) {
+
+                if(index == lessons.length) {
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
                 return LessonCard(data: lessons[index]);
               },
             ),
@@ -155,26 +219,77 @@ class _LessonScreenState extends State<LessonScreen> {
     )
     );
   }
+
+  // Future<void> fetchLessonList() async {
+  //
+  //   final prefs =
+  //   await SharedPreferences.getInstance();
+  //
+  //   final userId =
+  //   prefs.getString('user_id');
+  //
+  //   print("🔥 Instructor Id: $userId");
+  //
+  //   context.read<InstructorLessonListBloc>().add(
+  //
+  //     FetchInstructorLessonList(
+  //
+  //       instructorId:
+  //       userId.toString(),
+  //
+  //       limit: "30",
+  //
+  //       offset: "0",
+  //     ),
+  //   );
+  // }
+
   Future<void> fetchLessonList() async {
 
-    final prefs =
-    await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
 
-    final userId =
-    prefs.getString('user_id');
+    final userId = prefs.getString('user_id');
 
-    print("🔥 Instructor Id: $userId");
+    offset = 0;
+    hasMore = true;
 
     context.read<InstructorLessonListBloc>().add(
 
       FetchInstructorLessonList(
 
-        instructorId:
-        userId.toString(),
+        instructorId: userId.toString(),
 
-        limit: "30",
+        limit: limit.toString(),
 
-        offset: "0",
+        offset: offset.toString(),
+      ),
+    );
+  }
+
+  Future<void> loadMoreLessons() async {
+
+    if(isLoadingMore) return;
+
+    setState(() {
+      isLoadingMore = true;
+    });
+
+    offset += 1;
+    limit += 30;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final userId = prefs.getString('user_id');
+
+    context.read<InstructorLessonListBloc>().add(
+
+      FetchInstructorLessonList(
+
+        instructorId: userId.toString(),
+
+        limit: limit.toString(),
+
+        offset: offset.toString(),
       ),
     );
   }
@@ -316,6 +431,7 @@ class LessonCard extends StatelessWidget {
                               ),
                             ),
                           );
+                          // fetchLessonList();
                         },
                         child: Text(
                           "Edit",
@@ -510,4 +626,5 @@ class LessonCard extends StatelessWidget {
       ),
     );
   }
+
 }

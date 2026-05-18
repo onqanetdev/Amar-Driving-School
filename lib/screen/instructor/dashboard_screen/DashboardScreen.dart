@@ -9,6 +9,9 @@ import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
+import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
+import '../../../bloc/instructor/student_total_count/instructor_student_count_event.dart';
+import '../../../bloc/instructor/student_total_count/instructor_studentcount_state.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../model/LessonModel.dart';
@@ -99,6 +102,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _loadData();
+    fetchTotalStudentCount();
   }
 
   @override
@@ -117,99 +121,121 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Navigator.pop(context); // 👉 close app
         }
       },
-      child: Scaffold(
-        backgroundColor: Color.fromARGB(255, 233, 233, 233),
 
-        /// ---------------- BODY ----------------
-        /*body: Column(
+      child: BlocBuilder<InstructorStudentCountBloc, InstructorStudentCountState>(
+
+          builder: (context, state) {
+
+            /// 🔥 SUCCESS
+            if(state is InstructorStudentCountSuccess) {
+              totalStudents = int.parse(
+                state.totalStudentResponse.totalStudent,
+              );
+
+            }
+
+            /// 🔥 FAILURE
+            if(state is InstructorStudentCountFailure) {
+
+              print(state.error);
+            }
+
+            return Scaffold(
+              backgroundColor: Color.fromARGB(255, 233, 233, 233),
+
+              /// ---------------- BODY ----------------
+              /*body: Column(
           children: [
             _header(),
             bodyContent(),
           ],
         ),*/
-        body: _screens[_currentIndex],
+              body: _screens[_currentIndex],
 
-        /// ---------------- BOTTOM NAV (UNCHANGED) ----------------
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
+              /// ---------------- BOTTOM NAV (UNCHANGED) ----------------
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: _currentIndex,
+                onTap: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                type: BottomNavigationBarType.fixed,
+                backgroundColor: Colors.white,
+                selectedItemColor: HexColor(AppColor.colorOfToday),
+                unselectedItemColor: Colors.grey,
+                showUnselectedLabels: true,
+
+                items: [
+                  BottomNavigationBarItem(
+                    icon: Image.asset(
+                      'assets/app_icons/ic_home.png',
+                      width: 24,
+                      height: 24,
+                      color: HexColor(AppColor.colorAppGray),
+                    ),
+                    activeIcon: Image.asset(
+                      'assets/app_icons/ic_home.png',
+                      width: 24,
+                      height: 24,
+                      color: HexColor(AppColor.colorOfToday),
+                    ),
+                    label: "Home",
+                  ),
+
+                  BottomNavigationBarItem(
+                    icon: Image.asset(
+                      'assets/app_icons/ic_lesson.png',
+                      width: 24,
+                      height: 24,
+                      color: HexColor(AppColor.colorAppGray),
+                    ),
+                    activeIcon: Image.asset(
+                      'assets/app_icons/ic_lesson.png',
+                      width: 24,
+                      height: 24,
+                      color: HexColor(AppColor.colorOfToday),
+                    ),
+                    label: "My Lesson",
+                  ),
+
+                  BottomNavigationBarItem(
+                    icon: Image.asset(
+                      'assets/app_icons/ic_mocktest.png',
+                      width: 24,
+                      height: 24,
+                      color: HexColor(AppColor.colorAppGray),
+                    ),
+                    activeIcon: Image.asset(
+                      'assets/app_icons/ic_mocktest.png',
+                      width: 24,
+                      height: 24,
+                      color: HexColor(AppColor.colorOfToday),
+                    ),
+                    label: "Mocktest",
+                  ),
+
+                  BottomNavigationBarItem(
+                    icon: Image.asset(
+                      'assets/app_icons/ic_profile.png',
+                      width: 24,
+                      height: 24,
+                      color: HexColor(AppColor.colorAppGray),
+                    ),
+                    activeIcon: Image.asset(
+                      'assets/app_icons/ic_profile.png',
+                      width: 24,
+                      height: 24,
+                      color: HexColor(AppColor.colorAppGray),
+                    ),
+                    label: "Profile",
+                  ),
+                ],
+              ),
+            );
           },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: HexColor(AppColor.colorOfToday),
-          unselectedItemColor: Colors.grey,
-          showUnselectedLabels: true,
-
-          items: [
-            BottomNavigationBarItem(
-              icon: Image.asset(
-                'assets/app_icons/ic_home.png',
-                width: 24,
-                height: 24,
-                color: HexColor(AppColor.colorAppGray),
-              ),
-              activeIcon: Image.asset(
-                'assets/app_icons/ic_home.png',
-                width: 24,
-                height: 24,
-                color: HexColor(AppColor.colorOfToday),
-              ),
-              label: "Home",
-            ),
-
-            BottomNavigationBarItem(
-              icon: Image.asset(
-                'assets/app_icons/ic_lesson.png',
-                width: 24,
-                height: 24,
-                color: HexColor(AppColor.colorAppGray),
-              ),
-              activeIcon: Image.asset(
-                'assets/app_icons/ic_lesson.png',
-                width: 24,
-                height: 24,
-                color: HexColor(AppColor.colorOfToday),
-              ),
-              label: "My Lesson",
-            ),
-
-            BottomNavigationBarItem(
-              icon: Image.asset(
-                'assets/app_icons/ic_mocktest.png',
-                width: 24,
-                height: 24,
-                color: HexColor(AppColor.colorAppGray),
-              ),
-              activeIcon: Image.asset(
-                'assets/app_icons/ic_mocktest.png',
-                width: 24,
-                height: 24,
-                color: HexColor(AppColor.colorOfToday),
-              ),
-              label: "Mocktest",
-            ),
-
-            BottomNavigationBarItem(
-              icon: Image.asset(
-                'assets/app_icons/ic_profile.png',
-                width: 24,
-                height: 24,
-                color: HexColor(AppColor.colorAppGray),
-              ),
-              activeIcon: Image.asset(
-                'assets/app_icons/ic_profile.png',
-                width: 24,
-                height: 24,
-                color: HexColor(AppColor.colorAppGray),
-              ),
-              label: "Profile",
-            ),
-          ],
-        ),
       ),
+
     );
   }
 
@@ -1093,6 +1119,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> fetchTotalStudentCount() async {
+
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+    prefs.getString('user_id');
+
+    print(
+      "🔥 Dashboard Instructor Id: $userId",
+    );
+
+    context.read<InstructorStudentCountBloc>().add(
+
+      FetchInstructorStudentCount(
+
+        instructorId:
+        userId.toString(),
       ),
     );
   }
