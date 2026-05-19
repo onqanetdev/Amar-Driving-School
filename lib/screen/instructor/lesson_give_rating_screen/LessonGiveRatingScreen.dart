@@ -1,6 +1,9 @@
 import 'package:amar_driving_school/helper/helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/instructor/about_us/instructor_about_us_bloc.dart';
+import '../../../bloc/instructor/about_us/instructor_about_us_event.dart';
 import '../../../model/RatingItem.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
@@ -261,7 +264,18 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.75, // 🔥 control height
             ),
-            child: RatingGuideScreen(),
+            child:
+            BlocProvider(
+
+              create: (_) => InstructorAboutUsBloc()
+                ..add(FetchInstructorAboutUs(
+                  pageTitle:
+                  "Rating Guide for Lesson",
+                ),
+                ),
+
+              child: RatingGuideScreen(),
+            ),
           ),
         );
       },

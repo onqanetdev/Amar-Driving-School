@@ -473,10 +473,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           create: (_) => InstructorAboutUsBloc()
 
-            ..add(
-
-              FetchInstructorAboutUs(
-
+            ..add(FetchInstructorAboutUs(
                 pageTitle:
                 "Contact Us",
               ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/instructor/about_us/instructor_about_us_bloc.dart';
+import '../../../bloc/instructor/about_us/instructor_about_us_event.dart';
 import '../../../helper/helper.dart';
 import '../../../model/MockRatingItem.dart';
 import '../../../model/MockRatingSection.dart';
@@ -120,7 +123,18 @@ class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
                   .size
                   .height * 0.75,
             ),
-            child: RatingGuideScreen(),
+             child:  BlocProvider(
+
+                create: (_) => InstructorAboutUsBloc()
+                  ..add(FetchInstructorAboutUs(
+                    pageTitle:
+                    "Rating Guide for Mocktest",
+                  ),
+                  ),
+
+                child: RatingGuideScreen(),
+              )
+            //child: RatingGuideScreen(),
           ),
         );
       },
