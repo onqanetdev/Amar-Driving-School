@@ -165,17 +165,7 @@ class _LessonScreenState extends State<LessonScreen> {
             },
           ),
 
-          /// LIST
-          // Expanded(
-          //   child: ListView.separated(
-          //     padding: EdgeInsets.all(10),
-          //     itemCount: lessons.length,
-          //     separatorBuilder: (_, __) => SizedBox(height: 12),
-          //     itemBuilder: (context, index) {
-          //       return LessonCard(data: lessons[index]);
-          //     },
-          //   ),
-          // ),
+
 
           Expanded(
             child: ListView.separated(
@@ -210,29 +200,7 @@ class _LessonScreenState extends State<LessonScreen> {
     );
   }
 
-  // Future<void> fetchLessonList() async {
-  //
-  //   final prefs =
-  //   await SharedPreferences.getInstance();
-  //
-  //   final userId =
-  //   prefs.getString('user_id');
-  //
-  //   print("🔥 Instructor Id: $userId");
-  //
-  //   context.read<InstructorLessonListBloc>().add(
-  //
-  //     FetchInstructorLessonList(
-  //
-  //       instructorId:
-  //       userId.toString(),
-  //
-  //       limit: "30",
-  //
-  //       offset: "0",
-  //     ),
-  //   );
-  // }
+
 
   Future<void> fetchLessonList() async {
 

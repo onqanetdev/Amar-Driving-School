@@ -1,9 +1,15 @@
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../bloc/instructor/about_us/instructor_about_us_bloc.dart';
+import '../../../bloc/instructor/about_us/instructor_about_us_event.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_input_textfield.dart';
+import '../../common_screen/about_us_and_TermsNconditions/CmsPageScreen.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -108,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       children: [
 
-                        /// 🔷 CARD
+                        /// 🔷 CARD - USER DETAILS
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
@@ -189,13 +195,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 keyboardType: TextInputType.text,
                                 readOnly: false,
                               ),
-
-                              const SizedBox(height: 20),
                             ],
                           ),
                         ),
 
                         const SizedBox(height: 20),
+
+                        /// 🔷 NEW CARD - LEGAL & OPTIONS
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                blurRadius: 10,
+                              )
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+
+                              /// TERMS & CONDITIONS
+                              _buildMenuOption(
+                                icon: Icons.description_outlined,
+                                title: "Terms & Conditions",
+                                onTap: () {
+                                  // TODO: Handle Terms & Conditions tap
+                                  _handleTermsAndConditions();
+                                },
+                              ),
+
+                              const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEEEEEE)),
+
+                              /// ABOUT US
+                              _buildMenuOption(
+                                icon: Icons.info_outline,
+                                title: "About Us",
+                                onTap: () {
+                                  // TODO: Handle About Us tap
+                                  _handleTapped();
+                                },
+                              ),
+
+                              const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEEEEEE)),
+
+                              /// PRIVACY POLICY
+                              _buildMenuOption(
+                                icon: Icons.content_paste_outlined, // Fallback if shield icon differs
+                                alternativeIcon: Icons.lock_outline,
+                                title: "Privacy Policy",
+                                onTap: () {
+                                  // TODO: Handle Privacy Policy tap
+                                  _handlePrivacyPolicy();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
 
                         /// 🔷 EDIT BUTTON
                         AppButton(
@@ -224,6 +283,134 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+   void _handleTapped() {
+     Navigator.push(
+
+       context,
+
+       MaterialPageRoute(
+
+         builder: (_) => BlocProvider(
+
+           create: (_) => InstructorAboutUsBloc()
+
+             ..add(
+
+               FetchInstructorAboutUs(
+
+                 pageTitle: "About Us",
+               ),
+             ),
+
+           child: const CmsPageScreen(
+
+             title: "About Us",
+           ),
+         ),
+       ),
+     );
+  }
+  void _handleTermsAndConditions() {
+    Navigator.push(
+
+      context,
+
+      MaterialPageRoute(
+
+        builder: (_) => BlocProvider(
+
+          create: (_) => InstructorAboutUsBloc()
+
+            ..add(
+
+              FetchInstructorAboutUs(
+
+                pageTitle:
+                "Term & Conditions",
+              ),
+            ),
+
+          child: const CmsPageScreen(
+
+            title:
+            "Terms & Conditions",
+          ),
+        ),
+      ),
+    );
+  }
+  //Handle Privacy Policy
+
+  void _handlePrivacyPolicy() {
+    Navigator.push(
+
+      context,
+
+      MaterialPageRoute(
+
+        builder: (_) => BlocProvider(
+
+          create: (_) => InstructorAboutUsBloc()
+
+            ..add(
+
+              FetchInstructorAboutUs(
+
+                pageTitle:
+                "Privacy Policy",
+              ),
+            ),
+
+          child: const CmsPageScreen(
+
+            title:
+            "Privacy Policy",
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Helper widget to build individual clean menu options rows
+  Widget _buildMenuOption({
+    required IconData icon,
+    IconData? alternativeIcon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Row(
+          children: [
+            Icon(
+              alternativeIcon ?? icon,
+              color: Colors.grey.shade600,
+              size: 22,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              title,
+              style: const TextStyle(
+                fontFamily: "InterMedium", // Replace with your font family if different
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+            const Spacer(),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey.shade400,
+              size: 14,
+            ),
+          ],
+        ),
       ),
     );
   }
