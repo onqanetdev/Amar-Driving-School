@@ -41,9 +41,8 @@ class CmsPageScreen extends StatelessWidget {
           /// BODY
           Expanded(
 
-            child: BlocBuilder<
-                InstructorAboutUsBloc,
-                InstructorAboutUsState>(
+            child:
+            BlocBuilder<InstructorAboutUsBloc, InstructorAboutUsState>(
 
               builder: (context, state) {
 
@@ -59,8 +58,7 @@ class CmsPageScreen extends StatelessWidget {
                 }
 
                 /// SUCCESS
-                if(state
-                is InstructorAboutUsSuccess) {
+                if(state is InstructorAboutUsSuccess) {
 
                   final data =
                       state.aboutUsResponse.data;

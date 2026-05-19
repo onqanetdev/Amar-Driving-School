@@ -5,6 +5,7 @@ import 'package:amar_driving_school/screen/instructor/profile_screen/ProfileScre
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/common/profile_bloc.dart';
 import '../../../bloc/instructor/add_student/instructor_add_student_bloc.dart';
 import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/instructor_revenue/instructor_total_revenue_bloc.dart';
@@ -73,8 +74,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       child: MockTestScreen(),
     ),
+    BlocProvider(
+
+      create: (_) => ProfileBloc(),
+
+      child: const ProfileScreen(),
+    )
     //MockTestScreen(),
-    ProfileScreen(),
+   // ProfileScreen(),
   ];
 
 
