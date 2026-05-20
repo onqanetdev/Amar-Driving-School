@@ -4,13 +4,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bloc/instructor/about_us/instructor_about_us_bloc.dart';
 import '../../../bloc/instructor/about_us/instructor_about_us_event.dart';
+import '../../../bloc/instructor/lesson_review/instructor_lesson_review_bloc.dart';
+import '../../../bloc/instructor/lesson_review/instructor_lesson_review_event.dart';
+import '../../../bloc/instructor/lesson_review/instructor_lesson_review_state.dart';
 import '../../../model/RatingItem.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../rating_guide_screen/rating_guide_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LessonGiveRatingScreen extends StatefulWidget {
-  const LessonGiveRatingScreen({super.key});
+  final String subjectName;
+  final List<RatingItem> subTopics;
+  final String studentUserId;
+  final String topicId;
+  const LessonGiveRatingScreen({super.key, required this.subjectName, required this.subTopics, required this.studentUserId, required this.topicId});
 
   @override
   State<LessonGiveRatingScreen> createState() => _LessonGiveRatingScreenState();
@@ -18,42 +26,47 @@ class LessonGiveRatingScreen extends StatefulWidget {
 
 class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
 
-  List<RatingSection> sections = [
 
-    RatingSection(
-      title: "Pre-Drive Checks:",
-      items: [
-        RatingItem(title: "Vehicle approach"),
-        RatingItem(title: "Start-up drill"),
-      ],
-    ),
-
-    RatingSection(
-      title: "Basic Control:",
-      items: [
-        RatingItem(title: "Braking, stopping"),
-        RatingItem(title: "Accelerating, coasting"),
-        RatingItem(title: "Steering, turning"),
-        RatingItem(title: "Yielding"),
-        RatingItem(title: "Search, Evaluate, Execute (SEE)"),
-        RatingItem(title: "Curve negotiation"),
-        RatingItem(title: "Right-of-way execution"),
-      ],
-    ),
-
-    RatingSection(
-      title: "Lane Procedure:",
-      items: [
-        RatingItem(title: "Lane positioning"),
-        RatingItem(title: "Lane changing"),
-        RatingItem(title: "Parked vehicle negotiation"),
-      ],
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocListener<InstructorLessonReviewBloc, InstructorLessonReviewState>(
+
+        listener: (context, state) {
+
+          /// LOADING
+          if(state is InstructorLessonReviewLoading) {
+
+            Helper.showToast(
+              context,
+              "Submitting review...",
+            );
+          }
+
+          /// SUCCESS
+          if(state is InstructorLessonReviewSuccess) {
+
+            Helper.showToast(
+
+              context,
+
+              state.reviewResponse.message,
+            );
+
+            Navigator.pop(context);
+          }
+
+          /// FAILURE
+          if(state is InstructorLessonReviewFailure) {
+
+            Helper.showToast(
+              context,
+              state.error,
+            );
+          }
+        },
+
+      child: Scaffold(
       backgroundColor: Color(0xFFE9E9E9),
 
       body: Column(
@@ -78,26 +91,74 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
               padding: EdgeInsets.all(10),
               children: [
 
-                ...sections.map((section) => ratingSection(section)),
-
+                //...sections.map((section) => ratingSection(section)),
+                ratingSection(widget.subjectName),
                 SizedBox(height: 20),
 
                 /// SUBMIT BUTTON
                 AppButton(
                   text: "SUBMIT",
-                  onTap: () {
+                  onTap: () async {
 
-                    final missing = getFirstUnratedItem();
+                    /// VALIDATION
+                    for (var item
+                    in widget.subTopics) {
 
-                    if (missing != null) {
+                      if(item.selected == 0) {
 
-                      Helper.showToast(context, "Please rate: $missing");
-                      return;
+                        Helper.showToast(
+
+                          context,
+
+                          "Please rate ${item.title}",
+                        );
+
+                        return;
+                      }
                     }
-                    final jsonData = generateRatingJson();
 
-                    print(jsonData);
-                  },
+                    /// CREATE RATINGS ARRAY
+                    final ratingsData =
+
+                    widget.subTopics.map((item) {
+
+                      return {
+
+                        "subtopicid":
+                        item.title,
+
+                        "rating":
+                        item.selected.toString(),
+                      };
+
+                    }).toList();
+
+                    print(ratingsData);
+
+                    /// GET INSTRUCTOR ID
+                    final prefs = await SharedPreferences.getInstance();
+
+                    final instructorId =
+                    prefs.getString('user_id');
+
+                    /// CALL EVENT
+                    context.read<InstructorLessonReviewBloc>()
+                        .add(SubmitInstructorLessonReview(
+
+                        instructorId:
+                        instructorId.toString(),
+
+                        studentId:
+                        widget.studentUserId,
+
+                        topicId:
+                        widget.topicId,
+
+                        ratingsData:
+                        ratingsData,
+                      ),
+                    );
+                  } ,//On tap ending
                   textStyle: TextStyle(
                     fontFamily: "InterBold",
                     fontSize: 12,
@@ -111,10 +172,11 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
           )
         ],
       ),
+    ),
     );
   }
 
-  Widget ratingSection(RatingSection section) {
+  Widget ratingSection(String section) {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(12),
@@ -135,7 +197,7 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
 
           /// TITLE
           Text(
-            section.title,
+            section,
             style: TextStyle(
               fontSize: 18,
               fontFamily: "InterBold",
@@ -146,7 +208,7 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
           SizedBox(height: 10),
 
           /// ITEMS
-          ...section.items.map((item) => ratingRow(item)).toList(),
+          ...widget.subTopics.map((item) => ratingRow(item)).toList(),
         ],
       ),
     );
@@ -178,8 +240,9 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
 
               return GestureDetector(
                 onTap: () {
+                  print('Value is ${value}, for the item ${item.title}');
                   setState(() {
-                    item.selected = value;
+                   item.selected = value;
                   });
                 },
                 child: Container(
@@ -188,9 +251,7 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
                   height: 32,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? Color.fromARGB(255, 54, 113, 232)
-                        : Colors.grey.shade300,
+                    color: isSelected ? Color.fromARGB(255, 54, 113, 232) : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -209,46 +270,7 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
     );
   }
 
-  Map<String, dynamic> generateRatingJson() {
-    Map<String, dynamic> result = {};
 
-    for (var section in sections) {
-      Map<String, dynamic> sectionData = {};
-
-      for (var item in section.items) {
-        sectionData[item.title] = item.selected;
-      }
-
-      /// remove ":" from title
-      String cleanTitle = section.title.replaceAll(":", "");
-
-      result[cleanTitle] = sectionData;
-    }
-
-    return result;
-  }
-
-  String? getFirstUnratedItem() {
-    for (var section in sections) {
-      for (var item in section.items) {
-        if (item.selected == 0) {
-          return "${section.title} → ${item.title}";
-        }
-      }
-    }
-    return null;
-  }
-
-  bool validateRatings() {
-    for (var section in sections) {
-      for (var item in section.items) {
-        if (item.selected == 0) {
-          return false; // not rated
-        }
-      }
-    }
-    return true; // ✅ all rated
-  }
 
   void showRatingGuideDialog(BuildContext context) {
     showDialog(

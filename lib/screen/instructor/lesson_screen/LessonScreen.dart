@@ -3,10 +3,12 @@ import 'package:amar_driving_school/screen/instructor/add_lesson_screen/AddLesso
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/instructor/about_us/instructor_about_us_bloc.dart';
 import '../../../bloc/instructor/create_lesson/instructor_create_lesson_bloc.dart';
 import '../../../bloc/instructor/lesson_list/instructor_Lesson_List_Event.dart';
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_state.dart';
+import '../../../bloc/instructor/lesson_review/instructor_lesson_review_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/topic_list/instructor_topic_list_bloc.dart';
 import '../../../common/app_color.dart';
@@ -14,6 +16,7 @@ import '../../../common/convert_color.dart';
 import '../../../helper/helper.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../model/LessonModel.dart';
+import '../../../model/RatingItem.dart';
 import '../../../model/instructor_create_lesson_model/instructor_Lesson_List_Model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
@@ -121,82 +124,82 @@ class _LessonScreenState extends State<LessonScreen> {
           }
         },
 
-    child:  Scaffold(
-      backgroundColor: Color(0xFFE9E9E9),
+        child:  Scaffold(
+          backgroundColor: Color(0xFFE9E9E9),
 
-      body: Column(
-        children: [
-          /// HEADER
-          AppHeader(
-            title: "Lesson",
-            showBack: widget.showBack,
-            showAddButton: true,
-            addButtonText: "Add Lesson",
-            onAdd: () {
-              // Create lesson dialog
-              Navigator.push(
-                context,
-                MaterialPageRoute(
+          body: Column(
+            children: [
+              /// HEADER
+              AppHeader(
+                title: "Lesson",
+                showBack: widget.showBack,
+                showAddButton: true,
+                addButtonText: "Add Lesson",
+                onAdd: () {
+                  // Create lesson dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
 
-                    builder: (_) =>
-                        MultiBlocProvider(providers: [
-                          BlocProvider(
-                            create: (context) => InstructorTopicListBloc(),
-                          ),
+                        builder: (_) =>
+                            MultiBlocProvider(providers: [
+                              BlocProvider(
+                                create: (context) => InstructorTopicListBloc(),
+                              ),
 
-                          BlocProvider(
-                            create: (_) => InstructorSubTopicListBloc(),
-                          ),
+                              BlocProvider(
+                                create: (_) => InstructorSubTopicListBloc(),
+                              ),
 
-                          BlocProvider(
-                            create: (_) =>
-                                InstructorStudentListBloc(),
-                          ),
+                              BlocProvider(
+                                create: (_) =>
+                                    InstructorStudentListBloc(),
+                              ),
 
-                          BlocProvider(
-                            create: (_) =>
-                                InstructorCreateLessonBloc(),
-                          ),
-                        ],
-                            child: AddLessonScreen()
-                        )
-                ),
-              );
-            },
-          ),
-
-
-
-          Expanded(
-            child: ListView.separated(
-
-              controller: _scrollController,
-
-              padding: EdgeInsets.all(10),
-
-              itemCount: lessons.length + (hasMore ? 1 : 0),
-
-              separatorBuilder: (_, __) => SizedBox(height: 12),
-
-              itemBuilder: (context, index) {
-
-                if(index == lessons.length) {
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Center(
-                      child: CircularProgressIndicator(),
+                              BlocProvider(
+                                create: (_) =>
+                                    InstructorCreateLessonBloc(),
+                              ),
+                            ],
+                                child: AddLessonScreen()
+                            )
                     ),
                   );
-                }
+                },
+              ),
 
-                return LessonCard(data: lessons[index]);
-              },
-            ),
+
+
+              Expanded(
+                child: ListView.separated(
+
+                  controller: _scrollController,
+
+                  padding: EdgeInsets.all(10),
+
+                  itemCount: lessons.length + (hasMore ? 1 : 0),
+
+                  separatorBuilder: (_, __) => SizedBox(height: 12),
+
+                  itemBuilder: (context, index) {
+
+                    if(index == lessons.length) {
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
+                    return LessonCard(data: lessons[index]);
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    )
+        )
     );
   }
 
@@ -354,8 +357,6 @@ class LessonCard extends StatelessWidget {
                             ),
                           ],
                         ),
-
-
                       ],
                     ),
                   ],
@@ -443,7 +444,29 @@ class LessonCard extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => LessonGiveRatingScreen(),
+
+                          builder: (_) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (_) => InstructorLessonReviewBloc(),
+                              ),
+                              BlocProvider(
+                                create: (_) => InstructorAboutUsBloc(),
+                              ),
+                            ],
+
+                            child: LessonGiveRatingScreen(
+                              subjectName: data.name,
+                              subTopics: data.subtopicId
+                                  .split(',')
+                                  .map((e) => RatingItem(
+                                  title: e,
+                                ),
+                              ).toList(),
+                              studentUserId: data.userId,
+                              topicId: data.topicId,
+                            ),
+                          ),
                         ),
                       );
                     },
@@ -584,5 +607,4 @@ class LessonCard extends StatelessWidget {
       ),
     );
   }
-
 }
