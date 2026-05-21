@@ -1,4 +1,5 @@
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/upload_training_report/instructor_upload_training_report_bloc.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
 import 'package:amar_driving_school/screen/instructor/lesson_screen/LessonScreen.dart';
 import 'package:amar_driving_school/screen/instructor/profile_screen/ProfileScreen.dart';
@@ -1020,7 +1021,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => UploadTrainingScreen(),
+              //builder: (_) => UploadTrainingScreen(),
+              builder: (_) => MultiBlocProvider(providers: [
+                BlocProvider(
+                  create: (_) =>
+                      InstructorStudentListBloc(),
+                ),
+                BlocProvider(
+                  create: (_) =>
+                      InstructorUploadTrainingReportBloc(),
+                ),
+              ],
+                  child: UploadTrainingScreen()
+              )
             ),
           );
         }

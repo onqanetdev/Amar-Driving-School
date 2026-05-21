@@ -1,11 +1,22 @@
+import 'dart:io';
+
+import 'package:amar_driving_school/bloc/instructor/student_list/instructor_student_list_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_event.dart';
+import '../../../bloc/instructor/upload_training_report/instructor_upload_training_report_bloc.dart';
+import '../../../bloc/instructor/upload_training_report/instructor_upload_training_report_event.dart';
+import '../../../bloc/instructor/upload_training_report/instructor_upload_training_report_state.dart';
 import '../../../common/app_color.dart';
-import '../../../model/StudentModel.dart';
+import '../../../helper/helper.dart';
+import '../../../helper/loader_helper.dart';
+import '../../../model/instructor_student_list/instructor_student_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../../../widgets/app_input_textfield.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UploadTrainingScreen extends StatefulWidget {
   const UploadTrainingScreen({super.key});
@@ -21,119 +32,213 @@ class _UploadTrainingScreenState extends State<UploadTrainingScreen> {
   final fileController = TextEditingController();
 
   ///  STUDENT LIST (MODEL)
-  List<StudentModel> students = [
-    StudentModel(
-      name: "Ravi Kumar",
-      email: "ravi@gmail.com",
-      phone: "9876543210",
-      duration: "4 to 6 month",
-      date: "18.04.2026",
-      amount: 1840,
-    ),
-    StudentModel(
-      name: "Amit Sharma",
-      email: "amit@gmail.com",
-      phone: "9123456780",
-      duration: "3 month",
-      date: "10.03.2026",
-      amount: 1500,
-    ),
-  ];
+  // List<StudentModel> students = [
+  //   StudentModel(
+  //     name: "Ravi Kumar",
+  //     email: "ravi@gmail.com",
+  //     phone: "9876543210",
+  //     duration: "4 to 6 month",
+  //     date: "18.04.2026",
+  //     amount: 1840,
+  //   ),
+  //   StudentModel(
+  //     name: "Amit Sharma",
+  //     email: "amit@gmail.com",
+  //     phone: "9123456780",
+  //     duration: "3 month",
+  //     date: "10.03.2026",
+  //     amount: 1500,
+  //   ),
+  // ];
 
-  StudentModel? selectedStudent;
+  List<StudentData> students = [];
+
+  StudentData? selectedStudent;
+  File? selectedFile;
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchStudentList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
 
-      body: Column(
-        children: [
+    return MultiBlocListener(
 
-          /// 🔹 HEADER
-          AppHeader(
-            title: "Upload Training Report",
-            showBack: true,
-          ),
+      listeners: [
 
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(12),
-              children: [
+        /// STUDENT LISTENER
+        BlocListener<
+            InstructorStudentListBloc,
+            InstructorStudentListState>(
 
-                /// 🔹 CARD
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+          listener: (context, state) {
 
-                  child: Column(
-                    children: [
+            if(state
+            is InstructorStudentListLoading) {
 
-                      /// 🔹 STUDENT DROPDOWN
-                      AppInputField(
-                        controller: nameController,
-                        hintText: "Student Name",
-                        readOnly: true,            // 🔥 disable typing
-                        onTap: showStudentList,    // 🔥 open dialog
+              LoaderHelper.show(context);
+            }
 
-                        fillColor: AppColor.colorInputBg,
-                        borderColor: AppColor.colorInputBorder,
-                        focusedBorderColor: AppColor.colorInputFocusBorder,
-                        hintColor: AppColor.colorInputHint,
+            if(state
+            is InstructorStudentListSuccess) {
 
-                        suffixWidget: const Icon(
-                          Icons.keyboard_arrow_down,
-                          color: Colors.grey,
-                        ),
-                      ),
+              LoaderHelper.hide(context);
 
-                      const SizedBox(height: 10),
+              students =
+                  state.studentListResponse.data;
+            }
 
-                      /// 🔹 FILE UPLOAD FIELD (FIXED)
-                      AppInputField(
-                        controller: fileController,
-                        hintText: "Upload Training Report",
-                        readOnly: true,            // 🔥 no typing
-                        onTap: pickFile,           // 🔥 open picker
+            if(state
+            is InstructorStudentListFailure) {
 
-                        fillColor: AppColor.colorInputBg,
-                        borderColor: AppColor.colorInputBorder,
-                        focusedBorderColor: AppColor.colorInputFocusBorder,
-                        hintColor: AppColor.colorInputHint,
+              LoaderHelper.hide(context);
 
-                        suffixWidget: GestureDetector(
-                          onTap: pickFile,
-                          child: const Icon(
-                            Icons.upload_outlined,
+              Helper.showToast(
+                context,
+                state.error,
+              );
+            }
+          },
+        ),
+
+        /// UPLOAD REPORT LISTENER
+        BlocListener<InstructorUploadTrainingReportBloc, InstructorUploadTrainingReportState>(
+
+          listener: (context, state) {
+
+            /// LOADING
+            if(state is InstructorUploadTrainingReportLoading) {
+
+              LoaderHelper.show(context);
+            }
+
+            /// SUCCESS
+            if(state
+            is InstructorUploadTrainingReportSuccess) {
+
+              LoaderHelper.hide(context);
+
+              Helper.showToast(
+
+                context,
+
+                state.response.message,
+              );
+
+              Navigator.pop(context);
+            }
+
+            /// FAILURE
+            if(state
+            is InstructorUploadTrainingReportFailure) {
+
+              LoaderHelper.hide(context);
+
+              Helper.showToast(
+                context,
+                state.error,
+              );
+            }
+          },
+        ),
+      ],
+
+      child:  Scaffold(
+        backgroundColor: const Color(0xFFE9E9E9),
+
+        body: Column(
+          children: [
+
+            /// 🔹 HEADER
+            AppHeader(
+              title: "Upload Training Report",
+              showBack: true,
+            ),
+
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(12),
+                children: [
+
+                  /// 🔹 CARD
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+
+                    child: Column(
+                      children: [
+
+                        /// 🔹 STUDENT DROPDOWN
+                        AppInputField(
+                          controller: nameController,
+                          hintText: "Student Name",
+                          readOnly: true,            // 🔥 disable typing
+                          onTap: showStudentList,    // 🔥 open dialog
+
+                          fillColor: AppColor.colorInputBg,
+                          borderColor: AppColor.colorInputBorder,
+                          focusedBorderColor: AppColor.colorInputFocusBorder,
+                          hintColor: AppColor.colorInputHint,
+
+                          suffixWidget: const Icon(
+                            Icons.keyboard_arrow_down,
                             color: Colors.grey,
                           ),
                         ),
-                      ),
 
-                      const SizedBox(height: 15),
+                        const SizedBox(height: 10),
 
-                      /// 🔹 SUBMIT BUTTON
-                      AppButton(
-                        text: "SUBMIT",
-                        onTap: onSubmit,
-                        textStyle: const TextStyle(
-                          fontFamily: "InterBold",
-                          fontSize: 12,
-                          color: Colors.white,
+                        /// 🔹 FILE UPLOAD FIELD (FIXED)
+                        AppInputField(
+                          controller: fileController,
+                          hintText: "Upload Training Report",
+                          readOnly: true,            // 🔥 no typing
+                          onTap: pickFile,           // 🔥 open picker
+
+                          fillColor: AppColor.colorInputBg,
+                          borderColor: AppColor.colorInputBorder,
+                          focusedBorderColor: AppColor.colorInputFocusBorder,
+                          hintColor: AppColor.colorInputHint,
+
+                          suffixWidget: GestureDetector(
+                            onTap: pickFile,
+                            child: const Icon(
+                              Icons.upload_outlined,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
+
+                        const SizedBox(height: 15),
+
+                        /// 🔹 SUBMIT BUTTON
+                        AppButton(
+                          text: "SUBMIT",
+                          onTap: onSubmit,
+                          textStyle: const TextStyle(
+                            fontFamily: "InterBold",
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+
   }
 
   /// 🔥 STUDENT BOTTOM SHEET
@@ -283,37 +388,112 @@ class _UploadTrainingScreenState extends State<UploadTrainingScreen> {
     );
   }
 
+  Future<void> fetchStudentList() async {
+
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+    prefs.getString('user_id');
+
+    print(userId);
+
+    context.read<InstructorStudentListBloc>().add(
+
+      FetchInstructorStudentList(
+        instructureId: userId!,
+      ),
+    );
+  }
+
   /// 🔥 FILE PICK
   void pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+
+    FilePickerResult? result =
+    await FilePicker.platform.pickFiles(
+
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'png'], // 🔥 customize
+
+      allowedExtensions: [
+        'pdf',
+        'jpg',
+        'png',
+      ],
     );
 
-    if (result != null && result.files.isNotEmpty) {
-      final file = result.files.first;
+    if (result != null &&
+        result.files.isNotEmpty) {
+
+      final file =
+          result.files.first;
+
+      /// SAVE FILE
+      selectedFile =
+          File(file.path!);
 
       setState(() {
-        fileController.text = file.name; // 👈 show file name
+
+        fileController.text =
+            file.name;
       });
 
-      /// 🔥 optional: get path
-      String? filePath = file.path;
+      print(
+        "Selected File: ${selectedFile!.path}",
+      );
 
-      print("Selected File: $filePath");
     } else {
+
       print("No file selected");
     }
   }
 
   /// 🔥 SUBMIT
   void onSubmit() {
-    final data = {
-      "student_name": selectedStudent?.name,
-      "student_phone": selectedStudent?.phone,
-      "file": fileController.text,
-    };
+    // final data = {
+    //   "student_name": selectedStudent?.name,
+    //   "student_phone": selectedStudent?.phone,
+    //   "file": fileController.text,
+    // };
+    //
+    // print(data);
 
-    print(data);
+    /// VALIDATION
+    if(selectedStudent == null) {
+
+      Helper.showToast(
+
+        context,
+
+        "Please select student",
+      );
+
+      return;
+    }
+
+    if(selectedFile == null) {
+
+      Helper.showToast(
+
+        context,
+
+        "Please upload report",
+      );
+
+      return;
+    }
+
+    /// CALL EVENT
+    context.read<InstructorUploadTrainingReportBloc>().add(
+      UploadTrainingReport(
+
+        studentId:
+        selectedStudent!.userId,
+
+        status: "1",
+
+        reportFile:
+        selectedFile!,
+      ),
+    );
   }
 }

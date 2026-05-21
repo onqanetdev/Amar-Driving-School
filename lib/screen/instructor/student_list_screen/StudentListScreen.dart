@@ -31,17 +31,18 @@ class StudentListScreen extends StatefulWidget {
 }
 
 class _StudentListScreenState extends State<StudentListScreen> {
-  final List<StudentModel> students = List.generate(
-    6,
-        (index) => StudentModel(
-      name: "Asok Sarma",
-      email: "asok.sarma@gmail.com",
-      phone: "700345678",
-      duration: "4 to 6 month",
-      date: "18.04.2026",
-      amount: 1840,
-    ),
-  );
+
+  // final List<StudentModel> students = List.generate(
+  //   6,
+  //       (index) => StudentModel(
+  //     name: "Asok Sarma",
+  //     email: "asok.sarma@gmail.com",
+  //     phone: "700345678",
+  //     duration: "4 to 6 month",
+  //     date: "18.04.2026",
+  //     amount: 1840,
+  //   ),
+  // );
 
 
   @override
@@ -136,14 +137,14 @@ class _StudentListScreenState extends State<StudentListScreen> {
 
                       padding: const EdgeInsets.all(10),
 
-                      itemCount: students.length,
+                      itemCount: state.studentListResponse.data.length,
 
                       separatorBuilder: (_, __) =>
                       const SizedBox(height: 12),
 
                       itemBuilder: (context, index) {
 
-                        final data = students[index];
+                        final data = state.studentListResponse.data[index];
 
                         return StudentCard(
                           data: data,
