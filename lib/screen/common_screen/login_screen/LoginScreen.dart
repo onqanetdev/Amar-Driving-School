@@ -167,6 +167,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             InstructorLessonListBloc(),
                       ),
 
+                      //Revenue Bloc Provider
+                      BlocProvider(
+                        create: (_) =>
+                            InstructorTotalRevenueBloc(),
+                      ),
                     ],
 
                     child: const DashboardScreen(),

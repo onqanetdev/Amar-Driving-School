@@ -30,9 +30,10 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<InstructorLessonReviewBloc, InstructorLessonReviewState>(
+    return
+      BlocListener<InstructorLessonReviewBloc, InstructorLessonReviewState>(
 
-        listener: (context, state) {
+          listener: (context, state) {
 
           /// LOADING
           if(state is InstructorLessonReviewLoading) {

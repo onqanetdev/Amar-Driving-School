@@ -2,6 +2,7 @@ import 'package:amar_driving_school/bloc/instructor/create_mocktest/instructor_c
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_event.dart';
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_state.dart';
+import 'package:amar_driving_school/bloc/instructor/mocktest_review/instructor_mocktest_review_bloc.dart';
 import 'package:amar_driving_school/helper/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +15,7 @@ import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../model/LessonModel.dart';
+import '../../../model/MockRatingItem.dart';
 import '../../../model/instructor_create_mocktest/instructor_mocktest_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
@@ -458,16 +460,15 @@ class LessonCard extends StatelessWidget {
                   SizedBox(height: 10),
 
                   /// BUTTON
+                  if (data.rating != null)
                   AppButton(
                     height: 34,
                     text: "Give rating",
+                    gradientColors: [
+                      Colors.grey,
+                      Colors.grey,
+                    ],
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MockTestGiveRatingScreen(),
-                        ),
-                      );
 
                     },
                     textStyle: TextStyle(
@@ -475,7 +476,40 @@ class LessonCard extends StatelessWidget {
                       fontSize: 12,
                       color: Colors.white,
                     ),
-                  ),
+                  )
+                  else
+                    AppButton(
+                      height: 34,
+                      text: "Give rating",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MultiBlocProvider(providers: [
+                              BlocProvider(
+                                create: (_) => InstructorMocktestReviewBloc(),
+                              ),
+                            ],
+                              child:
+                              MockTestGiveRatingScreen(mocktestTitle: data.name, ids: data.subtopicId
+                                  .split(',')
+                                  .map((e) => MockRatingItem(
+                                title: e,
+                              ),
+                              ).toList(),
+                                studentUserId: data.userId,
+                                topicId: data.topicId,),
+                            ),
+                          ),
+                        );
+
+                      },
+                      textStyle: TextStyle(
+                        fontFamily: "InterBold",
+                        fontSize: 12,
+                        color: Colors.white,
+                      ),
+                    )
                 ],
               ),
             ],

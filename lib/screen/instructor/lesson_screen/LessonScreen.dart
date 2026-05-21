@@ -349,7 +349,6 @@ class LessonCard extends StatelessWidget {
                                 color: HexColor(AppColor.colorAppGray)),
                             SizedBox(width: 2),
                             Text(
-                              //data.time.toString(),
                               data.lessonStart.toString(),
                               overflow: TextOverflow.fade,
                               style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
@@ -437,45 +436,65 @@ class LessonCard extends StatelessWidget {
                   SizedBox(height: 10),
 
                   /// BUTTON
+
+                  if (data.rating != null)
                   AppButton(
                     height: 34,
                     text: "Give rating",
+                    gradientColors: [
+                      Colors.grey,
+                      Colors.grey,
+                    ],
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
 
-                          builder: (_) => MultiBlocProvider(
-                            providers: [
-                              BlocProvider(
-                                create: (_) => InstructorLessonReviewBloc(),
-                              ),
-                              BlocProvider(
-                                create: (_) => InstructorAboutUsBloc(),
-                              ),
-                            ],
-
-                            child: LessonGiveRatingScreen(
-                              subjectName: data.name,
-                              subTopics: data.subtopicId
-                                  .split(',')
-                                  .map((e) => RatingItem(
-                                  title: e,
-                                ),
-                              ).toList(),
-                              studentUserId: data.userId,
-                              topicId: data.topicId,
-                            ),
-                          ),
-                        ),
-                      );
                     },
                     textStyle: TextStyle(
                       fontFamily: "InterBold",
                       fontSize: 12,
                       color: Colors.white,
                     ),
-                  ),
+                  )
+
+                  else
+                    AppButton(
+                      height: 34,
+                      text: "Give rating",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+
+                            builder: (_) => MultiBlocProvider(
+                              providers: [
+                                BlocProvider(
+                                  create: (_) => InstructorLessonReviewBloc(),
+                                ),
+                                BlocProvider(
+                                  create: (_) => InstructorAboutUsBloc(),
+                                ),
+                              ],
+
+                              child: LessonGiveRatingScreen(
+                                subjectName: data.name,
+                                subTopics: data.subtopicId
+                                    .split(',')
+                                    .map((e) => RatingItem(
+                                  title: e,
+                                ),
+                                ).toList(),
+                                studentUserId: data.userId,
+                                topicId: data.topicId,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      textStyle: TextStyle(
+                        fontFamily: "InterBold",
+                        fontSize: 12,
+                        color: Colors.white,
+                      ),
+                    ),
                 ],
               ),
             ],
