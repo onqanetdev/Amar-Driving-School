@@ -1,4 +1,6 @@
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/todays_lesson/instructor_todays_lesson_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/todays_lesson/instructor_todays_lesson_state.dart';
 import 'package:amar_driving_school/bloc/instructor/upload_training_report/instructor_upload_training_report_bloc.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
 import 'package:amar_driving_school/screen/instructor/lesson_screen/LessonScreen.dart';
@@ -18,10 +20,12 @@ import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart'
 import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_event.dart';
 import '../../../bloc/instructor/student_total_count/instructor_studentcount_state.dart';
+import '../../../bloc/instructor/todays_lesson/instructor_todays_lesson_event.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../model/LessonModel.dart';
 import '../../../model/MockTestModel.dart';
+import '../../../model/instructor_todays_lesson_model/instructor_todays_lesson_model.dart';
 import '../../common_screen/login_screen/LoginScreen.dart';
 import '../add_student_screen/AddStudentScreen.dart';
 import '../invoice_screen/InvoiceScreen.dart';
@@ -86,19 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   ];
 
 
-  /// Dummy Data
-  final List<LessonModel> lessonList = [
-    LessonModel(
-      name: "Ravi Kumar",
-      topic: "Parallel Parking & Lane Change",
-      date: "tomorrow, May 26, 10:00 AM",
-    ),
-    LessonModel(
-      name: "Amarjit Kumar",
-      topic: "Parallel Parking & Lane Change",
-      date: "tomorrow, May 26, 10:00 AM",
-    ),
-  ];
+  List<TodaysLessonData> lessonList = [ ];
 
   final List<MockTestModel> mockList = [
     MockTestModel(name: "Ravi Kumar"),
@@ -107,23 +99,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
     MockTestModel(name: "Sourav"),
   ];
 
-  void _loadData() async {
-    await Future.delayed(const Duration(seconds: 25));
-
-    if (!mounted) return;
-
-    setState(() {
-      isLessonLoading = false;
-      isMockLoading = false;
-    });
-  }
+  // void _loadData() async {
+  //   await Future.delayed(const Duration(seconds: 25));
+  //
+  //   if (!mounted) return;
+  //
+  //   setState(() {
+  //     isLessonLoading = false;
+  //     isMockLoading = false;
+  //   });
+  // }
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+   // _loadData();
     fetchTotalStudentCount();
     fetchTotalRevenue();
+    fetchTodaysLesson();
   }
 
   @override
@@ -189,6 +182,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
               }
             },
           ),
+
+          //Instructor Todays Lesson
+          BlocListener<
+              InstructorTodaysLessonBloc, InstructorTodaysLessonState>(
+
+            listener: (context, state) {
+
+              if(state is InstructorTodaysLessonSuccess) {
+
+                // setState(() {
+                //   lessonList = state.todaysLessonResponse.data ;
+                // });
+
+                setState(() {
+
+                  lessonList =
+                      state.todaysLessonResponse.data;
+
+                  isLessonLoading = false;
+                });
+
+              }
+            },
+          )
 
         ],
         child:        Scaffold(
@@ -698,14 +715,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
 
                       Text(
-                        "Topic: ${data.topic}",
+                        "Topic: ${data.name}",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: Colors.white),
                       ),
 
                       Text(
-                        "Date: ${data.date}",
+                        "Date: ${data.lessonStart}",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: Colors.white),
@@ -1225,6 +1242,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       FetchInstructorTotalRevenue(
 
+        instructorId:
+        userId.toString(),
+      ),
+    );
+  }
+
+  Future<void> fetchTodaysLesson() async {
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+    prefs.getString('user_id');
+
+    context.read<InstructorTodaysLessonBloc>().add(
+
+      FetchInstructorTodaysLesson(
         instructorId:
         userId.toString(),
       ),

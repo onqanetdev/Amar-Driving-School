@@ -2,6 +2,7 @@ import 'package:amar_driving_school/bloc/instructor/instructor_register_bloc.dar
 import 'package:amar_driving_school/bloc/instructor/instructor_revenue/instructor_total_revenue_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/login_instructor/instructor_login_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/login_instructor/instructor_login_event.dart';
+import 'package:amar_driving_school/bloc/instructor/todays_lesson/instructor_todays_lesson_bloc.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
 import 'package:amar_driving_school/screen/Student/dashboard_screen/StudentDashboardScreen.dart';
 import 'package:amar_driving_school/screen/instructor/dashboard_screen/DashboardScreen.dart';
@@ -113,6 +114,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         create: (_) =>
                             InstructorTotalRevenueBloc(),
                       ),
+                      // Todays Lesson
+                      BlocProvider(
+                        create: (_) => InstructorTodaysLessonBloc(),
+                      ),
                     ],
 
                     child: const DashboardScreen(),
@@ -171,6 +176,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       BlocProvider(
                         create: (_) =>
                             InstructorTotalRevenueBloc(),
+                      ),
+                      //Todays Bloc Provider
+                      BlocProvider(
+                        create: (_) => InstructorTodaysLessonBloc(),
                       ),
                     ],
 
