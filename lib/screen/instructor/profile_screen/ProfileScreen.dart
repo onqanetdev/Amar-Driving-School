@@ -15,6 +15,8 @@ import '../../../widgets/app_input_textfield.dart';
 import '../../common_screen/about_us_and_TermsNconditions/CmsPageScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../common_screen/contact_us_form/contact_us_form.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -463,30 +465,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _handleContactUs() {
+
     Navigator.push(
 
       context,
 
       MaterialPageRoute(
 
-        builder: (_) => BlocProvider(
-
-          create: (_) => InstructorAboutUsBloc()
-
-            ..add(FetchInstructorAboutUs(
-                pageTitle:
-                "Contact Us",
-              ),
-            ),
-
-          child: const CmsPageScreen(
-
-            title:
-            "Contact Us",
-          ),
-        ),
+        builder: (_) => ContactUsScreen(title: 'Contact Us',),
       ),
     );
+
   }
 
   /// Helper widget to build individual clean menu options rows

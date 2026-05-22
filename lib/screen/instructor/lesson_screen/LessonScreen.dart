@@ -5,6 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bloc/instructor/about_us/instructor_about_us_bloc.dart';
 import '../../../bloc/instructor/create_lesson/instructor_create_lesson_bloc.dart';
+import '../../../bloc/instructor/lesson_delete/instructor_lesson_delete_bloc.dart';
+import '../../../bloc/instructor/lesson_delete/instructor_lesson_delete_event.dart';
+import '../../../bloc/instructor/lesson_delete/instructor_lesson_delete_state.dart';
 import '../../../bloc/instructor/lesson_list/instructor_Lesson_List_Event.dart';
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_state.dart';
@@ -34,7 +37,6 @@ class LessonScreen extends StatefulWidget {
 class _LessonScreenState extends State<LessonScreen> {
 
   List<LessonData> lessons = [];
-
 
   //This Section is for Load more
   final ScrollController _scrollController = ScrollController();
@@ -74,57 +76,112 @@ class _LessonScreenState extends State<LessonScreen> {
   @override
   Widget build(BuildContext context) {
 
-    return BlocListener<
-        InstructorLessonListBloc,
-        InstructorLessonListState>(
+    return MultiBlocListener(
 
-        listener: (context, state) {
+        listeners: [
 
-          /// 🔥 LOADING
-          if(state is InstructorLessonListLoading) {
+          /// LESSON LIST
+          BlocListener<
+              InstructorLessonListBloc,
+              InstructorLessonListState>(
 
-            LoaderHelper.show(context);
-          }
+            listener: (context, state) {
 
-          /// 🔥 SUCCESS
-          if(state is InstructorLessonListSuccess) {
+              /// LOADING
+              if(state
+              is InstructorLessonListLoading) {
 
-            LoaderHelper.hide(context);
-
-            setState(() {
-
-              if(offset == 0) {
-                lessons.clear();
+                LoaderHelper.show(context);
               }
 
-              lessons.addAll(state.lessonListResponse.data);
+              /// SUCCESS
+              if(state
+              is InstructorLessonListSuccess) {
 
-              isLoadingMore = false;
+                LoaderHelper.hide(context);
 
-              if(state.lessonListResponse.data.length < limit) {
-                hasMore = false;
+                setState(() {
+
+                  if(offset == 0) {
+
+                    lessons.clear();
+                  }
+
+                  lessons.addAll(
+
+                    state
+                        .lessonListResponse
+                        .data,
+                  );
+
+                  isLoadingMore = false;
+
+                  if(state
+                      .lessonListResponse
+                      .data
+                      .length < limit) {
+
+                    hasMore = false;
+                  }
+                });
               }
-            });
 
-            Helper.showToast(
-              context,
-              state.lessonListResponse.message,
-            );
-          }
+              /// FAILURE
+              if(state
+              is InstructorLessonListFailure) {
 
-          /// 🔥 FAILURE
-          if(state is InstructorLessonListFailure) {
+                LoaderHelper.hide(context);
 
-            LoaderHelper.hide(context);
+                Helper.showToast(
+                  context,
+                  state.error,
+                );
+              }
+            },
+          ),
 
-            Helper.showToast(
-              context,
-              state.error,
-            );
-          }
-        },
+          /// DELETE LESSON
+          BlocListener<InstructorLessonDeleteBloc, InstructorLessonDeleteState>(
 
-        child:  Scaffold(
+            listener: (context, state) {
+
+              /// LOADING
+              if(state is InstructorLessonDeleteLoading) {
+
+                LoaderHelper.show(context);
+              }
+
+              /// SUCCESS
+              if(state is InstructorLessonDeleteSuccess) {
+
+                LoaderHelper.hide(context);
+
+                Helper.showToast(
+
+                  context,
+
+                  state.deleteResponse.message,
+                );
+
+                /// REFRESH LIST
+                //fetchLessonList();
+              }
+
+              /// FAILURE
+              if(state is InstructorLessonDeleteFailure) {
+
+                LoaderHelper.hide(context);
+
+                Helper.showToast(
+                  context,
+                  state.error,
+                );
+              }
+            },
+          ),
+        ],
+
+        child: Scaffold(
           backgroundColor: Color(0xFFE9E9E9),
 
           body: Column(
@@ -201,9 +258,8 @@ class _LessonScreenState extends State<LessonScreen> {
           ),
         )
     );
+
   }
-
-
 
   Future<void> fetchLessonList() async {
 
@@ -600,8 +656,16 @@ class LessonCard extends StatelessWidget {
               Expanded(
                 child: InkWell(
                   onTap: () {
+                    //Navigator.pop(context);
+                    //Helper.showToast(context, "Deleted successfully");
                     Navigator.pop(context);
-                    Helper.showToast(context, "Deleted successfully");
+
+                    context.read<InstructorLessonDeleteBloc>()
+                        .add(DeleteInstructorLesson(
+                        lessonId:
+                        data.lessonId,
+                      ),
+                    );
                   },
                   child: Container(
                     height: 45,

@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_state.dart';
+import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_bloc.dart';
+import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_event.dart';
+import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_state.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_bloc.dart';
 import '../../../bloc/instructor/topic_list/instructor_topic_list_bloc.dart';
@@ -73,134 +76,193 @@ class _MockTestScreenState extends State<MockTestScreen> {
   @override
   Widget build(BuildContext context) {
     //bloc and state parameter
-    return BlocListener<InstructorMocktestListBloc, InstructorMocktestListState>(
+    return MultiBlocListener(
 
-        listener: (context, state) {
+        listeners: [
 
-          /// 🔥 LOADING
-          if(state is InstructorMocktestListLoading
-              && offset == 0) {
+          /// MOCKTEST LIST
+          BlocListener<
+              InstructorMocktestListBloc,
+              InstructorMocktestListState>(
 
-            LoaderHelper.show(context);
-          }
+            listener: (context, state) {
 
-          /// 🔥 SUCCESS
-          if(state is InstructorMocktestListSuccess) {
+              /// LOADING
+              if(state
+              is InstructorMocktestListLoading
+                  && offset == 0) {
 
-            LoaderHelper.hide(context);
-
-            setState(() {
-
-              if(offset == 0) {
-                allMocktests.clear();
+                LoaderHelper.show(context);
               }
 
-              allMocktests.addAll(state.mocktestListResponse.data);
+              /// SUCCESS
+              if(state
+              is InstructorMocktestListSuccess) {
 
-              isLoadingMore = false;
+                LoaderHelper.hide(context);
 
-              if(state.mocktestListResponse.data.length < limit) {
-                hasMore = false;
+                setState(() {
+
+                  if(offset == 0) {
+
+                    allMocktests.clear();
+                  }
+
+                  allMocktests.addAll(
+
+                    state
+                        .mocktestListResponse
+                        .data,
+                  );
+
+                  isLoadingMore = false;
+
+                  if(state
+                      .mocktestListResponse
+                      .data
+                      .length < limit) {
+
+                    hasMore = false;
+                  }
+                });
               }
-            });
 
-            Helper.showToast(
-              context,
-              state.mocktestListResponse.message,
-            );
-          }
+              /// FAILURE
+              if(state
+              is InstructorMocktestListFailure) {
 
-          /// 🔥 FAILURE
-          if(state is InstructorMocktestListFailure) {
+                LoaderHelper.hide(context);
 
-            LoaderHelper.hide(context);
+                Helper.showToast(
+                  context,
+                  state.error,
+                );
+              }
+            },
+          ),
 
-            Helper.showToast(
-              context,
-              state.error,
-            );
-          }
-        },
+          /// DELETE MOCKTEST
+          BlocListener<InstructorMocktestDeleteBloc, InstructorMocktestDeleteState>(
 
-      child:  Scaffold(
-           backgroundColor: Color(0xFFE9E9E9),
+            listener: (context, state) {
 
-           body: Column(
-             children: [
-               /// HEADER
-               AppHeader(
-                 title: "Mocktest",
-                 showBack: widget.showBack,
-                 showAddButton: true,
-                 addButtonText: "Add Mocktest",
-                 onAdd: () {
-                   // Create lesson dialog
-                   Navigator.push(
-                     context,
-                     MaterialPageRoute(
-                     //  builder: (_) => AddMockTestScreen(),
-                       builder: (_) => MultiBlocProvider(
+              /// LOADING
+              if(state is InstructorMocktestDeleteLoading) {
 
-                         providers: [
+                LoaderHelper.show(context);
+              }
 
-                           BlocProvider(
-                             create: (_) =>
-                                 InstructorTopicListBloc(),
+              /// SUCCESS
+              if(state is InstructorMocktestDeleteSuccess) {
+
+                LoaderHelper.hide(context);
+
+                Helper.showToast(
+
+                  context,
+
+                  state.deleteResponse.message,
+                );
+
+                /// REFRESH LIST
+                //fetchLessonList();
+              }
+
+              /// FAILURE
+              if(state
+              is InstructorMocktestDeleteFailure) {
+
+                LoaderHelper.hide(context);
+
+                Helper.showToast(
+                  context,
+                  state.error,
+                );
+              }
+            },
+          ),
+        ],
+
+      child: Scaffold(
+               backgroundColor: Color(0xFFE9E9E9),
+
+               body: Column(
+                 children: [
+                   /// HEADER
+                   AppHeader(
+                     title: "Mocktest",
+                     showBack: widget.showBack,
+                     showAddButton: true,
+                     addButtonText: "Add Mocktest",
+                     onAdd: () {
+                       // Create lesson dialog
+                       Navigator.push(
+                         context,
+                         MaterialPageRoute(
+                         //  builder: (_) => AddMockTestScreen(),
+                           builder: (_) => MultiBlocProvider(
+
+                             providers: [
+
+                               BlocProvider(
+                                 create: (_) =>
+                                     InstructorTopicListBloc(),
+                               ),
+
+                               BlocProvider(
+                                 create: (_) =>
+                                     InstructorSubTopicListBloc(),
+                               ),
+
+                               BlocProvider(
+                                 create: (_) =>
+                                     InstructorStudentListBloc(),
+                               ),
+
+                               BlocProvider(
+                                 create: (_) =>
+                                     InstructorCreateMocktestBloc(),
+                               ),
+
+                             ],
+
+                             child: AddMockTestScreen(),
                            ),
-
-                           BlocProvider(
-                             create: (_) =>
-                                 InstructorSubTopicListBloc(),
-                           ),
-
-                           BlocProvider(
-                             create: (_) =>
-                                 InstructorStudentListBloc(),
-                           ),
-
-                           BlocProvider(
-                             create: (_) =>
-                                 InstructorCreateMocktestBloc(),
-                           ),
-
-                         ],
-
-                         child: AddMockTestScreen(),
-                       ),
-                     ),
-                   );
-                 },
-               ),
-
-               /// LIST
-               Expanded(
-                 child: ListView.separated(
-                   controller: _scrollController,
-                   padding: EdgeInsets.all(10),
-                   itemCount: hasMore ? allMocktests.length + 1 : allMocktests.length,
-                   separatorBuilder: (_, __) => SizedBox(height: 12),
-                   itemBuilder: (context, index) {
-                     if(index == allMocktests.length) {
-
-                       return const Padding(
-
-                         padding: EdgeInsets.all(16),
-
-                         child: Center(
-                           child:
-                           CircularProgressIndicator(),
                          ),
                        );
-                     }
+                     },
+                   ),
 
-                     return LessonCard(data: allMocktests[index]);
-                   },
-                 ),
+                   /// LIST
+                   Expanded(
+                     child: ListView.separated(
+                       controller: _scrollController,
+                       padding: EdgeInsets.all(10),
+                       itemCount: hasMore ? allMocktests.length + 1 : allMocktests.length,
+                       separatorBuilder: (_, __) => SizedBox(height: 12),
+                       itemBuilder: (context, index) {
+                         if(index == allMocktests.length) {
+
+                           return const Padding(
+
+                             padding: EdgeInsets.all(16),
+
+                             child: Center(
+                               child:
+                               CircularProgressIndicator(),
+                             ),
+                           );
+                         }
+
+                         return LessonCard(data: allMocktests[index]);
+                       },
+                     ),
+                   ),
+                 ],
                ),
-             ],
-           ),
-         ),
+             ),
     );
+
   }
 
 
@@ -213,6 +275,7 @@ class _MockTestScreenState extends State<MockTestScreen> {
 
     offset = 0;
     hasMore = true;
+
 
     //bloc
     context.read<InstructorMocktestListBloc>().add(
@@ -616,7 +679,12 @@ class LessonCard extends StatelessWidget {
                 child: InkWell(
                   onTap: () {
                     Navigator.pop(context);
-                    Helper.showToast(context, "Deleted successfully");
+                    print(data.id);
+                    context.read<InstructorMocktestDeleteBloc>().add(DeleteInstructorMocktest(
+                        mockId:
+                        data.id,
+                      ),
+                    );
                   },
                   child: Container(
                     height: 45,

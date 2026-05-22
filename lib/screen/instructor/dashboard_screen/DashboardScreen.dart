@@ -16,8 +16,10 @@ import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/instructor_revenue/instructor_total_revenue_bloc.dart';
 import '../../../bloc/instructor/instructor_revenue/instructor_total_revenue_event.dart';
 import '../../../bloc/instructor/instructor_revenue/instructor_total_revenue_state.dart';
+import '../../../bloc/instructor/lesson_delete/instructor_lesson_delete_bloc.dart';
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
+import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_event.dart';
@@ -68,21 +70,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ],
     ),
     //LessonScreen(),
-    BlocProvider(
+    // BlocProvider(
+    //
+    //   create: (_) =>
+    //       InstructorLessonListBloc(),
+    //
+    //   child: LessonScreen(),
+    // ),
 
-      create: (_) =>
-          InstructorLessonListBloc(),
+    MultiBlocProvider(
+
+      providers: [
+
+        BlocProvider(
+          create: (_) => InstructorLessonListBloc(),
+        ),
+
+        BlocProvider(
+          create: (_) => InstructorLessonDeleteBloc(),
+        ),
+      ],
 
       child: LessonScreen(),
     ),
 
-    BlocProvider(
+    MultiBlocProvider(
 
-      create: (_) =>
-          InstructorMocktestListBloc(),
+      providers: [
+
+        BlocProvider(
+
+          create: (_) =>
+              InstructorMocktestListBloc(),
+        ),
+
+        BlocProvider(
+
+          create: (_) =>
+              InstructorMocktestDeleteBloc(),
+        ),
+      ],
 
       child: MockTestScreen(),
     ),
+
     BlocProvider(
 
       create: (_) => ProfileBloc(),
@@ -949,16 +980,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  //builder: (_) => LessonScreen(showBack: true,),
-                  builder: (_) => BlocProvider(
 
-                    create: (_) =>
-                        InstructorLessonListBloc(),
+                  // builder: (_) => BlocProvider(
+                  //   create: (_) =>
+                  //       InstructorLessonListBloc(),
+                  //
+                  //   child: LessonScreen(
+                  //     showBack: true,
+                  //   ),
+                  // ),
+
+                  builder: (_) => MultiBlocProvider(
+
+                    providers: [
+
+                      BlocProvider(
+
+                        create: (_) =>
+                            InstructorLessonListBloc(),
+                      ),
+
+                      BlocProvider(
+
+                        create: (_) =>
+                            InstructorLessonDeleteBloc(),
+                      ),
+                    ],
 
                     child: LessonScreen(
                       showBack: true,
                     ),
                   ),
+
                 ),
               );
             }else{
@@ -966,13 +1019,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 context,
                 MaterialPageRoute(
                   //builder: (_) => MockTestScreen(showBack: true,),
-                  builder: (_) => BlocProvider(
+                  builder: (_) =>
+                      MultiBlocProvider(
 
-                    create: (_) =>
-                        InstructorMocktestListBloc(),
+                        providers: [
 
-                    child: MockTestScreen(showBack: true,),
-                  ),
+                          BlocProvider(
+
+                            create: (_) =>
+                                InstructorMocktestListBloc(),
+                          ),
+
+                          BlocProvider(
+
+                            create: (_) =>
+                                InstructorMocktestDeleteBloc(),
+                          ),
+                        ],
+
+                        child: MockTestScreen(showBack: true,),
+                      ),
                 ),
               );
             }
