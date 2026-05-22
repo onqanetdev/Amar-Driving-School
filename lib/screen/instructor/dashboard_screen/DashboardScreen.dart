@@ -1,6 +1,8 @@
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/todays_lesson/instructor_todays_lesson_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/todays_lesson/instructor_todays_lesson_state.dart';
+import 'package:amar_driving_school/bloc/instructor/todays_mocktest/instructor_todays_mocktest_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/todays_mocktest/instructor_todays_mocktest_state.dart';
 import 'package:amar_driving_school/bloc/instructor/upload_training_report/instructor_upload_training_report_bloc.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
 import 'package:amar_driving_school/screen/instructor/lesson_screen/LessonScreen.dart';
@@ -21,11 +23,13 @@ import '../../../bloc/instructor/student_total_count/instructor_student_count_bl
 import '../../../bloc/instructor/student_total_count/instructor_student_count_event.dart';
 import '../../../bloc/instructor/student_total_count/instructor_studentcount_state.dart';
 import '../../../bloc/instructor/todays_lesson/instructor_todays_lesson_event.dart';
+import '../../../bloc/instructor/todays_mocktest/instructor_todays_mocktest_event.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../model/LessonModel.dart';
 import '../../../model/MockTestModel.dart';
 import '../../../model/instructor_todays_lesson_model/instructor_todays_lesson_model.dart';
+import '../../../model/instructor_todays_mocktest_model/instructor_todays_mocktest_model.dart';
 import '../../common_screen/login_screen/LoginScreen.dart';
 import '../add_student_screen/AddStudentScreen.dart';
 import '../invoice_screen/InvoiceScreen.dart';
@@ -92,23 +96,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<TodaysLessonData> lessonList = [ ];
 
-  final List<MockTestModel> mockList = [
-    MockTestModel(name: "Ravi Kumar"),
-    MockTestModel(name: "Amit Das"),
-    MockTestModel(name: "Rahul Roy"),
-    MockTestModel(name: "Sourav"),
+  List<TodaysMocktestData> mockList = [
   ];
 
-  // void _loadData() async {
-  //   await Future.delayed(const Duration(seconds: 25));
-  //
-  //   if (!mounted) return;
-  //
-  //   setState(() {
-  //     isLessonLoading = false;
-  //     isMockLoading = false;
-  //   });
-  // }
 
   @override
   void initState() {
@@ -117,6 +107,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     fetchTotalStudentCount();
     fetchTotalRevenue();
     fetchTodaysLesson();
+
+    fetchTodaysMocktest();
   }
 
   @override
@@ -184,8 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
 
           //Instructor Todays Lesson
-          BlocListener<
-              InstructorTodaysLessonBloc, InstructorTodaysLessonState>(
+          BlocListener<InstructorTodaysLessonBloc, InstructorTodaysLessonState>(
 
             listener: (context, state) {
 
@@ -205,8 +196,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               }
             },
-          )
+          ),
 
+          //Instructor Mocktest List
+          BlocListener<InstructorTodaysMocktestBloc, InstructorTodaysMocktestState>(
+
+            listener: (context, state) {
+
+              if(state is InstructorTodaysMocktestSuccess) {
+
+                setState(() {
+
+                  mockList =
+                      state.todaysMocktestResponse.data;
+
+                  isMockLoading = false;
+                });
+
+              }
+            },
+          ),
         ],
         child:        Scaffold(
           backgroundColor: Color.fromARGB(255, 233, 233, 233),
@@ -1258,6 +1267,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     context.read<InstructorTodaysLessonBloc>().add(
 
       FetchInstructorTodaysLesson(
+        instructorId:
+        userId.toString(),
+      ),
+    );
+  }
+  Future<void> fetchTodaysMocktest() async {
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+    prefs.getString('user_id');
+
+    context.read<InstructorTodaysMocktestBloc>().add(
+
+      FetchInstructorTodaysMocktest(
         instructorId:
         userId.toString(),
       ),

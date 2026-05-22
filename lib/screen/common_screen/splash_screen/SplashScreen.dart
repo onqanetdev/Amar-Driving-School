@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:amar_driving_school/bloc/instructor/instructor_revenue/instructor_total_revenue_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/todays_lesson/instructor_todays_lesson_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/todays_mocktest/instructor_todays_mocktest_bloc.dart';
 import 'package:amar_driving_school/bloc/student/student_login/student_login_bloc.dart';
 import 'package:amar_driving_school/screen/Student/dashboard_screen/StudentDashboardScreen.dart';
 import 'package:amar_driving_school/screen/instructor/dashboard_screen/DashboardScreen.dart';
@@ -181,6 +182,11 @@ class _SplashScreenState extends State<SplashScreen> {
                   BlocProvider(
                     create: (_) =>
                         InstructorTodaysLessonBloc(),
+                  ),
+
+                  BlocProvider(
+                    create: (_) =>
+                        InstructorTodaysMocktestBloc(),
                   ),
                 ],
 
