@@ -7,6 +7,7 @@ import '../../../bloc/common/profile_event.dart';
 import '../../../bloc/common/profile_state.dart';
 import '../../../bloc/instructor/about_us/instructor_about_us_bloc.dart';
 import '../../../bloc/instructor/about_us/instructor_about_us_event.dart';
+import '../../../bloc/instructor/contact_us_form/instructor_contact_us_form_bloc.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../helper/loader_helper.dart';
@@ -470,10 +471,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       context,
 
-      MaterialPageRoute(
+        MaterialPageRoute(
 
-        builder: (_) => ContactUsScreen(title: 'Contact Us',),
-      ),
+          builder: (_) => BlocProvider(
+
+            create: (_) => InstructorContactUsBloc(),
+
+            child: ContactUsScreen(
+              title: "Contact Us",
+            ),
+          ),
+        ),
     );
 
   }

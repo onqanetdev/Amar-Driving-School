@@ -37,7 +37,7 @@ class StudentData {
   final String userId;
   final String loginId;
   final String regDate;
-  final String name;
+  String name;
   final dynamic age;
   final dynamic surname;
   final String email;

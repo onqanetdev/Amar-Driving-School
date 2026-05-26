@@ -2,8 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/instructor/contact_us_form/contact_us_form_event.dart';
+import '../../../bloc/instructor/contact_us_form/instructor_contact_us_form_bloc.dart';
+import '../../../bloc/instructor/contact_us_form/instructor_contact_us_form_state.dart';
 import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_bloc.dart';
 import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_event.dart';
+import '../../../helper/helper.dart';
+import '../../../helper/loader_helper.dart';
 import '../../../widgets/app_header.dart';
 
 class ContactUsScreen extends StatefulWidget {
@@ -37,7 +42,46 @@ class _ContactUsScreenState
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+   return BlocListener<InstructorContactUsBloc, InstructorContactUsState>(
+
+        listener: (context, state) {
+
+          /// LOADING
+          if(state is InstructorContactUsLoading) {
+
+            LoaderHelper.show(context);
+          }
+
+          /// SUCCESS
+          if(state is InstructorContactUsSuccess) {
+
+            LoaderHelper.hide(context);
+
+            Helper.showToast(
+
+              context,
+
+              state.contactUsResponse.message,
+            );
+
+            Navigator.pop(context);
+          }
+
+          /// FAILURE
+          if(state is InstructorContactUsFailure) {
+
+            LoaderHelper.hide(context);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+
+              SnackBar(
+                content: Text(state.error),
+              ),
+            );
+          }
+        },
+
+    child:  Scaffold(
 
       backgroundColor:
       const Color(0xFFE9E9E9),
@@ -198,6 +242,7 @@ class _ContactUsScreenState
                           messageController.text,
                         };
                         print(data);
+                        submitContactUsForm();
                       },
 
                       style:
@@ -235,6 +280,7 @@ class _ContactUsScreenState
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -291,6 +337,92 @@ class _ContactUsScreenState
 
           borderSide: BorderSide.none,
         ),
+      ),
+    );
+  }
+
+  void submitContactUsForm() {
+
+    /// VALIDATION
+    if(firstNameController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+
+        const SnackBar(
+          content: Text("Please enter first name"),
+        ),
+      );
+
+      return;
+    }
+
+    if(lastNameController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+
+        const SnackBar(
+          content: Text("Please enter last name"),
+        ),
+      );
+
+      return;
+    }
+
+    if(emailController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+
+        const SnackBar(
+          content: Text("Please enter email"),
+        ),
+      );
+
+      return;
+    }
+
+    if(contactController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+
+        const SnackBar(
+          content: Text("Please enter contact"),
+        ),
+      );
+
+      return;
+    }
+
+    if(messageController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+
+        const SnackBar(
+          content: Text("Please enter message"),
+        ),
+      );
+
+      return;
+    }
+
+    /// API CALL
+    context.read<InstructorContactUsBloc>().add(
+
+      SubmitInstructorContactUs(
+
+        firstName:
+        firstNameController.text.trim(),
+
+        lastName:
+        lastNameController.text.trim(),
+
+        email:
+        emailController.text.trim(),
+
+        contact:
+        contactController.text.trim(),
+
+        message:
+        messageController.text.trim(),
       ),
     );
   }

@@ -18,7 +18,7 @@ class CreateLessonApiService {
 
     required String userid,
     required String instructorid,
-    required String name,
+    //required String name,
     required String startDate,
     required String startTime,
     required String duration,
@@ -41,7 +41,7 @@ class CreateLessonApiService {
 
           'userid': userid,
           'instructorid': instructorid,
-          'name': name,
+          //'name': name,
           'start_date': startDate,
           'start_time': startTime,
           'duration': duration,

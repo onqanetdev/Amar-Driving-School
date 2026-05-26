@@ -28,7 +28,7 @@ class InstructorCreateLessonBloc extends Bloc<InstructorCreateLessonEvent, Instr
 
             userid: event.userid,
             instructorid: event.instructorid,
-            name: event.name,
+            //name: event.name,
             startDate: event.startDate,
             startTime: event.startTime,
             duration: event.duration,

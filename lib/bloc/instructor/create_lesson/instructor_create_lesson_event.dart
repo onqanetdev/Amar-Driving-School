@@ -7,7 +7,7 @@ class InstructorCreateLessonTapped
 
   final String userid;
   final String instructorid;
-  final String name;
+ // final String name;
   final String startDate;
   final String startTime;
   final String duration;
@@ -18,7 +18,7 @@ class InstructorCreateLessonTapped
 
     required this.userid,
     required this.instructorid,
-    required this.name,
+   // required this.name,
     required this.startDate,
     required this.startTime,
     required this.duration,

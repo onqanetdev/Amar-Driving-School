@@ -1,43 +1,61 @@
 
-class InstructorLessonListModel {
+class InstructorLessonDetailModel {
 
   final int status;
   final bool success;
   final String message;
-  final List<LessonData> data;
+  final LessonDetailData data;
 
-  InstructorLessonListModel({
+  InstructorLessonDetailModel({
 
     required this.status,
+
     required this.success,
+
     required this.message,
+
     required this.data,
   });
 
-  factory InstructorLessonListModel.fromJson(
+  factory InstructorLessonDetailModel.fromJson(
       Map<String, dynamic> json) {
 
-    return InstructorLessonListModel(
+    return InstructorLessonDetailModel(
 
       status: json['status'],
+
       success: json['success'],
+
       message: json['message'],
 
-      data: (json['data'] as List)
-          .map(
-            (e) => LessonData.fromJson(e),
-      ).toList(),
+      data: LessonDetailData.fromJson(
+        json['data'],
+      ),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+
+    return {
+
+      'status': status,
+
+      'success': success,
+
+      'message': message,
+
+      'data': data.toJson(),
+    };
   }
 }
 
-class LessonData {
+class LessonDetailData {
 
   final String lessonId;
   final String userId;
   final String name;
   final String classDate;
-  final String? lessonStart;
+  final dynamic lessonStart;
   final dynamic lessonEnd;
   final dynamic pickupAddress;
   final dynamic classResult;
@@ -49,47 +67,114 @@ class LessonData {
   final String instructorId;
   final String status;
 
-  LessonData({
+  LessonDetailData({
 
     required this.lessonId,
+
     required this.userId,
+
     required this.name,
+
     required this.classDate,
+
     required this.lessonStart,
+
     required this.lessonEnd,
+
     required this.pickupAddress,
+
     required this.classResult,
+
     required this.lessonWisePaymentMode,
+
     required this.lessonDuration,
+
     required this.topicId,
+
     required this.subtopicId,
+
     required this.rating,
+
     required this.instructorId,
+
     required this.status,
   });
 
-  factory LessonData.fromJson(
+  factory LessonDetailData.fromJson(
       Map<String, dynamic> json) {
 
-    return LessonData(
+    return LessonDetailData(
 
       lessonId: json['lesson_id'],
+
       userId: json['user_id'],
+
       name: json['name'],
+
       classDate: json['class_date'],
+
       lessonStart: json['lesson_start'],
+
       lessonEnd: json['lesson_end'],
+
       pickupAddress: json['pickup_address'],
+
       classResult: json['class_result'],
+
       lessonWisePaymentMode:
       json['lesson_wise_payment_mode'],
+
       lessonDuration:
       json['lesson_duration'],
+
       topicId: json['topic_id'],
+
       subtopicId: json['subtopic_id'],
+
       rating: json['rating'],
-      instructorId: json['instructor_id'],
+
+      instructorId:
+      json['instructor_id'],
+
       status: json['status'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+
+    return {
+
+      'lesson_id': lessonId,
+
+      'user_id': userId,
+
+      'name': name,
+
+      'class_date': classDate,
+
+      'lesson_start': lessonStart,
+
+      'lesson_end': lessonEnd,
+
+      'pickup_address': pickupAddress,
+
+      'class_result': classResult,
+
+      'lesson_wise_payment_mode':
+      lessonWisePaymentMode,
+
+      'lesson_duration':
+      lessonDuration,
+
+      'topic_id': topicId,
+
+      'subtopic_id': subtopicId,
+
+      'rating': rating,
+
+      'instructor_id': instructorId,
+
+      'status': status,
+    };
   }
 }

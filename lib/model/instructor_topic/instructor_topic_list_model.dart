@@ -36,7 +36,7 @@ class InstructorTopicListModel {
 class TopicData {
 
   final String id;
-  final String name;
+  String name;
   final String slug;
   final String status;
 

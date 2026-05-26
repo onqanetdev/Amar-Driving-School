@@ -424,7 +424,7 @@ class LessonCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  /// EDIT DELETE
+                  ///   DELETE
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -433,16 +433,37 @@ class LessonCard extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              // builder: (_) => AddLessonScreen(
-                              //   lesson: data,
-                              // ),
-                              builder: (_) => BlocProvider(
+                              builder: (_) =>
+                                  MultiBlocProvider(
 
-                                create: (_) =>
-                                    InstructorTopicListBloc(),
+                                    providers: [
 
-                                child: AddLessonScreen(lesson: data),
-                              ),
+                                      BlocProvider(
+                                        create: (_) =>
+                                            InstructorTopicListBloc(),
+                                      ),
+
+                                      BlocProvider(
+                                        create: (_) =>
+                                            InstructorSubTopicListBloc(),
+                                      ),
+
+                                      BlocProvider(
+                                        create: (_) =>
+                                            InstructorStudentListBloc(),
+                                      ),
+
+                                      BlocProvider(
+                                        create: (_) =>
+                                            InstructorCreateLessonBloc(),
+                                      ),
+                                    ],
+
+                                    child:
+                                    AddLessonScreen(
+                                      lesson: data
+                                    ),
+                                  ),
                             ),
                           );
                           // fetchLessonList();
