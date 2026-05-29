@@ -17,6 +17,10 @@ import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
+import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_bloc.dart';
+import '../../../bloc/student/todays_mocktest_list/student_todays_mocktest_list_bloc.dart';
+import '../../../bloc/student/total_lesson_count/student_total_lesson_count_bloc.dart';
+import '../../../bloc/student/total_mocktest_count/student_total_mocktest_count_bloc.dart';
 import '../../../helper/ApiService.dart';
 import '../../../helper/helper.dart';
 import '../login_screen/LoginScreen.dart';
@@ -150,7 +154,35 @@ class _SplashScreenState extends State<SplashScreen> {
         if (selectedRole == 'student') {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (_) => const StudentDashboardScreen()),
+            MaterialPageRoute(builder: (_) =>
+            MultiBlocProvider(
+
+              providers: [
+
+                BlocProvider(
+
+                  create: (_) => StudentTotalLessonCountBloc(),
+                ),
+
+                BlocProvider(
+
+                  create: (_) => StudentTotalMocktestCountBloc(),
+                ),
+
+                BlocProvider(
+                  create: (_) => StudentTodaysLessonListBloc(),
+                ),
+
+                BlocProvider(
+
+                  create: (_) =>
+                      StudentTodaysMocktestListBloc(),
+                ),
+              ],
+
+              child: StudentDashboardScreen(),
+            )
+            ),
                 (route) => false,
           );
         } else {

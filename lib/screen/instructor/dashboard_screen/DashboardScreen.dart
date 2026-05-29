@@ -26,6 +26,7 @@ import '../../../bloc/instructor/student_total_count/instructor_student_count_ev
 import '../../../bloc/instructor/student_total_count/instructor_studentcount_state.dart';
 import '../../../bloc/instructor/todays_lesson/instructor_todays_lesson_event.dart';
 import '../../../bloc/instructor/todays_mocktest/instructor_todays_mocktest_event.dart';
+import '../../../bloc/student/student_login/student_login_bloc.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../model/LessonModel.dart';
@@ -89,6 +90,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         BlocProvider(
           create: (_) => InstructorLessonDeleteBloc(),
         ),
+
+         BlocProvider(
+                  create: (_) => InstructorRegBloc(),
+                ),
+
+                BlocProvider(
+                  create: (_) => InstructorLoginBloc(),
+                ),
+
+
       ],
 
       child: LessonScreen(),
@@ -605,6 +616,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 create: (_) => InstructorLoginBloc(),
                               ),
 
+                              /// ADD THIS
+                              BlocProvider(
+                                create: (_) => StudentLoginBloc(),
+                              ),
                             ],
                             child: const LoginScreen(),
                           ),
@@ -1005,6 +1020,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         create: (_) =>
                             InstructorLessonDeleteBloc(),
                       ),
+
+                      BlocProvider(
+                        create: (_) => InstructorRegBloc(),
+                      ),
+
+                      BlocProvider(
+                        create: (_) => InstructorLoginBloc(),
+                      ),
+
                     ],
 
                     child: LessonScreen(

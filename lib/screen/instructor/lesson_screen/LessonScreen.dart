@@ -81,9 +81,7 @@ class _LessonScreenState extends State<LessonScreen> {
         listeners: [
 
           /// LESSON LIST
-          BlocListener<
-              InstructorLessonListBloc,
-              InstructorLessonListState>(
+          BlocListener<InstructorLessonListBloc, InstructorLessonListState>(
 
             listener: (context, state) {
 
@@ -355,7 +353,7 @@ class LessonCard extends StatelessWidget {
                         color: HexColor("${AppColor.colourOfAdvanceCarDrive}"),
                       ),
                     ),
-
+                    Text("Student Id: ${data.userId}"),
                     SizedBox(height: 6),
 
                     /// DURATION

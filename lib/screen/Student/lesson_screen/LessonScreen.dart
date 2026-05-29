@@ -1,6 +1,8 @@
 import 'package:amar_driving_school/screen/instructor/add_lesson_screen/AddLessonScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/student/lesson_review/student_lesson_review_bloc.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../helper/helper.dart';
@@ -180,9 +182,18 @@ class LessonCard extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => LessonReportScreen(),
-                        ),
+                          MaterialPageRoute(
+
+                            builder: (_) => MultiBlocProvider(
+                              providers: [
+                                BlocProvider(
+                                  create: (_) => StudentLessonReviewBloc(),
+                                ),
+                              ],
+
+                              child: const LessonReportScreen(),
+                            ),
+                          ),
                       );
                     },
                     textStyle: TextStyle(

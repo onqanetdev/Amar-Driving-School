@@ -1,6 +1,6 @@
 
 
-import 'dart:convert';
+//import 'dart:convert';
 
 class StudentLoginResModel {
   final int status;
@@ -33,21 +33,21 @@ class StudentData {
   String? surname;
   String? email;
   String? phone;
-  Null? licenseNo;
-  Null? carNo;
+  String? licenseNo;
+  String? carNo;
   String? assignHour;
-  Null? startdate;
-  Null? pickupLocation;
-  Null? dropLocation;
-  Null? profilePicture;
+  String? startdate;
+ // Null? pickupLocation;
+ // Null? dropLocation;
+  String? profilePicture;
   String? instructureId;
-  Null? packageId;
+  // Null? packageId;
   String? givenHour;
   String? role;
-  Null? trainingStatus;
-  Null? result;
-  Null? paymentStatus;
-  Null? comments;
+  String? trainingStatus;
+  String? result;
+  String? comments;
+  //Null? comments;
   String? amount;
   String? delStatus;
   String? status;
@@ -65,16 +65,16 @@ class StudentData {
         this.carNo,
         this.assignHour,
         this.startdate,
-        this.pickupLocation,
-        this.dropLocation,
+       // this.pickupLocation,
+        //this.dropLocation,
         this.profilePicture,
         this.instructureId,
-        this.packageId,
+        //this.packageId,
         this.givenHour,
         this.role,
         this.trainingStatus,
         this.result,
-        this.paymentStatus,
+        //this.paymentStatus,
         this.comments,
         this.amount,
         this.delStatus,
@@ -96,16 +96,16 @@ class StudentData {
       carNo: json['car_no'],
       assignHour: json['assign_hour'],
       startdate: json['startdate'],
-      pickupLocation: json['pickup_location'],
-      dropLocation: json['drop_location'],
+      //pickupLocation: json['pickup_location'],
+      //dropLocation: json['drop_location'],
       profilePicture: json['profile_picture'],
       instructureId: json['instructure_id'],
-      packageId: json['package_id'],
+      //packageId: json['package_id'],
       givenHour: json['given_hour'],
       role: json['role'],
       trainingStatus: json['training_status'],
       result: json['result'],
-      paymentStatus: json['payment_status'],
+     // paymentStatus: json['payment_status'],
       comments: json['comments'],
       amount: json['amount'],
       delStatus: json['del_status'],

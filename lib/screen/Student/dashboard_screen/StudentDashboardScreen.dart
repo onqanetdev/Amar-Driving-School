@@ -2,11 +2,27 @@ import 'package:amar_driving_school/helper/app_button_animation.dart';
 import 'package:amar_driving_school/screen/Student/profile_screen/ProfileScreen.dart';
 import 'package:amar_driving_school/screen/common_screen/login_screen/LoginScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_bloc.dart';
+import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_event.dart';
+import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_state.dart';
+import '../../../bloc/student/todays_mocktest_list/student_todays_mocktest_list_bloc.dart';
+import '../../../bloc/student/todays_mocktest_list/student_todays_mocktest_list_event.dart';
+import '../../../bloc/student/todays_mocktest_list/student_todays_mocktest_list_state.dart';
+import '../../../bloc/student/total_lesson_count/student_total_lesson_count_bloc.dart';
+import '../../../bloc/student/total_lesson_count/student_total_lesson_count_event.dart';
+import '../../../bloc/student/total_lesson_count/student_total_lesson_count_state.dart';
+import '../../../bloc/student/total_mocktest_count/student_total_mocktest_count_bloc.dart';
+import '../../../bloc/student/total_mocktest_count/student_total_mocktest_count_event.dart';
+import '../../../bloc/student/total_mocktest_count/student_total_mocktest_count_state.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
+import '../../../helper/loader_helper.dart';
 import '../../../model/LessonModel.dart';
 import '../../../model/MockTestModel.dart';
+import '../../../model/student_all_model/student_todays_lesson_list_model.dart';
+import '../../../model/student_all_model/student_todays_lesson_mocktest_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../student/mock_test_screen/MockTestScreen.dart';
 import '../lesson_screen/LessonScreen.dart';
@@ -25,7 +41,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
 
   final ScrollController _mockTestScrollController = ScrollController();
 
-  int totalStudents = 70;
+  String totalLesson = '5';
+  String totalMocktest = '7';
   double totalRevenue = 1270;
   int _currentIndex = 0;
   double _scale = 1.0;
@@ -48,35 +65,25 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
 
 
   /// Dummy Data
-  final List<LessonModel> lessonList = [
-    LessonModel(
-      name: "Ravi Kumar",
-      topic: "Parallel Parking & Lane Change",
-      date: "tomorrow, May 26, 10:00 AM",
-    ),
-    LessonModel(
-      name: "Amarjit Kumar",
-      topic: "Parallel Parking & Lane Change",
-      date: "tomorrow, May 26, 10:00 AM",
-    ),
-  ];
 
-  final List<MockTestModel> mockList = [
-    MockTestModel(name: "Ravi Kumar"),
-    MockTestModel(name: "Amit Das"),
-    MockTestModel(name: "Rahul Roy"),
-    MockTestModel(name: "Sourav"),
-  ];
+  List<StudentTodaysLessonData> lessonList = [];
 
-  final List<LessonModel> lessons = List.generate(
-    5,
-        (index) => LessonModel(
-      name: "Car Drive Mocktest",
-      duration: "1hr",
-      date: "18.04.2026",
-      time: "10:30AM",
-    ),
-  );
+
+   //List<StudentTodaysMocktestData> mockList = [ ];
+
+  // final List<LessonModel> lessons = List.generate(
+  //   5,
+  //       (index) => LessonModel(
+  //     name: "Car Drive Mocktest",
+  //     duration: "1hr",
+  //     date: "18.04.2026",
+  //     time: "10:30AM",
+  //   ),
+  // );
+
+
+  List<StudentTodaysMocktestData> lessons = [ ];
+
 
   void _loadData() async {
     await Future.delayed(const Duration(seconds: 10));
@@ -93,11 +100,159 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   void initState() {
     super.initState();
     _loadData();
+
+    fetchTotalLessonCount();
+
+    fetchTotalMocktestCount();
+
+    fetchTodaysLessonList();
+    fetchTodaysMocktestList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
+    return
+      MultiBlocListener(
+
+          listeners: [
+
+            /// TOTAL LESSON COUNT
+            BlocListener<StudentTotalLessonCountBloc, StudentTotalLessonCountState>(
+
+              listener: (context, state) {
+
+                /// LOADING
+                if(state is StudentTotalLessonCountLoading) {
+
+                  LoaderHelper.show(context);
+                }
+
+                /// SUCCESS
+                if(state is StudentTotalLessonCountSuccess) {
+
+                  LoaderHelper.hide(context);
+
+                  setState(() {
+
+                    totalLesson = state.totalLessonCountResponse.data.toString();
+                  });
+                }
+
+                /// FAILURE
+                if(state is StudentTotalLessonCountFailure) {
+
+                  LoaderHelper.hide(context);
+
+                  print(state.error);
+                }
+              },
+            ),
+
+            /// MOCKTEST COUNT LISTENER
+            BlocListener<StudentTotalMocktestCountBloc, StudentTotalMocktestCountState>(
+
+              listener: (context, state) {
+
+                /// LOADING
+                if(state is StudentTotalMocktestCountLoading) {
+
+                  LoaderHelper.show(context);
+                }
+
+                /// SUCCESS
+                if(state is StudentTotalMocktestCountSuccess) {
+
+                  LoaderHelper.hide(context);
+
+                  setState(() {
+
+                    totalMocktest = state.totalMocktestCountResponse.data.toString();
+                  });
+                }
+
+                /// FAILURE
+                if(state is StudentTotalMocktestCountFailure) {
+
+                  LoaderHelper.hide(context);
+
+                  print(state.error);
+                }
+              },
+            ),
+
+            /// TODAY'S LESSON LIST
+            BlocListener<StudentTodaysLessonListBloc, StudentTodaysLessonListState>(
+
+              listener: (context, state) {
+
+                /// LOADING
+                if(state is StudentTodaysLessonListLoading) {
+
+                  LoaderHelper.show(context);
+                }
+
+                /// SUCCESS
+                if(state is StudentTodaysLessonListSuccess) {
+
+                  LoaderHelper.hide(context);
+                  print('Lesson List ----->${state.todaysLessonListResponse.data}');
+                  setState(() {
+                    lessonList = state.todaysLessonListResponse.data;
+                  });
+
+                  print(
+                    "Lesson List Length = ${lessonList.length}",
+                  );
+                }
+
+                /// FAILURE
+                if(state is StudentTodaysLessonListFailure) {
+
+                  LoaderHelper.hide(context);
+
+                  print(state.error);
+                }
+              },
+            ),
+
+            /// TODAY'S MOCKTEST LIST
+            BlocListener<
+                StudentTodaysMocktestListBloc, StudentTodaysMocktestListState>(
+
+              listener: (context, state) {
+
+                /// LOADING
+                if(state is StudentTodaysMocktestListLoading) {
+
+                  LoaderHelper.show(context);
+                }
+
+                /// SUCCESS
+                if(state is StudentTodaysMocktestListSuccess) {
+
+                  LoaderHelper.hide(context);
+
+                  setState(() {
+
+                    lessons = state.todaysMocktestListResponse
+                            .data;
+                  });
+                }
+
+                /// FAILURE
+                if(state is StudentTodaysMocktestListFailure) {
+
+                  LoaderHelper.hide(context);
+
+                  print(state.error);
+                }
+              },
+            ),
+
+          ],
+
+
+     child:  PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
         if (didPop) return;
@@ -111,6 +266,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           Navigator.pop(context); // 👉 close app
         }
       },
+
+
       child: Scaffold(
         backgroundColor: Color.fromARGB(255, 233, 233, 233),
 
@@ -204,7 +361,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           ],
         ),
       ),
-    );
+    ),
+      );
   }
 
   Widget _exitDialog(BuildContext context) {
@@ -513,7 +671,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
 
                 _subHeader("Mocktest"),
                 SizedBox(height: 10),
-                ListView.separated(
+
+                lessons.isEmpty
+                    ? emptyCard("Today has no mocktest") : ListView.separated(
                   shrinkWrap: true, // 🔥 IMPORTANT
                   physics: NeverScrollableScrollPhysics(), // 🔥 IMPORTANT
                   padding: EdgeInsets.symmetric(vertical: 10,horizontal: 0),
@@ -543,11 +703,20 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       return _lessonShimmer();
     }
 
-    if (lessonList.isEmpty) return SizedBox();
+   // if (lessonList.isEmpty) return SizedBox();
+
+    if (lessonList.isEmpty) {
+
+      return emptyCard(
+        "Today has no lesson",
+      );
+    }
 
     return SizedBox(
       height: 100, // 🔥 important for horizontal list
-      child: ListView.builder(
+      child: lessonList.isEmpty
+          ? emptyCard("Today has no lesson")
+          : ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: lessonList.length,
         itemBuilder: (context, index) {
@@ -595,14 +764,14 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                       ),*/
 
                       Text(
-                        "Topic: ${data.topic}",
+                        "Topic: ${data.name}",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: Colors.white),
                       ),
 
                       Text(
-                        "Date: ${data.date}",
+                        "Date: ${data.classDate}",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: Colors.white),
@@ -855,7 +1024,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text( '5',
+                      Text( totalLesson as String,
                         style: TextStyle(
                             fontSize: 22,
                             fontFamily: 'InterBold',
@@ -901,8 +1070,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        '7',
+                      Text( totalMocktest,
                         style: TextStyle(
                             fontSize: 22,
                             fontFamily: 'InterBold',
@@ -978,10 +1146,111 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
+  Widget emptyCard(String title) {
+
+    return Card(
+
+      elevation: 3,
+
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      child: Padding(
+
+        padding: const EdgeInsets.all(20),
+
+        child: Center(
+
+          child: Text(
+
+            title,
+
+            style: const TextStyle(
+              fontSize: 14,
+              fontFamily: "InterMedium",
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  //Calling My fetch total Lesson count here
+  Future<void> fetchTotalLessonCount() async {
+
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+        prefs.getString("stud_user_id") ?? "";
+
+    context.read<StudentTotalLessonCountBloc>()
+        .add(FetchStudentTotalLessonCount(
+        userId: userId,
+      ),
+    );
+  }
+
+  //Calling Fetch Total Mocktest Count
+
+  Future<void> fetchTotalMocktestCount() async {
+
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final userId =
+        prefs.getString("stud_user_id") ?? "";
+
+    context.read<StudentTotalMocktestCountBloc>().add(FetchStudentTotalMocktestCount(
+        userId: userId,
+      ),
+    );
+  }
+
+  Future<void> fetchTodaysLessonList() async {
+
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final studentCode =
+        prefs.getString("stud_user_id") ?? "";
+
+    context
+        .read<StudentTodaysLessonListBloc>()
+        .add(
+
+      FetchStudentTodaysLessonList(
+
+        studentCode: studentCode,
+      ),
+    );
+  }
+
+  Future<void> fetchTodaysMocktestList() async {
+
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final studentCode =
+        prefs.getString("stud_user_id") ?? "";
+
+    context
+        .read<StudentTodaysMocktestListBloc>()
+        .add(
+
+      FetchStudentTodaysMocktestList(
+
+        studentCode: studentCode,
+      ),
+    );
+  }
+
 }
 
 class LessonCard extends StatelessWidget {
-  final LessonModel data;
+  final StudentTodaysMocktestData data;
 
   const LessonCard({super.key, required this.data});
   //bool isMockLoading = true;
@@ -1017,7 +1286,7 @@ class LessonCard extends StatelessWidget {
                   children: [
                     /// TITLE
                     Text(
-                      data.name,
+                      data.name ?? 'No Lesson Found',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1062,7 +1331,7 @@ class LessonCard extends StatelessWidget {
                                 color: HexColor(AppColor.colorAppGray)),
                             SizedBox(width: 2),
                             Text(
-                              data.date,
+                              data.classDate ?? 'No Date',
                               overflow: TextOverflow.fade,
                               style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
                                 fontFamily: "InterSemiBold",),
@@ -1076,7 +1345,7 @@ class LessonCard extends StatelessWidget {
                                 color: HexColor(AppColor.colorAppGray)),
                             SizedBox(width: 2),
                             Text(
-                              data.time.toString(),
+                              data.lessonStart ?? 'No Data',
                               overflow: TextOverflow.fade,
                               style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
                                 fontFamily: "InterSemiBold",),

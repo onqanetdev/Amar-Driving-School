@@ -20,6 +20,10 @@ import '../../../bloc/instructor/student_total_count/instructor_student_count_bl
 import '../../../bloc/student/student_login/student_login_bloc.dart';
 import '../../../bloc/student/student_login/student_login_event.dart';
 import '../../../bloc/student/student_login/student_login_state.dart';
+import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_bloc.dart';
+import '../../../bloc/student/todays_mocktest_list/student_todays_mocktest_list_bloc.dart';
+import '../../../bloc/student/total_lesson_count/student_total_lesson_count_bloc.dart';
+import '../../../bloc/student/total_mocktest_count/student_total_mocktest_count_bloc.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../helper/helper.dart';
@@ -225,13 +229,43 @@ class _LoginScreenState extends State<LoginScreen> {
                 state.studResdata.student.loginId as String,
               );
 
+              await prefs.setString('stud_user_id', state.studResdata.student.userId as String);
+
               _showMsg(state.studResdata.message);
 
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const StudentDashboardScreen(),
+                  builder: (_) =>
+                  //const StudentDashboardScreen(),
+                  MultiBlocProvider(
 
+                    providers: [
+
+                      BlocProvider(
+
+                        create: (_) => StudentTotalLessonCountBloc(),
+                      ),
+
+                      BlocProvider(
+                        create: (_) => StudentTotalMocktestCountBloc(),
+                      ),
+
+                      BlocProvider(
+
+                        create: (_) => StudentTodaysLessonListBloc(),
+                      ),
+
+                      BlocProvider(
+
+                        create: (_) =>
+                            StudentTodaysMocktestListBloc(),
+                      ),
+
+                    ],
+
+                    child: StudentDashboardScreen(),
+                  )
                 ),
                     (route) => false,
               );
