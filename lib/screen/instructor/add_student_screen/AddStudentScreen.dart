@@ -42,8 +42,8 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
       nameController.text = widget.student!.name;
       emailController.text = widget.student!.email;
       phoneController.text = widget.student!.phone;
-      durationController.text = widget.student!.assignHour;
-      dateController.text = widget.student!.startdate;
+      durationController.text = widget.student?.assignHour ?? "";
+      dateController.text = widget.student?.startdate ?? "";
       priceController.text = widget.student!.amount.toString();
       isPaid = widget.student!.paymentStatus as bool;
     }

@@ -419,7 +419,7 @@ class StudentCard extends StatelessWidget {
                         color: HexColor(AppColor.colorAppGray)),
                     SizedBox(width: 2),
                     Text(
-                      data.assignHour,
+                      data.assignHour ?? "",
                       overflow: TextOverflow.fade,
                       style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorAppGray),
                         fontFamily: "InterSemiBold",),
@@ -433,7 +433,7 @@ class StudentCard extends StatelessWidget {
                         color: HexColor(AppColor.colorAppGray)),
                     SizedBox(width: 2),
                     Text(
-                      data.startdate,
+                      data.startdate ?? '',
                       overflow: TextOverflow.fade,
                       style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorAppGray),
                         fontFamily: "InterSemiBold",),

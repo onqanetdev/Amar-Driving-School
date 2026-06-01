@@ -9,6 +9,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bloc/instructor/create_lesson/instructor_create_lesson_bloc.dart';
 import '../../../bloc/instructor/create_lesson/instructor_create_lesson_event.dart';
 import '../../../bloc/instructor/create_lesson/instructor_create_lesson_state.dart';
+import '../../../bloc/instructor/lesson_edit/instructor_lesson_edit_bloc.dart';
+import '../../../bloc/instructor/lesson_edit/instructor_lesson_edit_event.dart';
+import '../../../bloc/instructor/lesson_edit/instructor_lesson_edit_state.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_event.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_state.dart';
@@ -69,6 +72,8 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
   List<StudentData> students = [];
   String studentUserId = '';
 
+  bool isEdit = false;
+  bool editDataLoaded = false;
   //Set<String> selectedSubTopicIds = {};
 
   @override
@@ -79,6 +84,8 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
     //showStudentList();
     if (widget.lesson != null) {
       /// 👉 EDIT MODE
+      isEdit = true;
+      print("The Edited File is ${isEdit}");
       titleController.text = widget.lesson!.name;
       dateController.text = widget.lesson!.classDate;
       timeController.text = widget.lesson!.lessonStart!;
@@ -106,9 +113,15 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                 allSubCategories = state.subTopicListResponse.data;
 
                 /// CONVERT API IDS
-                allSelectedSubTopic = widget.lesson!.subtopicId.split(',')
-                        .map((e) => e.trim())
-                        .toSet();
+                // allSelectedSubTopic = widget.lesson!.subtopicId.split(',')
+                //         .map((e) => e.trim())
+                //         .toSet();
+
+                //allSelectedSubTopic = widget.lesson!.subtopicId.split(',').map((e) => e.trim()).toSet();
+
+                if (isEdit && !editDataLoaded) {
+                  allSelectedSubTopic = widget.lesson!.subtopicId.split(',').map((e) => e.trim()).toSet();
+                }
 
                 // allSelectedSubTopic =
                 //     widget.lesson!
@@ -120,6 +133,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
             if(state is InstructorSubTopicListFailure) {
               LoaderHelper.hide(context);
+              print('Sub Topic List Failure 😞');
             }
           },
         ),
@@ -127,10 +141,12 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
         BlocListener<InstructorTopicListBloc, InstructorTopicListState>(
           listener: (context, state) async {
 
+            if(state is InstructorTopicListLoading) {
+              LoaderHelper.show(context);
+            }
 
             if(state is InstructorTopicListSuccess)  {
-
-
+              LoaderHelper.hide(context);
               print("Selected Sub Topics Are : ${widget.lesson?.subtopicId}");
               // allSelectedSubTopic = Set(widget.lesson?.subtopicId);
               setState(() {
@@ -139,32 +155,64 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                     state.topicListResponse.data;
 
                 /// AUTO SELECT CATEGORY
-                selectedCategory =
-                    allCategories.firstWhere(
+                // selectedCategory =
+                //     allCategories.firstWhere(
+                //
+                //           (e) =>
+                //       e.id ==
+                //           widget.lesson?.topicId,
+                //     );
+                //
+                //
+                //
+                // /// CALL SUBTOPIC API
+                // context
+                //     .read<
+                //     InstructorSubTopicListBloc>().add(
+                //     FetchInstructorSubTopicList(
+                //
+                //       topicId: widget.lesson!.topicId,
+                //     ),
+                // );
+                //
+                // addCategory();
+                // allSelectedSubTopic = widget.lesson!.subtopicId.split(',').map((e) => e.trim()).toSet();
 
-                          (e) =>
-                      e.id ==
-                          widget.lesson?.topicId,
-                    );
+                if (isEdit && !editDataLoaded) {
 
-                /// CALL SUBTOPIC API
-                context
-                    .read<
-                    InstructorSubTopicListBloc>().add(
+                  selectedCategory =
+                      allCategories.firstWhere(
+                            (e) => e.id == widget.lesson?.topicId,
+                      );
+
+                  context.read<InstructorSubTopicListBloc>().add(
                     FetchInstructorSubTopicList(
-
                       topicId: widget.lesson!.topicId,
                     ),
-                );
+                  );
 
-                addCategory();
-                allSelectedSubTopic = widget.lesson!.subtopicId.split(',').map((e) => e.trim()).toSet();
+                  addCategory();
 
-              });
+                  allSelectedSubTopic =
+                      widget.lesson!.subtopicId
+                          .split(',')
+                          .map((e) => e.trim())
+                          .toSet();
+
+                  editDataLoaded = true;
+                }
+
+
+              }
+              );
+            }
+
+            if (state is InstructorTopicListFailure) {
+              print('Topic List Failure 😞');
             }
           },
         ),
-        //Bloc Lister for  Student List
+        //Bloc Listener for  Student List
         BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
 
           listener: (context, state) {
@@ -214,11 +262,11 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
             /// FAILURE
             if(state is InstructorStudentListFailure) {
-
+              print('Student List  Failure 😞');
             }
           },
         ),
-        // Bloc Lister for Add Lesson
+        // Bloc Listener for Add Lesson
         BlocListener<InstructorCreateLessonBloc, InstructorCreateLessonState>(
 
           listener: (context, state) async {
@@ -243,13 +291,18 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                 ),
               );
 
-              Navigator.pop(context);
+             Navigator.pop(context);
+            //   if (!isEdit) {
+            //     Navigator.pop(context);
+            //   }
             }
 
             /// 🔥 FAILURE
             if(state is InstructorCreateLessonFailure) {
 
               LoaderHelper.hide(context);
+
+              print('Create Failure 😞');
 
               ScaffoldMessenger.of(context).showSnackBar(
 
@@ -260,7 +313,56 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
             }
           },
         ),
+        // Bloc Listener for Edit Lesoon
+        BlocListener<InstructorLessonEditBloc, InstructorLessonEditState>(
+          listener: (context, state) {
 
+            if(state is InstructorLessonEditLoading) {
+
+              LoaderHelper.show(context);
+            }
+
+            if(state is InstructorLessonEditSuccess) {
+
+              LoaderHelper.hide(context);
+
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(
+
+                SnackBar(
+
+                  content: Text(
+                    state
+                        .lessonEditResponse
+                        .message,
+                  ),
+                ),
+              );
+
+              /// OPTIONAL
+              Navigator.pop(context);
+            }
+
+            if(state is InstructorLessonEditFailure) {
+
+              LoaderHelper.hide(context);
+
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(
+
+                SnackBar(
+
+                  content: Text(
+                    state.error,
+                  ),
+
+                  backgroundColor:
+                  Colors.red,
+                ),
+              );
+            }
+          },
+        ),
       ],
           child: Scaffold(
             backgroundColor: const Color(0xFFE9E9E9),
@@ -338,9 +440,23 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                                         /// ❌ REMOVE BUTTON
                                         GestureDetector(
                                           onTap: () {
+
                                             setState(() {
-                                              selectedCategories.remove(cat);
+
+                                              selectedCategory = null;
+
+                                              selectedCategories.clear();
+
+                                              allSubCategories.clear();
+
+                                              allSelectedSubTopic.clear();
+
+                                              // reset subtopic selection state
+                                              for (var sub in allSubCategories) {
+                                                sub.isSelected = false;
+                                              }
                                             });
+
                                           },
                                           child: Icon(Icons.close, size: 18, color: Colors.red),
                                         )
@@ -535,7 +651,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                             /// SUBMIT
                             AppButton(
                               text: "SUBMIT",
-                              onTap: onSubmit,
+                              onTap: isEdit ? onSubmitEdit : onSubmit,
                               textStyle: const TextStyle(
                                 fontFamily: "InterBold",
                                 fontSize: 12,
@@ -798,7 +914,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
     });
   }
 
-
+//This Submit is for Create Lesson
   Future<void> onSubmit() async {
 
     final prefs =
@@ -912,6 +1028,141 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
     context.read<InstructorCreateLessonBloc>().add(
 
       InstructorCreateLessonTapped(
+
+        userid: studentUserId.toString(),
+
+        instructorid: userId.toString(),
+
+        //name: titleController.text.trim(),
+
+        startDate: dateController.text.trim(),
+
+        startTime: timeController.text.trim(),
+
+        duration: durationController.text.trim(),
+
+        topicId: selectedCategory!.id,
+
+        subtopicId:
+        allSelectedSubTopic.join(","),
+
+      ),
+    );
+  }
+  //This Submit for Edit Lesson
+  Future<void> onSubmitEdit() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final userId = prefs.getString('user_id');
+
+    studentUserId = widget.lesson!.userId;
+
+    /// 🔥 VALIDATIONS
+
+    if(selectedCategory == null) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select category"),
+        ),
+      );
+
+      return;
+    }
+
+    if(allSelectedSubTopic.isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select sub topic"),
+        ),
+      );
+
+      return;
+    }
+
+    // if(titleController.text.trim().isEmpty) {
+    //
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text("Please enter lesson title"),
+    //     ),
+    //   );
+    //
+    //   return;
+    // }
+
+    if(studentListController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select student"),
+        ),
+      );
+
+      return;
+    }
+
+    if(dateController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select date"),
+        ),
+      );
+
+      return;
+    }
+
+    if(timeController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select start time"),
+        ),
+      );
+
+      return;
+    }
+
+    if(durationController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select duration"),
+        ),
+      );
+
+      return;
+    }
+
+    if(studentUserId == null) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select student"),
+        ),
+      );
+
+      return;
+    }
+
+    print(
+      'The selected Ids for Edit Lesson are : $allSelectedSubTopic, '
+          'topic ids Are for Edit Lesson ${selectedCategory?.id}, '
+          'the title is for Edit lesson ${titleController.text}, '
+          'date is for Edit Lesson${dateController.text}, '
+          'Start Time is Edit Lesson ${timeController.text}, '
+          'Selected duration is For Edit Lesson ${durationController.text}, '
+          'Student User id is For Edit Lesson  $studentUserId, '
+          'Teacher id is for Edit Lesson $userId',
+    );
+
+    /// 🔥 API CALL
+    context.read<InstructorLessonEditBloc>().add(
+
+      InstructorLessonEditTapped(
 
         userid: studentUserId.toString(),
 

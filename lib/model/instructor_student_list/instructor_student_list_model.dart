@@ -44,21 +44,21 @@ class StudentData {
   final String phone;
   final dynamic licenseNo;
   final dynamic carNo;
-  final String assignHour;
-  final String startdate;
+  final String? assignHour;
+  final String? startdate;
   final dynamic pickupLocation;
   final dynamic dropLocation;
   final dynamic profilePicture;
-  final String password;
+  //final String password;
   final String instructureId;
   final dynamic packageId;
   final String givenHour;
   final String role;
   final dynamic trainingStatus;
   final dynamic result;
-  final String paymentStatus;
+  final String? paymentStatus;
   final dynamic comments;
-  final String amount;
+  final String? amount;
   final String delStatus;
   final String status;
 
@@ -79,7 +79,7 @@ class StudentData {
     required this.pickupLocation,
     required this.dropLocation,
     required this.profilePicture,
-    required this.password,
+    //required this.password,
     required this.instructureId,
     required this.packageId,
     required this.givenHour,
@@ -108,19 +108,19 @@ class StudentData {
       phone: json['phone'],
       licenseNo: json['license_no'],
       carNo: json['car_no'],
-      assignHour: json['assign_hour'],
-      startdate: json['startdate'],
+      assignHour: json['assign_hour']?.toString(),
+      startdate: json['startdate']?.toString(),
       pickupLocation: json['pickup_location'],
       dropLocation: json['drop_location'],
       profilePicture: json['profile_picture'],
-      password: json['password'],
+      //password: json['password'],
       instructureId: json['instructure_id'],
       packageId: json['package_id'],
       givenHour: json['given_hour'],
       role: json['role'],
       trainingStatus: json['training_status'],
       result: json['result'],
-      paymentStatus: json['payment_status'],
+      paymentStatus: json['payment_status']?.toString(),
       comments: json['comments'],
       amount: json['amount'],
       delStatus: json['del_status'],

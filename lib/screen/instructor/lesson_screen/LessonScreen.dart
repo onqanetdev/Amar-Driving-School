@@ -1,3 +1,4 @@
+import 'package:amar_driving_school/bloc/instructor/lesson_edit/instructor_lesson_edit_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/sub_topic_list/instructor_sub_topic_list_bloc.dart';
 import 'package:amar_driving_school/screen/instructor/add_lesson_screen/AddLessonScreen.dart';
 import 'package:flutter/material.dart';
@@ -214,6 +215,11 @@ class _LessonScreenState extends State<LessonScreen> {
                               BlocProvider(
                                 create: (_) =>
                                     InstructorCreateLessonBloc(),
+                              ),
+                              //Edit Lesson
+                              BlocProvider(
+                                create: (_) =>
+                                    InstructorLessonEditBloc(),
                               ),
                             ],
                                 child: AddLessonScreen()
@@ -454,6 +460,12 @@ class LessonCard extends StatelessWidget {
                                       BlocProvider(
                                         create: (_) =>
                                             InstructorCreateLessonBloc(),
+                                      ),
+
+                                      //Edit
+                                      BlocProvider(
+                                        create: (_) =>
+                                            InstructorLessonEditBloc(),
                                       ),
                                     ],
 
