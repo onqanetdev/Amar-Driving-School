@@ -4,6 +4,11 @@ import 'package:amar_driving_school/screen/common_screen/login_screen/LoginScree
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/instructor/instructor_register_bloc.dart';
+import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
+import '../../../bloc/student/lesson_list/student_lesson_list_bloc.dart';
+import '../../../bloc/student/mocktest_list/student_mocktest_list_bloc.dart';
+import '../../../bloc/student/student_login/student_login_bloc.dart';
 import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_bloc.dart';
 import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_event.dart';
 import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_state.dart';
@@ -58,8 +63,24 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         Expanded(child: bodyContent()),
       ],
     ),
-    LessonScreen(),
-    MockTestScreen(),
+
+  MultiBlocProvider(providers: [
+  BlocProvider(
+    create: (_) => StudentLessonListBloc(),
+  ),],
+    child:  LessonScreen(),
+  ),
+
+   // LessonScreen(),
+    //MockTestScreen(),
+    MultiBlocProvider(providers: [
+      BlocProvider(
+        create: (_) =>
+            StudentMocktestListBloc(),
+      ),
+    ], child: MockTestScreen()
+    ),
+
     ProfileScreen(),
   ];
 
@@ -610,7 +631,25 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                       // clear session / shared prefs
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => MultiBlocProvider(providers: [
+
+                              BlocProvider(
+                                create: (_) => InstructorRegBloc(),
+                              ),
+
+                              BlocProvider(
+                                create: (_) => InstructorLoginBloc(),
+                              ),
+
+                              BlocProvider(
+                                create: (_) => StudentLoginBloc(),
+                              ),
+                            ],
+                                child: const LoginScreen(),
+                            ),
+                            //const LoginScreen()
+                        ),
                             (route) => false,
                       );
 
@@ -949,14 +988,28 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => LessonScreen(showBack: true,),
+                  builder: (_) =>
+                      MultiBlocProvider(providers: [
+                    BlocProvider(
+                      create: (_) => StudentLessonListBloc(),
+                    ),
+                  ],
+                      child: LessonScreen(showBack: true,)
+                  ),
                 ),
               );
             }else{
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => MockTestScreen(showBack: true,),
+                  builder: (_) =>
+                      MultiBlocProvider(providers: [
+                        BlocProvider(
+                          create: (_) =>
+                              StudentMocktestListBloc(),
+                        ),
+                      ], child: MockTestScreen(showBack: true,)
+                      ),
                 ),
               );
             }
@@ -999,6 +1052,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               //   color: Color.fromARGB(77, 158, 158, 158),
               //   borderRadius: BorderRadius.circular(10),
               // ),
+
 
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -1397,3 +1451,4 @@ class LessonCard extends StatelessWidget {
     );
   }
 }
+

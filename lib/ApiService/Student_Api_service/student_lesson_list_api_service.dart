@@ -4,17 +4,21 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../model/instructor_todays_lesson_model/instructor_todays_lesson_model.dart';
+import '../../model/student_all_model/student_lesson_list_model.dart';
 
-class InstructorTodaysLessonApiService {
+class StudentLessonListApiService {
 
   /// API URL
   final String apiUrl =
-      "https://amardrivingcrm.com/Beta/api/Home/tdaylsnlist";
+      "https://amardrivingcrm.com/Beta/api/Student/lessonlist";
 
-  /// FETCH TODAY'S LESSON LIST
-  Future<InstructorTodaysLessonModel> fetchTodaysLesson({
-    required String instructorId,
+  /// FETCH LESSON LIST
+  Future<StudentLessonListModel> fetchLessonList({
+
+    required String studentId,
+    required String limit,
+    required String offset,
+
   }) async {
 
     try {
@@ -24,11 +28,14 @@ class InstructorTodaysLessonApiService {
         Uri.parse(apiUrl),
 
         body: {
-          "instractor_id": instructorId,
+
+          "studentid": studentId,
+          "limit": limit,
+          "offset": offset,
         },
       );
 
-      print("📌 TODAY'S LESSON API");
+      print("📌 FETCH LESSON LIST API");
 
       print(
         "📌 STATUS CODE: ${response.statusCode}",
@@ -40,10 +47,10 @@ class InstructorTodaysLessonApiService {
 
       final jsonData = jsonDecode(response.body);
 
-      /// SUCCESS
-      if(response.statusCode == 200) {
+      if (response.statusCode == 200) {
 
-        return InstructorTodaysLessonModel.fromJson(jsonData);
+        return StudentLessonListModel
+            .fromJson(jsonData);
 
       } else {
 
@@ -52,13 +59,14 @@ class InstructorTodaysLessonApiService {
         );
       }
 
-    } catch(e, stackTrace) {
+    } catch (e, stackTrace) {
 
       print("🔥 API ERROR: $e");
 
       print(
         "🔥 STACKTRACE: $stackTrace",
       );
+
       rethrow;
     }
   }

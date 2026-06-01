@@ -1,60 +1,378 @@
 import 'package:amar_driving_school/helper/helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/student/mocktest_list/student_mocktest_list_bloc.dart';
+import '../../../bloc/student/mocktest_list/student_mocktest_list_event.dart';
+import '../../../bloc/student/mocktest_list/student_mocktest_list_state.dart';
+import '../../../bloc/student/mocktest_review/student_mocktest_review_bloc.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../model/LessonModel.dart';
+import '../../../model/student_all_model/student_mocktest_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../mock_test_reports_screen/MockTestReportsScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 
-class MockTestScreen extends StatelessWidget {
+class MockTestScreen extends StatefulWidget {
   final bool showBack;
   MockTestScreen({super.key,this.showBack = false});
 
-  final List<LessonModel> lessons = List.generate(
-    5,
-    (index) => LessonModel(
-      name: "Car Drive Mocktest",
-      duration: "1hr",
-      date: "18.04.2026",
-      time: "10:30AM",
-    ),
-  );
+  @override
+  State<MockTestScreen> createState() => _MockTestScreenState();
+}
+
+class _MockTestScreenState extends State<MockTestScreen> {
+   List<StudentMocktestData> lessons = [];
+
+  bool isMocktestListLoading = true;
+
+  @override
+  void initState() {
+
+    super.initState();
+
+    fetchStudentMocktestList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFE9E9E9),
+    return MultiBlocListener(listeners: [
+      BlocListener<StudentMocktestListBloc, StudentMocktestListState>(
 
-      body: Column(
-        children: [
-          /// HEADER
-          AppHeader(
-            title: "Mocktest",
-            showBack: showBack,
-            showAddButton: false,
-          ),
+        listener: (context, state) {
 
-          /// LIST
-          Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.all(10),
-              itemCount: lessons.length,
-              separatorBuilder: (_, __) => SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                return LessonCard(data: lessons[index]);
-              },
-            ),
+          if(state is StudentMocktestListLoading) {
+
+            setState(() {
+
+              isMocktestListLoading = true;
+            });
+          }
+
+          if(state is StudentMocktestListSuccess) {
+
+            setState(() {
+
+              isMocktestListLoading = false;
+
+              lessons = state
+                      .mocktestListResponse
+                      .data;
+            });
+
+            print(
+              "Mocktest Count => "
+                  "${lessons.length}",
+            );
+          }
+
+          if(state is StudentMocktestListFailure) {
+
+            setState(() {
+
+              isMocktestListLoading = false;
+            });
+
+            print(state.error);
+          }
+        },
+      ),
+    ],
+        child: Scaffold(
+          backgroundColor: Color(0xFFE9E9E9),
+
+          body: Column(
+            children: [
+              /// HEADER
+              AppHeader(
+                title: "Mocktest",
+                showBack: widget.showBack,
+                showAddButton: false,
+              ),
+
+              /// LIST
+              Expanded(
+                child: isMocktestListLoading
+
+                    ? _mocktestShimmer()
+
+                    : lessons.isEmpty
+
+                    ? emptyCard(
+                  "No Mocktest Found!",
+                ) : ListView.separated(
+                  padding: EdgeInsets.all(10),
+                  itemCount: lessons.length,
+                  separatorBuilder: (_, __) => SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    return LessonCard(data: lessons[index]);
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
+        )
+    );
+
+  }
+
+  Future<void> fetchStudentMocktestList() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final studentId =
+        prefs.getString("stud_user_id") ?? "";
+
+    context.read<StudentMocktestListBloc>()
+        .add(
+
+      FetchStudentMocktestList(
+
+        studentId: studentId,
+
+        limit: "10",
+
+        offset: "0",
       ),
     );
   }
+
+   Widget _mocktestShimmer() {
+
+     return ListView.separated(
+
+       padding: const EdgeInsets.all(16),
+
+       itemCount: 5,
+
+       shrinkWrap: true,
+
+       physics:
+       const NeverScrollableScrollPhysics(),
+
+       separatorBuilder: (_, __) =>
+       const SizedBox(height: 12),
+
+       itemBuilder: (_, __) {
+
+         return Shimmer.fromColors(
+
+           baseColor: Colors.grey.shade300,
+
+           highlightColor:
+           Colors.grey.shade100,
+
+           child: Container(
+
+             padding:
+             const EdgeInsets.all(16),
+
+             decoration: BoxDecoration(
+
+               color: Colors.white,
+
+               borderRadius:
+               BorderRadius.circular(16),
+
+               boxShadow: const [
+
+                 BoxShadow(
+
+                   color: Colors.black12,
+
+                   blurRadius: 4,
+
+                   offset: Offset(0, 2),
+                 ),
+               ],
+             ),
+
+             child: Column(
+
+               crossAxisAlignment:
+               CrossAxisAlignment.start,
+
+               children: [
+
+                 /// TOPIC NAME
+                 Container(
+
+                   height: 16,
+
+                   width: 150,
+
+                   decoration: BoxDecoration(
+
+                     color: Colors.white,
+
+                     borderRadius:
+                     BorderRadius.circular(4),
+                   ),
+                 ),
+
+                 const SizedBox(height: 12),
+
+                 /// DATE + TIME
+                 Row(
+
+                   children: [
+
+                     Container(
+
+                       height: 12,
+
+                       width: 90,
+
+                       decoration:
+                       BoxDecoration(
+
+                         color: Colors.white,
+
+                         borderRadius:
+                         BorderRadius.circular(4),
+                       ),
+                     ),
+
+                     const SizedBox(width: 20),
+
+                     Container(
+
+                       height: 12,
+
+                       width: 60,
+
+                       decoration:
+                       BoxDecoration(
+
+                         color: Colors.white,
+
+                         borderRadius:
+                         BorderRadius.circular(4),
+                       ),
+                     ),
+                   ],
+                 ),
+
+                 const SizedBox(height: 12),
+
+                 /// DURATION
+                 Container(
+
+                   height: 12,
+
+                   width: 100,
+
+                   decoration:
+                   BoxDecoration(
+
+                     color: Colors.white,
+
+                     borderRadius:
+                     BorderRadius.circular(4),
+                   ),
+                 ),
+
+                 const SizedBox(height: 12),
+
+                 /// BOTTOM ROW
+                 Row(
+
+                   mainAxisAlignment:
+                   MainAxisAlignment.spaceBetween,
+
+                   children: [
+
+                     Container(
+
+                       height: 12,
+
+                       width: 70,
+
+                       decoration:
+                       BoxDecoration(
+
+                         color: Colors.white,
+
+                         borderRadius:
+                         BorderRadius.circular(4),
+                       ),
+                     ),
+
+                     Container(
+
+                       height: 24,
+
+                       width: 24,
+
+                       decoration:
+                       const BoxDecoration(
+
+                         color: Colors.white,
+
+                         shape: BoxShape.circle,
+                       ),
+                     ),
+                   ],
+                 ),
+               ],
+             ),
+           ),
+         );
+       },
+     );
+   }
+
+   Widget emptyCard(String text) {
+
+     return Card(
+
+       elevation: 4,
+
+       margin: const EdgeInsets.all(16),
+
+       shape: RoundedRectangleBorder(
+
+         borderRadius:
+         BorderRadius.circular(16),
+       ),
+
+       child: Padding(
+
+         padding: const EdgeInsets.symmetric(
+
+           vertical: 30,
+
+           horizontal: 20,
+         ),
+
+         child: Center(
+
+           child: Text(
+
+             text,
+
+             textAlign: TextAlign.center,
+
+             style: const TextStyle(
+
+               fontSize: 16,
+
+               fontFamily: "InterSemiBold",
+
+               color: Colors.black87,
+             ),
+           ),
+         ),
+       ),
+     );
+   }
 }
 
 class LessonCard extends StatelessWidget {
-  final LessonModel data;
+  final StudentMocktestData data;
 
   const LessonCard({super.key, required this.data});
 
@@ -87,7 +405,7 @@ class LessonCard extends StatelessWidget {
                   children: [
                     /// TITLE
                     Text(
-                      data.name,
+                      data.name ?? "No Name Found",
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -132,7 +450,7 @@ class LessonCard extends StatelessWidget {
                                 color: HexColor(AppColor.colorAppGray)),
                             SizedBox(width: 2),
                             Text(
-                              data.date,
+                              data.lessonStart ?? "Start Date not Found",
                               overflow: TextOverflow.fade,
                               style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
                                 fontFamily: "InterSemiBold",),
@@ -146,7 +464,7 @@ class LessonCard extends StatelessWidget {
                                 color: HexColor(AppColor.colorAppGray)),
                             SizedBox(width: 2),
                             Text(
-                              data.time.toString(),
+                              data.duration.toString(),
                               overflow: TextOverflow.fade,
                               style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
                                 fontFamily: "InterSemiBold",),
@@ -178,7 +496,13 @@ class LessonCard extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => MockTestReportsScreen(),
+                          builder: (_) => MultiBlocProvider(providers: [
+                            BlocProvider(
+                              create: (_) => StudentMocktestReviewBloc(),
+                            ),
+                          ], child:  MockTestReportsScreen(),
+                          ),
+
                         ),
                       );
 

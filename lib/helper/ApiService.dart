@@ -7,7 +7,7 @@ class ApiService {
   //static String _baseUrl = 'https://onqanet.net/dev_waqueel01/driveronhire/api/';
   //static String _baseUrl = 'https://onqanet.net/dev_waqueel01/driveronhire/api/';
   /*static String _baseUrl = 'https://gujaratdriver.com/api/';*/
-  static String _baseUrl = 'https://onqanet.net/dev_waqueel01/gujratdriver/api/';
+  static String _baseUrl = 'https://amardrivingcrm.com/Beta/api/';
 
   late final String _loginUrl = _baseUrl + 'apilogin';
   late final String _registrationUrl = _baseUrl + 'register';
@@ -17,7 +17,7 @@ class ApiService {
   static final String _productDetailsPUrl = _baseUrl + 'product-details';
   static final String _profileDetailsUrl = _baseUrl + 'userdetail';
   static final String _cartListUrl = _baseUrl + 'cart';
-  static final String APP_VERSION_CHECK = _baseUrl + "version";
+  static final String APP_VERSION_CHECK = _baseUrl + "Home/getversion";
   static final String _addMoreItemToCartUrl = _baseUrl + 'add-to-cart-more-item';
   static final String _updateCartItemUrl = _baseUrl + 'cart/update-product';
   static final String _updateDeliveryTimeUrl = _baseUrl + 'cart/update-delivery-time';
