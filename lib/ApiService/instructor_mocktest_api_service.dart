@@ -4,20 +4,17 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../model/instructor_create_mocktest/instructor_create_mocktest_model.dart';
+import '../model/instructor_update_mocktest_model/instructor_update_mocktest_model.dart';
 
-class InstructorCreateMocktestApiService {
+class MocktestUpdateApiService {
 
-  /// API URL
-  final String apiUrl =
-      "https://amardrivingcrm.com/Beta/api/Mocktest/createmocktest";
+  final String baseUrl =
+      "https://amardrivingcrm.com/Beta/api/Mocktest/updatemock";
 
-  /// CREATE MOCKTEST
-  Future<InstructorCreateMocktestModel> createMocktest({
+  Future<InstructorUpdateMocktestModel> updateMocktest({
 
     required String userid,
     required String instructorid,
-   // required String name,
     required String startDate,
     required String startTime,
     required String duration,
@@ -28,17 +25,17 @@ class InstructorCreateMocktestApiService {
 
     try {
 
+      print("📌 UPDATE MOCKTEST API");
+
       final response = await http.post(
 
-        Uri.parse(apiUrl),
+        Uri.parse(baseUrl),
 
         body: {
 
           "userid": userid,
 
           "instructorid": instructorid,
-
-          //"name": name,
 
           "start_date": startDate,
 
@@ -52,8 +49,6 @@ class InstructorCreateMocktestApiService {
         },
       );
 
-      print("📌 CREATE MOCKTEST API");
-
       print(
         "📌 STATUS CODE: ${response.statusCode}",
       );
@@ -62,27 +57,24 @@ class InstructorCreateMocktestApiService {
         "📌 RAW RESPONSE: ${response.body}",
       );
 
-      final jsonData = jsonDecode(response.body);
+      final decodedJson = jsonDecode(response.body);
 
-      if(response.statusCode == 200) {
+      if (response.statusCode == 200) {
 
-        return InstructorCreateMocktestModel
-            .fromJson(jsonData);
+        return InstructorUpdateMocktestModel
+            .fromJson(decodedJson);
 
       } else {
 
         throw Exception(
-          jsonData['message'],
+          decodedJson['message'] ??
+              'Failed to update mocktest',
         );
       }
 
-    } catch(e, stackTrace) {
+    } catch (e) {
 
       print("🔥 API ERROR: $e");
-
-      print(
-        "🔥 STACKTRACE: $stackTrace",
-      );
 
       rethrow;
     }

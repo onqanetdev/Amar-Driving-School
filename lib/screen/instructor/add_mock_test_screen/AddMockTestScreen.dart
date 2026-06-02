@@ -3,8 +3,12 @@ import 'package:amar_driving_school/bloc/instructor/create_mocktest/instructor_c
 import 'package:amar_driving_school/helper/app_button_animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../../bloc/instructor/create_mocktest/instructor_create_mocktestEvent.dart';
+import '../../../bloc/instructor/mocktest_edit/instructor_update_mocktest_bloc.dart';
+import '../../../bloc/instructor/mocktest_edit/instructor_update_mocktest_event.dart';
+import '../../../bloc/instructor/mocktest_edit/instructor_update_mocktest_state.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_event.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_state.dart';
@@ -20,6 +24,7 @@ import '../../../helper/loader_helper.dart';
 import '../../../model/CategoryModel.dart';
 import '../../../model/LessonModel.dart';
 import '../../../model/SubCategoryModel.dart';
+import '../../../model/instructor_create_mocktest/instructor_mocktest_list_model.dart';
 import '../../../model/instructor_student_list/instructor_student_list_model.dart';
 import '../../../model/instructor_topic/instructor_sub_topic_list_model.dart';
 import '../../../model/instructor_topic/instructor_topic_list_model.dart';
@@ -29,8 +34,8 @@ import '../../../widgets/app_input_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddMockTestScreen extends StatefulWidget {
-  final LessonModel? lesson;
-  const AddMockTestScreen({super.key,this.lesson});
+  final MocktestData? mocktest;
+  const AddMockTestScreen({super.key,this.mocktest});
 
   @override
   State<AddMockTestScreen> createState() => _AddMockTestScreenState();
@@ -38,7 +43,7 @@ class AddMockTestScreen extends StatefulWidget {
 
 class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
-  final titleController = TextEditingController();
+ // final titleController = TextEditingController();
   final dateController = TextEditingController();
   final timeController = TextEditingController();
   final hourController = TextEditingController();
@@ -67,18 +72,31 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
   List<StudentData> students = [];
   String studentUserId = '';
 
+  //Sample  varibale
+
+  bool isEdit = false;
+  bool editDataLoaded = false;
+
+
   @override
-  initState(){
+  void initState() {
     super.initState();
 
     loadInitialData();
-    // if (widget.lesson != null) {
-    //   /// 👉 EDIT MODE
-    //   titleController.text = widget.lesson!.name;
-    //   dateController.text = widget.lesson!.classDate;
-    //   timeController.text = widget.lesson!.lessonStart!;
-    //   hourController.text = widget.lesson!.lessonDuration!;
-    // }
+
+    if (widget.mocktest != null) {
+
+      isEdit = true;
+
+      dateController.text =
+          widget.mocktest!.classDate;
+
+      timeController.text =
+          widget.mocktest!.lessonStart ?? '';
+
+      durationController.text =
+          widget.mocktest!.duration ?? '';
+    }
   }
 
   @override
@@ -93,12 +111,24 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
               LoaderHelper.show(context);
             }
 
-            if(state is InstructorSubTopicListSuccess)  {
-              LoaderHelper.hide(context);
-              setState(() {
-                allSubCategories = state.subTopicListResponse.data;
-              });
+            if(state is InstructorSubTopicListSuccess) {
 
+              LoaderHelper.hide(context);
+
+              setState(() {
+
+                allSubCategories =
+                    state.subTopicListResponse.data;
+
+                if (isEdit) {
+
+                  allSelectedSubTopic =
+                      widget.mocktest!.subtopicId
+                          .split(',')
+                          .map((e) => e.trim())
+                          .toSet();
+                }
+              });
             }
 
             if(state is InstructorSubTopicListFailure) {
@@ -111,19 +141,48 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
           listener: (context, state) async {
 
 
-            if(state is InstructorTopicListSuccess)  {
-              // LoaderHelper.hide(context);
-              //allSubCategories = state.subTopicListResponse.data;
+            if (state is InstructorTopicListSuccess) {
+
               setState(() {
 
                 allCategories =
                     state.topicListResponse.data;
+
+                if (isEdit && !editDataLoaded) {
+
+                  selectedCategory =
+                      allCategories.firstWhere(
+                            (e) =>
+                        e.id ==
+                            widget.mocktest?.topicId,
+                      );
+
+                  context
+                      .read<
+                      InstructorSubTopicListBloc>()
+                      .add(
+                    FetchInstructorSubTopicList(
+                      topicId:
+                      widget.mocktest!.topicId,
+                    ),
+                  );
+
+                  addCategory();
+
+                  allSelectedSubTopic =
+                      widget.mocktest!.subtopicId
+                          .split(',')
+                          .map((e) => e.trim())
+                          .toSet();
+
+                  editDataLoaded = true;
+                }
               });
             }
 
           },
         ),
-        //Bloc Lister for  Student List
+        //Bloc Listener for  Student List
         BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
 
           listener: (context, state) {
@@ -135,9 +194,34 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
             /// SUCCESS
             if(state is InstructorStudentListSuccess) {
-              LoaderHelper.hide(context);
-              students = state.studentListResponse.data;
 
+              LoaderHelper.hide(context);
+
+              setState(() {
+
+                students =
+                    state.studentListResponse.data;
+
+                if (students.isNotEmpty &&
+                    widget.mocktest != null) {
+
+                  selectedStudent =
+                      students.firstWhere(
+
+                            (e) =>
+                        e.userId ==
+                            widget.mocktest!.userId,
+
+                        orElse: () => students.first,
+                      );
+
+                  studentListController.text =
+                      selectedStudent?.name ?? "";
+
+                  studentUserId =
+                      selectedStudent?.userId ?? "";
+                }
+              });
             }
 
             /// FAILURE
@@ -146,7 +230,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
             }
           },
         ),
-        // Bloc Lister for Add Lesson
+        // Bloc Listener for Add Lesson
         BlocListener<InstructorCreateMocktestBloc, InstructorCreateMocktestState>(
 
           listener: (context, state) async {
@@ -188,7 +272,54 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
             }
           },
         ),
+        // Bloc Listener for Edit Mocktest
+        BlocListener<InstructorUpdateMocktestBloc, InstructorUpdateMocktestState>(
 
+          listener: (context, state) async {
+
+            if(state is InstructorUpdateMocktestLoading) {
+
+              LoaderHelper.show(context);
+            }
+
+            if(state is InstructorUpdateMocktestSuccess) {
+
+              LoaderHelper.hide(context);
+
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(
+
+                SnackBar(
+                  content: Text(
+                    state.updateMocktestResponse
+                        .message,
+                  ),
+                ),
+              );
+
+              Navigator.pop(context);
+            }
+
+            if(state is InstructorUpdateMocktestFailure) {
+
+              LoaderHelper.hide(context);
+
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(
+
+                SnackBar(
+
+                  content: Text(
+                    state.error,
+                  ),
+
+                  backgroundColor:
+                  Colors.red,
+                ),
+              );
+            }
+          },
+        ),
       ],
           child: Scaffold(
             backgroundColor: const Color(0xFFE9E9E9),
@@ -198,7 +329,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
                 /// HEADER
                 AppHeader(
-                  title: "Create Lesson",
+                  title: "Create Mocktest",
                   showBack: true,
                 ),
 
@@ -297,21 +428,45 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
                                         ...List.generate(allSubCategories.length, (index) {
                                           //final sub = cat.subCategories[index];
                                           final sub = allSubCategories[index];
-                                          final isSelected = sub.isSelected;
-
+                                        //  final isSelected = sub.isSelected;
+                                          final isSelected = allSelectedSubTopic.contains(sub.id);
                                           return GestureDetector(
                                             onTap: () {
                                               print('the sub topic id is ${sub.id}, and the topic id is ${sub.topicId}');
-                                              if (sub.isSelected == false) {
-                                                allSelectedSubTopic.add(sub.id);
-                                              } else {
-                                                allSelectedSubTopic.remove(sub.id);
-                                              }
-                                              print(allSelectedSubTopic);
+                                              //
+                                              // if (sub.isSelected == false) {
+                                              //   allSelectedSubTopic.add(sub.id);
+                                              // } else {
+                                              //   allSelectedSubTopic.remove(sub.id);
+                                              // }
+                                              // print(allSelectedSubTopic);
+                                              //
+                                              // setState(() {
+                                              //   //sub.isSelected = !sub.isSelected;
+                                              //   if (allSelectedSubTopic.contains(sub.id)) {
+                                              //     allSelectedSubTopic.remove(sub.id);
+                                              //   } else {
+                                              //     allSelectedSubTopic.add(sub.id);
+                                              //   }
+                                              // });
+
                                               setState(() {
-                                                sub.isSelected = !sub.isSelected;
+
+                                                if (allSelectedSubTopic.contains(sub.id)) {
+
+                                                  allSelectedSubTopic.remove(sub.id);
+
+                                                } else {
+
+                                                  allSelectedSubTopic.add(sub.id);
+
+                                                }
+
+                                                print(allSelectedSubTopic);
                                               });
-                                            },
+
+
+                                            }, //on tap
                                             child: Container(
                                               margin: const EdgeInsets.only(bottom: 6),
                                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -369,17 +524,17 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
 
                             /// 🔹 TITLE
-                            AppInputField(
-                              controller: titleController,
-                              hintText: "Advance Car Drive",
-                              fillColor: AppColor.colorInputBg,
-                              borderColor: AppColor.colorInputBorder,
-                              focusedBorderColor: AppColor.colorInputFocusBorder,
-                              hintColor: AppColor.colorInputHint,
-                              borderRadius: 10,
-                              obscureText: false,
-                              keyboardType: TextInputType.text,
-                            ),
+                            // AppInputField(
+                            //   controller: titleController,
+                            //   hintText: "Advance Car Drive",
+                            //   fillColor: AppColor.colorInputBg,
+                            //   borderColor: AppColor.colorInputBorder,
+                            //   focusedBorderColor: AppColor.colorInputFocusBorder,
+                            //   hintColor: AppColor.colorInputHint,
+                            //   borderRadius: 10,
+                            //   obscureText: false,
+                            //   keyboardType: TextInputType.text,
+                            // ),
 
                             const SizedBox(height: 10),
 
@@ -479,7 +634,9 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
                             /// SUBMIT
                             AppButton(
                               text: "SUBMIT",
-                              onTap: onSubmit,
+                              onTap: isEdit
+                                  ? onSubmitMocktestEdit
+                                  : onSubmit,
                               textStyle: const TextStyle(
                                 fontFamily: "InterBold",
                                 fontSize: 12,
@@ -742,26 +899,6 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
     });
   }
 
-  // Future<void> onSubmit() async {
-  //   final json = generateJson();
-  //   final prefs =
-  //       await SharedPreferences.getInstance();
-  //
-  //   final userId =
-  //   prefs.getString('user_id');
-  //
-  //   print('The selected Ids are : ${allSelectedSubTopic}, '
-  //       'topic id is  ${selectedCategory?.id}, '
-  //       'the title is ${titleController.text} , '
-  //       'date is ${dateController.text}, '
-  //       'Start Time is ${timeController.text} , '
-  //       'Selected duration is ${durationController.text}, '
-  //       'Selected Minutes is ${minController.text}, '
-  //       'Student User id is ${studentUserId}, '
-  //       'Teacher id is ${userId}',
-  //
-  //   );
-  // }
 
   Future<void> onSubmit() async {
 
@@ -795,16 +932,16 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
       return;
     }
 
-    if(titleController.text.trim().isEmpty) {
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter lesson title"),
-        ),
-      );
-
-      return;
-    }
+    // if(titleController.text.trim().isEmpty) {
+    //
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text("Please enter lesson title"),
+    //     ),
+    //   );
+    //
+    //   return;
+    // }
 
     if(studentListController.text.trim().isEmpty) {
 
@@ -862,15 +999,26 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
     }
 
     print(
-      'The selected Ids are : $allSelectedSubTopic, '
+      '🛜🛜🛜🛜The selected Ids are : $allSelectedSubTopic, '
           'topic id is ${selectedCategory?.id}, '
-          'the title is ${titleController.text}, '
+          //'the title is ${titleController.text}, '
           'date is ${dateController.text}, '
           'Start Time is ${timeController.text}, '
           'Selected duration is ${durationController.text}, '
           'Student User id is $studentUserId, '
           'Teacher id is $userId',
     );
+
+    final inputDate = dateController.text.trim();
+
+    final parsedDate = DateFormat("d/M/yyyy").parse(inputDate);
+
+    final formattedDate = DateFormat("yyyy-MM-dd").format(parsedDate);
+
+    print("Converted Date => $formattedDate");
+
+
+
 
     /// 🔥 API CALL
     context.read<InstructorCreateMocktestBloc>().add(
@@ -881,9 +1029,10 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
         instructorid: userId.toString(),
 
-        name: titleController.text.trim(),
+        //Fname: titleController.text.trim(),
 
-        startDate: dateController.text.trim(),
+        //startDate: dateController.text.trim(),
+        startDate: formattedDate,
 
         startTime: timeController.text.trim(),
 
@@ -891,9 +1040,141 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
         topicId: selectedCategory!.id,
 
+        subtopicId: allSelectedSubTopic.join(","),
+
+      ),
+    );
+  }
+
+  Future<void> onSubmitMocktestEdit() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final userId = prefs.getString('user_id');
+
+    print("🔥 UPDATE BUTTON CLICKED");
+
+    /// VALIDATIONS
+
+    if (selectedCategory == null) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please select category",
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    if (allSelectedSubTopic.isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please select sub topic",
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    if (studentListController.text
+        .trim()
+        .isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please select student",
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    if (dateController.text
+        .trim()
+        .isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please select date",
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    if (timeController.text
+        .trim()
+        .isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please select start time",
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    if (durationController.text
+        .trim()
+        .isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please select duration",
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    print(
+      'Selected Sub Topics: $allSelectedSubTopic\n'
+          'Topic Id: ${selectedCategory?.id}\n'
+          'Date: ${dateController.text}\n'
+          'Time: ${timeController.text}\n'
+          'Duration: ${durationController.text}\n'
+          'Student Id: $studentUserId\n'
+          'Instructor Id: $userId',
+    );
+
+    context.read<InstructorUpdateMocktestBloc>().add(
+
+      InstructorUpdateMocktestTapped(
+
+        userid:
+        studentUserId,
+
+        instructorid:
+        userId.toString(),
+
+        startDate:
+        dateController.text.trim(),
+
+        startTime:
+        timeController.text.trim(),
+
+        duration:
+        durationController.text.trim(),
+
+        topicId:
+        selectedCategory!.id,
+
         subtopicId:
         allSelectedSubTopic.join(","),
-
       ),
     );
   }

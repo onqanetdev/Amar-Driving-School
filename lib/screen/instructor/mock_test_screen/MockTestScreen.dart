@@ -1,4 +1,5 @@
 import 'package:amar_driving_school/bloc/instructor/create_mocktest/instructor_create_mocktest_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/mocktest_edit/instructor_update_mocktest_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_event.dart';
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_state.dart';
@@ -223,7 +224,11 @@ class _MockTestScreenState extends State<MockTestScreen> {
                                  create: (_) =>
                                      InstructorCreateMocktestBloc(),
                                ),
-
+                               // Mocktest Edit
+                               BlocProvider(
+                                 create: (_) =>
+                                     InstructorUpdateMocktestBloc(),
+                               ),
                              ],
 
                              child: AddMockTestScreen(),
@@ -470,9 +475,14 @@ class LessonCard extends StatelessWidget {
                                         InstructorCreateMocktestBloc(),
                                   ),
 
+                                  BlocProvider(
+                                    create: (_) =>
+                                        InstructorUpdateMocktestBloc(),
+                                  ),
+
                                 ],
 
-                                child: AddMockTestScreen(),
+                                child: AddMockTestScreen(mocktest: data,),
                               ),
                             ),
 

@@ -29,8 +29,8 @@ class InstructorCreateMocktestBloc extends Bloc<InstructorCreateMocktestEvent, I
             instructorid:
             event.instructorid,
 
-            name:
-            event.name,
+            // name:
+            // event.name,
 
             startDate:
             event.startDate,
