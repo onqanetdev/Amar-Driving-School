@@ -195,46 +195,86 @@ class _MockTestScreenState extends State<MockTestScreen> {
                      showBack: widget.showBack,
                      showAddButton: true,
                      addButtonText: "Add Mocktest",
-                     onAdd: () {
+                     onAdd: () async {
                        // Create lesson dialog
-                       Navigator.push(
-                         context,
-                         MaterialPageRoute(
-                         //  builder: (_) => AddMockTestScreen(),
-                           builder: (_) => MultiBlocProvider(
+                       // Navigator.push(
+                       //   context,
+                       //   MaterialPageRoute(
+                       //   //  builder: (_) => AddMockTestScreen(),
+                       //     builder: (_) => MultiBlocProvider(
+                       //
+                       //       providers: [
+                       //
+                       //         BlocProvider(
+                       //           create: (_) =>
+                       //               InstructorTopicListBloc(),
+                       //         ),
+                       //
+                       //         BlocProvider(
+                       //           create: (_) =>
+                       //               InstructorSubTopicListBloc(),
+                       //         ),
+                       //
+                       //         BlocProvider(
+                       //           create: (_) =>
+                       //               InstructorStudentListBloc(),
+                       //         ),
+                       //
+                       //         BlocProvider(
+                       //           create: (_) =>
+                       //               InstructorCreateMocktestBloc(),
+                       //         ),
+                       //         // Mocktest Edit
+                       //         BlocProvider(
+                       //           create: (_) =>
+                       //               InstructorUpdateMocktestBloc(),
+                       //         ),
+                       //       ],
+                       //
+                       //       child: AddMockTestScreen(),
+                       //     ),
+                       //   ),
+                       // );
+                       final result = await Navigator.push(context,
+                           MaterialPageRoute(
+                             //  builder: (_) => AddMockTestScreen(),
+                             builder: (_) => MultiBlocProvider(
 
-                             providers: [
+                               providers: [
 
-                               BlocProvider(
-                                 create: (_) =>
-                                     InstructorTopicListBloc(),
-                               ),
+                                 BlocProvider(
+                                   create: (_) =>
+                                       InstructorTopicListBloc(),
+                                 ),
 
-                               BlocProvider(
-                                 create: (_) =>
-                                     InstructorSubTopicListBloc(),
-                               ),
+                                 BlocProvider(
+                                   create: (_) =>
+                                       InstructorSubTopicListBloc(),
+                                 ),
 
-                               BlocProvider(
-                                 create: (_) =>
-                                     InstructorStudentListBloc(),
-                               ),
+                                 BlocProvider(
+                                   create: (_) =>
+                                       InstructorStudentListBloc(),
+                                 ),
 
-                               BlocProvider(
-                                 create: (_) =>
-                                     InstructorCreateMocktestBloc(),
-                               ),
-                               // Mocktest Edit
-                               BlocProvider(
-                                 create: (_) =>
-                                     InstructorUpdateMocktestBloc(),
-                               ),
-                             ],
+                                 BlocProvider(
+                                   create: (_) =>
+                                       InstructorCreateMocktestBloc(),
+                                 ),
+                                 // Mocktest Edit
+                                 BlocProvider(
+                                   create: (_) =>
+                                       InstructorUpdateMocktestBloc(),
+                                 ),
+                               ],
 
-                             child: AddMockTestScreen(),
+                               child: AddMockTestScreen(),
+                             ),
                            ),
-                         ),
                        );
+                       if (result == true) {
+                         fetchLessonList();
+                       }
                      },
                    ),
 
@@ -446,13 +486,52 @@ class LessonCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       GestureDetector(
-                        onTap: (){
-                          Navigator.push(
+                        onTap: () async {
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //
+                          //     builder: (_) => MultiBlocProvider(
+                          //
+                          //       providers: [
+                          //
+                          //         BlocProvider(
+                          //           create: (_) =>
+                          //               InstructorTopicListBloc(),
+                          //         ),
+                          //
+                          //         BlocProvider(
+                          //           create: (_) =>
+                          //               InstructorSubTopicListBloc(),
+                          //         ),
+                          //
+                          //         BlocProvider(
+                          //           create: (_) =>
+                          //               InstructorStudentListBloc(),
+                          //         ),
+                          //
+                          //         BlocProvider(
+                          //           create: (_) =>
+                          //               InstructorCreateMocktestBloc(),
+                          //         ),
+                          //
+                          //         BlocProvider(
+                          //           create: (_) =>
+                          //               InstructorUpdateMocktestBloc(),
+                          //         ),
+                          //
+                          //       ],
+                          //
+                          //       child: AddMockTestScreen(mocktest: data,),
+                          //     ),
+                          //   ),
+                          //
+                          // );
+
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-
                               builder: (_) => MultiBlocProvider(
-
                                 providers: [
 
                                   BlocProvider(
@@ -481,12 +560,22 @@ class LessonCard extends StatelessWidget {
                                   ),
 
                                 ],
-
-                                child: AddMockTestScreen(mocktest: data,),
+                                child: AddMockTestScreen(
+                                  mocktest: data,
+                                ),
                               ),
                             ),
-
                           );
+
+                          if (result == true) {
+                            context.read<InstructorMocktestListBloc>().add(
+                              FetchInstructorMocktestList(
+                                instructorId: data.instructorId,
+                                limit: '10',
+                                offset: "0",
+                              ),
+                            );
+                          }
                         },
                         child: Text(
                           "Edit",

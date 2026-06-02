@@ -255,7 +255,8 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
                 ),
               );
 
-              Navigator.pop(context);
+              //Navigator.pop(context);
+              Navigator.pop(context, true);
             }
 
             /// 🔥 FAILURE
@@ -297,7 +298,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
                 ),
               );
 
-              Navigator.pop(context);
+              Navigator.pop(context, true);
             }
 
             if(state is InstructorUpdateMocktestFailure) {
@@ -1111,9 +1112,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
       return;
     }
 
-    if (timeController.text
-        .trim()
-        .isEmpty) {
+    if (timeController.text.trim().isEmpty) {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

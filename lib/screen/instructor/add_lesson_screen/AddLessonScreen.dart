@@ -5,6 +5,7 @@ import 'package:amar_driving_school/bloc/instructor/topic_list/instructor_topic_
 import 'package:amar_driving_school/model/instructor_topic/instructor_topic_list_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../../bloc/instructor/create_lesson/instructor_create_lesson_bloc.dart';
 import '../../../bloc/instructor/create_lesson/instructor_create_lesson_event.dart';
@@ -291,7 +292,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                 ),
               );
 
-             Navigator.pop(context);
+             Navigator.pop(context, true);
             //   if (!isEdit) {
             //     Navigator.pop(context);
             //   }
@@ -340,7 +341,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
               );
 
               /// OPTIONAL
-              Navigator.pop(context);
+              Navigator.pop(context, true);
             }
 
             if(state is InstructorLessonEditFailure) {
@@ -798,7 +799,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
                     /// CLOSE BUTTON
                     GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => Navigator.pop(context, true),
                       child: const Icon(Icons.close, size: 20),
                     )
                   ],
@@ -838,7 +839,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                         setState(() {
                           selectedCategory = cat;
                         });
-                        Navigator.pop(context);
+                        Navigator.pop(context,true);
                       },
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 8),
@@ -1013,6 +1014,13 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
       return;
     }
 
+    final parsedDate = DateFormat("d/M/yyyy").parse(dateController.text.trim());
+
+    final formattedDate = DateFormat("yyyy-MM-dd").format(parsedDate);
+
+    print("Converted Date => $formattedDate");
+
+
     print(
       'The selected Ids are : $allSelectedSubTopic, '
           'topic id is ${selectedCategory?.id}, '
@@ -1035,7 +1043,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
         //name: titleController.text.trim(),
 
-        startDate: dateController.text.trim(),
+        startDate: formattedDate,
 
         startTime: timeController.text.trim(),
 
@@ -1159,6 +1167,12 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
           'Teacher id is for Edit Lesson $userId',
     );
 
+    final parsedDate = DateFormat("d/M/yyyy").parse(dateController.text.trim());
+
+    final formattedDate = DateFormat("yyyy-MM-dd").format(parsedDate);
+
+    print("Converted Edit Date => $formattedDate");
+
     /// 🔥 API CALL
     context.read<InstructorLessonEditBloc>().add(
 
@@ -1170,7 +1184,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
         //name: titleController.text.trim(),
 
-        startDate: dateController.text.trim(),
+        startDate: formattedDate,
 
         startTime: timeController.text.trim(),
 
@@ -1313,7 +1327,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                     ),
 
                     GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => Navigator.pop(context, true),
                       child: const Icon(Icons.close),
                     )
                   ],
@@ -1351,7 +1365,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                           studentListController.text = student.name;
                           studentUserId = student.userId ;
                         });
-                        Navigator.pop(context);
+                        Navigator.pop(context, true);
                       },
                       child: Container(
                         margin: const EdgeInsets.symmetric(

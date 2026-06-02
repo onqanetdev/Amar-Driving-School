@@ -191,41 +191,80 @@ class _LessonScreenState extends State<LessonScreen> {
                 showBack: widget.showBack,
                 showAddButton: true,
                 addButtonText: "Add Lesson",
-                onAdd: () {
+                onAdd: () async {
                   // Create lesson dialog
-                  Navigator.push(
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //
+                  //       builder: (_) =>
+                  //           MultiBlocProvider(providers:
+                  //           [
+                  //             BlocProvider(
+                  //               create: (context) => InstructorTopicListBloc(),
+                  //             ),
+                  //
+                  //             BlocProvider(
+                  //               create: (_) => InstructorSubTopicListBloc(),
+                  //             ),
+                  //
+                  //             BlocProvider(
+                  //               create: (_) =>
+                  //                   InstructorStudentListBloc(),
+                  //             ),
+                  //
+                  //             BlocProvider(
+                  //               create: (_) =>
+                  //                   InstructorCreateLessonBloc(),
+                  //             ),
+                  //             //Edit Lesson
+                  //             BlocProvider(
+                  //               create: (_) =>
+                  //                   InstructorLessonEditBloc(),
+                  //             ),
+                  //           ],
+                  //               child: AddLessonScreen()
+                  //           )
+                  //   ),
+                  // );
+
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
+                      builder: (_) => MultiBlocProvider(
+                        providers: [
+                          BlocProvider(
+                            create: (context) => InstructorTopicListBloc(),
+                          ),
 
-                        builder: (_) =>
-                            MultiBlocProvider(providers: [
-                              BlocProvider(
-                                create: (context) => InstructorTopicListBloc(),
-                              ),
+                          BlocProvider(
+                            create: (_) => InstructorSubTopicListBloc(),
+                          ),
 
-                              BlocProvider(
-                                create: (_) => InstructorSubTopicListBloc(),
-                              ),
+                          BlocProvider(
+                            create: (_) =>
+                                InstructorStudentListBloc(),
+                          ),
 
-                              BlocProvider(
-                                create: (_) =>
-                                    InstructorStudentListBloc(),
-                              ),
-
-                              BlocProvider(
-                                create: (_) =>
-                                    InstructorCreateLessonBloc(),
-                              ),
-                              //Edit Lesson
-                              BlocProvider(
-                                create: (_) =>
-                                    InstructorLessonEditBloc(),
-                              ),
-                            ],
-                                child: AddLessonScreen()
-                            )
+                          BlocProvider(
+                            create: (_) =>
+                                InstructorCreateLessonBloc(),
+                          ),
+                          //Edit Lesson
+                          BlocProvider(
+                            create: (_) =>
+                                InstructorLessonEditBloc(),
+                          ),
+                        ],
+                        child: AddLessonScreen(),
+                      ),
                     ),
                   );
+
+                  if (result == true) {
+                    fetchLessonList();
+                  }
+
                 },
               ),
 
@@ -433,50 +472,92 @@ class LessonCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       GestureDetector(
-                        onTap: (){
-                          Navigator.push(
+                        onTap: () async {
+
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (_) =>
+                          //         MultiBlocProvider(
+                          //
+                          //           providers: [
+                          //
+                          //             BlocProvider(
+                          //               create: (_) =>
+                          //                   InstructorTopicListBloc(),
+                          //             ),
+                          //
+                          //             BlocProvider(
+                          //               create: (_) =>
+                          //                   InstructorSubTopicListBloc(),
+                          //             ),
+                          //
+                          //             BlocProvider(
+                          //               create: (_) =>
+                          //                   InstructorStudentListBloc(),
+                          //             ),
+                          //
+                          //             BlocProvider(
+                          //               create: (_) =>
+                          //                   InstructorCreateLessonBloc(),
+                          //             ),
+                          //
+                          //             //Edit
+                          //             BlocProvider(
+                          //               create: (_) =>
+                          //                   InstructorLessonEditBloc(),
+                          //             ),
+                          //           ],
+                          //
+                          //           child:
+                          //           AddLessonScreen(
+                          //             lesson: data
+                          //           ),
+                          //         ),
+                          //   ),
+                          // );
+                          // fetchLessonList();
+
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  MultiBlocProvider(
+                              builder: (_) => MultiBlocProvider(
+                                providers: [
 
-                                    providers: [
-
-                                      BlocProvider(
-                                        create: (_) =>
-                                            InstructorTopicListBloc(),
-                                      ),
-
-                                      BlocProvider(
-                                        create: (_) =>
-                                            InstructorSubTopicListBloc(),
-                                      ),
-
-                                      BlocProvider(
-                                        create: (_) =>
-                                            InstructorStudentListBloc(),
-                                      ),
-
-                                      BlocProvider(
-                                        create: (_) =>
-                                            InstructorCreateLessonBloc(),
-                                      ),
-
-                                      //Edit
-                                      BlocProvider(
-                                        create: (_) =>
-                                            InstructorLessonEditBloc(),
-                                      ),
-                                    ],
-
-                                    child:
-                                    AddLessonScreen(
-                                      lesson: data
-                                    ),
+                                  BlocProvider(
+                                    create: (_) => InstructorTopicListBloc(),
                                   ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorSubTopicListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorStudentListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorCreateLessonBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorLessonEditBloc(),
+                                  ),
+                                ],
+
+                                child: AddLessonScreen(
+                                  lesson: data,
+                                ),
+                              ),
                             ),
                           );
-                          // fetchLessonList();
+
+                          if (result == true) {
+                            // refresh lesson list
+                            // easiest way:
+                            Navigator.pop(context, true);
+                          }
+
                         },
                         child: Text(
                           "Edit",
