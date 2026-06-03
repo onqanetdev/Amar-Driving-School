@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../../../bloc/student/lesson_review/student_lesson_review_bloc.dart';
+import '../../../bloc/student/lesson_review/student_lesson_review_event.dart';
+import '../../../bloc/student/lesson_review/student_lesson_review_state.dart';
+import '../../../helper/loader_helper.dart';
 import '../../../model/RatingItem.dart';
+import '../../../model/student_all_model/student_lesson_review.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LessonReportScreen extends StatefulWidget {
-  const LessonReportScreen({super.key});
+  final String? studentCode;
+  const LessonReportScreen({super.key, this.studentCode});
 
   @override
   State<LessonReportScreen> createState() => _LessonReportScreenState();
@@ -16,96 +23,118 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
   /// 🔥 EDIT MODE
   bool isEditMode = false;
 
-  List<RatingSection> sections = [
+  // List<RatingSection> sections = [
+  //
+  //   RatingSection(
+  //     title: "Pre-Drive Checks:",
+  //     items: [
+  //       RatingItem(title: "Vehicle approach"),
+  //       RatingItem(title: "Start-up drill"),
+  //     ],
+  //   ),
+  // ];
 
-    RatingSection(
-      title: "Pre-Drive Checks:",
-      items: [
-        RatingItem(title: "Vehicle approach"),
-        RatingItem(title: "Start-up drill"),
-      ],
-    ),
+  List<LessonReviewData> sections = [];
 
-    RatingSection(
-      title: "Basic Control:",
-      items: [
-        RatingItem(title: "Braking, stopping"),
-        RatingItem(title: "Accelerating, coasting"),
-        RatingItem(title: "Steering, turning"),
-        RatingItem(title: "Yielding"),
-        RatingItem(title: "Search, Evaluate, Execute (SEE)"),
-        RatingItem(title: "Curve negotiation"),
-        RatingItem(title: "Right-of-way execution"),
-      ],
-    ),
-
-    RatingSection(
-      title: "Lane Procedure:",
-      items: [
-        RatingItem(title: "Lane positioning"),
-        RatingItem(title: "Lane changing"),
-        RatingItem(title: "Parked vehicle negotiation"),
-      ],
-    ),
-  ];
 
   @override
   void initState() {
     super.initState();
 
     /// 🔥 DEFAULT VALUE (optional)
-    for (var section in sections) {
-      for (var item in section.items) {
-        item.selected = 2; // default selection
-      }
-    }
+    // for (var section in sections) {
+    //   for (var item in section.subtopics) {
+    //
+    //     //item.selected = 2; // default selection
+    //
+    //   }
+    // }
+
+    fetchLessonReview();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
 
-      body: Column(
-        children: [
+    return  MultiBlocListener(
 
-          /// 🔹 HEADER
-          AppHeader(
-            title: "Lesson Report",
-            showBack: true,
-            showAddButton: true,
-            addButtonText: isEditMode ? "Save" : "Edit",
-            showAddIcon: false,
-            onAdd: toggleEditMode,
-          ),
+        listeners: [
 
-          /// 🔹 LIST
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(10),
-              children: [
+          /// LESSON REVIEW LISTENER
+          BlocListener<StudentLessonReviewBloc, StudentLessonReviewState>(
 
-                ...sections.map((section) => ratingSection(section)),
+            listener: (context, state) {
 
-                const SizedBox(height: 20),
+              /// LOADING
+              if(state is StudentLessonReviewLoading) {
 
-                /// 🔹 SUBMIT
-                AppButton(
-                  text: "SUBMIT",
-                  onTap: onSubmit,
-                  textStyle: const TextStyle(
-                    fontFamily: "InterBold",
-                    fontSize: 12,
-                    color: Colors.white,
-                  ),
-                ),
+                LoaderHelper.show(context);
+              }
 
-                const SizedBox(height: 20),
-              ],
-            ),
+              /// SUCCESS
+              if(state is StudentLessonReviewSuccess) {
+
+                LoaderHelper.hide(context);
+
+                setState(() {
+
+                  sections =
+                      state
+                          .lessonReviewResponse
+                          .data;
+                });
+              }
+
+              /// FAILURE
+              if(state is StudentLessonReviewFailure) {
+
+                LoaderHelper.hide(context);
+
+                print(state.error);
+              }
+            },
           ),
         ],
-      ),
+
+
+        child:  Scaffold(
+          backgroundColor: const Color(0xFFE9E9E9),
+
+          body: Column(
+            children: [
+
+              /// 🔹 HEADER
+              AppHeader(
+                title: "Lesson Report",
+                showBack: true,
+                showAddButton: false,
+              ),
+
+              /// 🔹 LIST
+              Expanded(
+                child:
+                sections.isEmpty ? Center(
+                  child: Text(
+                    "No Lesson Review Found!",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: "InterBold",
+                      color: Colors.grey,
+                    ),
+                  ),
+                ) : ListView(
+                  padding: const EdgeInsets.all(10),
+                  children: [
+
+                    ...sections.map((section) => ratingSection(section)),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
     );
   }
 
@@ -117,7 +146,7 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
   }
 
   /// 🔹 SECTION UI
-  Widget ratingSection(RatingSection section) {
+  Widget ratingSection(LessonReviewData section) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -138,7 +167,7 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
 
           /// TITLE
           Text(
-            section.title,
+            section.topicName ?? " ",
             style: const TextStyle(
               fontSize: 18,
               fontFamily: "InterBold",
@@ -148,14 +177,14 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
 
           const SizedBox(height: 10),
 
-          ...section.items.map((item) => ratingRow(item)).toList(),
+          ...section.subtopics.map((item) => ratingRow(item)).toList(),
         ],
       ),
     );
   }
 
   /// 🔹 RATING ROW
-  Widget ratingRow(RatingItem item) {
+  Widget ratingRow(LessonSubtopic item) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -164,7 +193,7 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
           /// TITLE
           Expanded(
             child: Text(
-              "${item.title}:",
+              "${item.subtopicName}:",
               style: const TextStyle(
                 fontSize: 13,
                 fontFamily: "InterMedium",
@@ -177,14 +206,14 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
           Row(
             children: List.generate(5, (index) {
               final value = index + 1;
-              final isSelected = item.selected == value;
-
+              //final isSelected = Int(item.rating) == value;
+              final isSelected = item.rating != "N/A" && item.rating == value.toString();
               return GestureDetector(
                 onTap: isEditMode
                     ? () {
-                  setState(() {
-                    item.selected = value;
-                  });
+                  // setState(() {
+                  //   item.selected = value;
+                  // });
                 }
                     : null,
 
@@ -222,24 +251,24 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
 
   /// 🔹 SUBMIT
   void onSubmit() {
-    final json = generateJson();
-    print(json);
+    // final json = generateJson();
+    //print(json);
   }
 
-  /// 🔹 JSON
-  Map<String, dynamic> generateJson() {
-    Map<String, dynamic> result = {};
+  Future<void> fetchLessonReview() async {
 
-    for (var section in sections) {
-      Map<String, dynamic> sectionData = {};
+    //final prefs = await SharedPreferences.getInstance();
 
-      for (var item in section.items) {
-        sectionData[item.title] = item.selected;
-      }
+    final studentCode = widget.studentCode;
 
-      result[section.title.replaceAll(":", "")] = sectionData;
-    }
+    print('My Student Code is ${studentCode}');
 
-    return result;
+    context.read<StudentLessonReviewBloc>().add(
+
+      FetchStudentLessonReview(
+        studentCode: studentCode!,
+      ),
+    );
   }
+
 }

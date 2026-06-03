@@ -10,7 +10,7 @@ class StudentMocktestReviewApiService {
 
   /// API URL
   final String apiUrl =
-      "https://amardrivingcrm.com/Beta/api/Student/mockreviewlist";
+      "https://amardrivingcrm.com/Beta/api/Mocktest/mockreviewlist";
 
   /// FETCH MOCKTEST REVIEW LIST
   Future<StudentMocktestReviewModel>  fetchMocktestReviewList({

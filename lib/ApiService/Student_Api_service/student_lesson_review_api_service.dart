@@ -10,7 +10,7 @@ class StudentLessonReviewApiService {
 
   /// API URL
   final String apiUrl =
-      "https://amardrivingcrm.com/Beta/api/Student/lessonreviewlist";
+      "https://amardrivingcrm.com/Beta/api/Lesson/lessonreviewlist";
 
   /// FETCH LESSON REVIEW
   Future<StudentLessonReview> fetchLessonReview({
@@ -44,8 +44,7 @@ class StudentLessonReviewApiService {
       final jsonData = jsonDecode(response.body);
 
       /// SUCCESS
-      if(response.statusCode == 200 &&
-          jsonData['success'] == true) {
+      if(response.statusCode == 200) {
 
         return StudentLessonReview.fromJson(jsonData);
 

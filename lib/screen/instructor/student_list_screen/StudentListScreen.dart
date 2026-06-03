@@ -2,6 +2,7 @@ import 'package:amar_driving_school/bloc/instructor/lesson_edit/instructor_lesso
 import 'package:amar_driving_school/bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/mocktest_edit/instructor_update_mocktest_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_bloc.dart';
+import 'package:amar_driving_school/bloc/student/lesson_review/student_lesson_review_bloc.dart';
 import 'package:amar_driving_school/common/app_color.dart';
 import 'package:amar_driving_school/common/convert_color.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
@@ -19,6 +20,7 @@ import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart'
 import '../../../bloc/instructor/student_list/instructor_student_list_event.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_state.dart';
 import '../../../bloc/instructor/upload_training_report/instructor_upload_training_report_bloc.dart';
+import '../../../bloc/student/mocktest_review/student_mocktest_review_bloc.dart';
 import '../../../helper/helper.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../model/StudentModel.dart';
@@ -39,17 +41,9 @@ class StudentListScreen extends StatefulWidget {
 
 class _StudentListScreenState extends State<StudentListScreen> {
 
-  // final List<StudentModel> students = List.generate(
-  //   6,
-  //       (index) => StudentModel(
-  //     name: "Asok Sarma",
-  //     email: "asok.sarma@gmail.com",
-  //     phone: "700345678",
-  //     duration: "4 to 6 month",
-  //     date: "18.04.2026",
-  //     amount: 1840,
-  //   ),
-  // );
+   List<StudentData> students = [];
+
+
 
 
   @override
@@ -130,8 +124,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
                   /// SUCCESS
                   if(state is InstructorStudentListSuccess) {
 
-                    final students =
-                        state.studentListResponse.data;
+                     students = state.studentListResponse.data;
 
                     if(students.isEmpty) {
 
@@ -208,11 +201,9 @@ class _StudentListScreenState extends State<StudentListScreen> {
 
   Future<void> fetchStudentList() async {
 
-    final prefs =
-    await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
 
-    final userId =
-    prefs.getString('user_id');
+    final userId = prefs.getString('user_id');
 
     //print("Instructor Id 🌐🌐🌐${userId}");
 
@@ -529,12 +520,12 @@ class StudentCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => MockTestReportsScreen(),
-              //     MultiBlocProvider(providers: [
-              //
-              // ],
-              //     child: MockTestReportsScreen()
-              // )
+              builder: (_) => MultiBlocProvider(providers: [
+                  BlocProvider(
+                    create: (_) => StudentMocktestReviewBloc(),
+                  ),
+                ], child:  MockTestReportsScreen(studentCode: data.userId,),
+                ),
                   //MockTestReportsScreen(),
             ),
           );
@@ -542,7 +533,13 @@ class StudentCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => LessonReportScreen(),
+              builder: (_) => MultiBlocProvider(providers: [
+                BlocProvider(
+                  create: (_) => StudentLessonReviewBloc(),
+                ),
+              ], child: LessonReportScreen(studentCode: data.userId,)
+              )
+                  //LessonReportScreen(),
             ),
           );
         }else if(text=="Upload Training Report") {

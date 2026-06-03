@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../../../bloc/student/mocktest_review/student_mocktest_review_bloc.dart';
+import '../../../bloc/student/mocktest_review/student_mocktest_review_event.dart';
+import '../../../bloc/student/mocktest_review/student_mocktest_review_state.dart';
 import '../../../model/MockRatingItem.dart';
 import '../../../model/MockRatingSection.dart';
+import '../../../model/student_all_model/student_mocktest_review_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class MockTestReportsScreen extends StatefulWidget {
-  const MockTestReportsScreen({super.key});
+
+  final String? studentCode;
+  const MockTestReportsScreen({super.key, this.studentCode});
 
   @override
   State<MockTestReportsScreen> createState() =>
@@ -20,40 +29,92 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
 
   final percentList = [20, 30, 50, 80, 100];
 
+  bool isMocktestReviewLoading = true;
+
   /// 🔹 DATA
-  List<MockRatingSection> sections = [
-    MockRatingSection(
-      title: "Pre-Drive Checks:",
-      items: [
-        MockRatingItem(title: "Vehicle approach"),
-        MockRatingItem(title: "Start-up drill"),
-      ],
-    ),
-    MockRatingSection(
-      title: "Basic Control:",
-      items: List.generate(
-        4,
-            (index) => MockRatingItem(title: "Vehicle approach"),
-      ),
-    ),
+  // List<MockRatingSection> sections = [
+  //   MockRatingSection(
+  //     title: "Pre-Drive Checks:",
+  //     items: [
+  //       MockRatingItem(title: "Vehicle approach"),
+  //       MockRatingItem(title: "Start-up drill"),
+  //     ],
+  //   ),
+  //   MockRatingSection(
+  //     title: "Basic Control:",
+  //     items: List.generate(
+  //       4,
+  //           (index) => MockRatingItem(title: "Vehicle approach"),
+  //     ),
+  //   ),
+  // ];
+
+  List<MocktestReviewData> sections = [
+
   ];
 
   @override
   void initState() {
     super.initState();
 
+    fetchMocktestReviewList();
+
     /// 🔥 DEFAULT VALUE (30%)
-    for (var section in sections) {
-      for (var item in section.items) {
-        item.selectedRating = 2; // 30%
-        item.isEditable = false;
-      }
-    }
+    // for (var section in sections) {
+    //   for (var item in section.items) {
+    //     item.selectedRating = 2; // 30%
+    //     item.isEditable = false;
+    //   }
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MultiBlocListener(listeners: [
+
+      BlocListener<StudentMocktestReviewBloc, StudentMocktestReviewState>(
+
+        listener: (context, state) {
+
+          if(state is StudentMocktestReviewLoading) {
+
+            setState(() {
+
+              isMocktestReviewLoading = true;
+            });
+          }
+
+          if(state is StudentMocktestReviewSuccess) {
+
+            setState(() {
+
+              isMocktestReviewLoading = false;
+
+              sections =
+                  state.mocktestReviewResponse.data;
+            });
+
+            print(
+              "Mocktest Review Count => "
+                  "${sections.length}",
+            );
+          }
+
+          if(state is StudentMocktestReviewFailure) {
+
+            setState(() {
+
+              isMocktestReviewLoading = false;
+            });
+
+            print(state.error);
+          }
+        },
+      ),
+
+    ],
+
+      child: Scaffold(
       backgroundColor: const Color(0xFFE9E9E9),
 
       body: Column(
@@ -63,15 +124,28 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
           AppHeader(
             title: "Mock Test Report",
             showBack: true,
-            showAddButton: true,
-            addButtonText: isEditMode ? "Save" : "Edit",
+            showAddButton: false,
+            //addButtonText: isEditMode ? "Save" : "Edit",
             showAddIcon: false,
-            onAdd: toggleEditMode,
+           // onAdd: toggleEditMode,
           ),
 
           /// 🔹 LIST
           Expanded(
-            child: ListView(
+            child: sections.isEmpty
+
+                ? Center(
+              child: Text(
+                "No Mocktest Review Found!",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontFamily: "InterBold",
+                  color: Colors.grey,
+                ),
+              ),
+            )
+
+                : ListView(
               padding: const EdgeInsets.all(10),
               children: [
 
@@ -96,24 +170,25 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
           ),
         ],
       ),
+    )
     );
   }
 
   /// 🔥 TOGGLE EDIT
-  void toggleEditMode() {
-    setState(() {
-      isEditMode = !isEditMode;
-
-      for (var section in sections) {
-        for (var item in section.items) {
-          item.isEditable = isEditMode;
-        }
-      }
-    });
-  }
+  // void toggleEditMode() {
+  //   setState(() {
+  //     isEditMode = !isEditMode;
+  //
+  //     for (var section in sections) {
+  //       for (var item in section.items) {
+  //         item.isEditable = isEditMode;
+  //       }
+  //     }
+  //   });
+  // }
 
   /// 🔹 SECTION UI
-  Widget sectionUI(MockRatingSection section) {
+  Widget sectionUI(MocktestReviewData section) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(10),
@@ -134,7 +209,7 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
 
           /// TITLE
           Text(
-            section.title,
+            section.topicName ?? 'No name',
             style: const TextStyle(
               fontSize: 18,
               fontFamily: "InterBold",
@@ -144,14 +219,14 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
 
           const SizedBox(height: 10),
 
-          ...section.items.map((item) => ratingRow(item)).toList(),
+          ...section.subtopics.map((item) => ratingRow(item)).toList(),
         ],
       ),
     );
   }
 
   /// 🔹 RATING ROW
-  Widget ratingRow(MockRatingItem item) {
+  Widget ratingRow(MocktestReviewSubtopic item) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
       child: Column(
@@ -160,7 +235,7 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
 
           /// TITLE
           Text(
-            "${item.title}:",
+            "${item.subtopicName}:",
             style: const TextStyle(
               fontSize: 13,
               fontFamily: "InterMedium",
@@ -177,19 +252,19 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
                 child: Row(
                   children: List.generate(5, (index) {
                     final value = index + 1;
-                    final isSelected = item.selectedRating == value;
-
+                    //final isSelected = item.selectedRating == value;
+                    final isSelected = item.rating != "N/A" && item.rating == value.toString();
                     return GestureDetector(
-                      onTap: item.isEditable
-                          ? () {
-                        setState(() {
-                          item.selectedRating = value;
-                        });
-                      }
-                          : null,
+                      // onTap: item.isEditable
+                      //     ? () {
+                      //   setState(() {
+                      //     item.selectedRating = value;
+                      //   });
+                      // }
+                      //     : null,
 
                       child: Opacity(
-                        opacity: item.isEditable ? 1 : 0.6,
+                        opacity: isSelected ? 1 : 0.6,
                         child: Container(
                           margin:
                           const EdgeInsets.symmetric(horizontal: 3),
@@ -230,7 +305,7 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: Text(
-                  item.grade,
+                   "${item.rating} %",
                   style: const TextStyle(
                     color: Colors.white,
                     fontFamily: "InterBold",
@@ -246,28 +321,22 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
 
   /// 🔹 SUBMIT
   void onSubmit() {
-    final json = generateJson();
-    print(json);
+
+    //print();
   }
 
-  /// 🔹 JSON
-  Map<String, dynamic> generateJson() {
-    Map<String, dynamic> result = {};
+  Future<void> fetchMocktestReviewList() async {
 
-    for (var section in sections) {
-      Map<String, dynamic> sectionData = {};
+    final prefs = await SharedPreferences.getInstance();
 
-      for (var item in section.items) {
-        sectionData[item.title] = {
-          "rating": item.selectedRating,
-          "percentage": item.percentage,
-          "grade": item.grade,
-        };
-      }
+    final studentCode = widget.studentCode;
 
-      result[section.title.replaceAll(":", "")] = sectionData;
-    }
+    print('Student Code ${studentCode}');
 
-    return result;
+    context.read<StudentMocktestReviewBloc>()
+        .add(FetchStudentMocktestReview(studentCode: studentCode!,
+      ),
+    );
   }
+
 }
