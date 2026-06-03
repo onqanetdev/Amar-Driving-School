@@ -1014,9 +1014,11 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
       return;
     }
 
-    final parsedDate = DateFormat("d/M/yyyy").parse(dateController.text.trim());
+    // final parsedDate = DateFormat("d/M/yyyy").parse(dateController.text.trim());
+    //
+    // final formattedDate = DateFormat("yyyy-MM-dd").format(parsedDate);
 
-    final formattedDate = DateFormat("yyyy-MM-dd").format(parsedDate);
+    final formattedDate = dateController.text.trim();
 
     print("Converted Date => $formattedDate");
 
@@ -1167,9 +1169,9 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
           'Teacher id is for Edit Lesson $userId',
     );
 
-    final parsedDate = DateFormat("d/M/yyyy").parse(dateController.text.trim());
 
-    final formattedDate = DateFormat("yyyy-MM-dd").format(parsedDate);
+
+    final formattedDate = dateController.text.trim();
 
     print("Converted Edit Date => $formattedDate");
 
@@ -1228,7 +1230,9 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
     );
 
     if (date != null) {
-      dateController.text = "${date.day}/${date.month}/${date.year}";
+     // dateController.text = "${date.day}/${date.month}/${date.year}";
+      dateController.text =
+          DateFormat("yyyy-MM-dd").format(date);
     }
   }
 

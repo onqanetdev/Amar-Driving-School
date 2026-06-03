@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
               /// 🔥 SAVE USER DATA
               await prefs.setString(
                 'user_id',
-                state.instructRegResponseData.data.instructure_id.toString(),
+                state.instructRegResponseData.instructor.userId,
               );
 
               _showMsg(state.instructRegResponseData.message);

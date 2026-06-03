@@ -184,132 +184,153 @@ class _MockTestScreenState extends State<MockTestScreen> {
           ),
         ],
 
-      child: Scaffold(
-               backgroundColor: Color(0xFFE9E9E9),
+      child: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
 
-               body: Column(
-                 children: [
-                   /// HEADER
-                   AppHeader(
-                     title: "Mocktest",
-                     showBack: widget.showBack,
-                     showAddButton: true,
-                     addButtonText: "Add Mocktest",
-                     onAdd: () async {
+            Navigator.pop(context, true);
+          },
 
-                       final result = await Navigator.push(context,
-                           MaterialPageRoute(
-                             //  builder: (_) => AddMockTestScreen(),
-                             builder: (_) => MultiBlocProvider(
-
-                               providers: [
-
-                                 BlocProvider(
-                                   create: (_) =>
-                                       InstructorTopicListBloc(),
-                                 ),
-
-                                 BlocProvider(
-                                   create: (_) =>
-                                       InstructorSubTopicListBloc(),
-                                 ),
-
-                                 BlocProvider(
-                                   create: (_) =>
-                                       InstructorStudentListBloc(),
-                                 ),
-
-                                 BlocProvider(
-                                   create: (_) =>
-                                       InstructorCreateMocktestBloc(),
-                                 ),
-                                 // Mocktest Edit
-                                 BlocProvider(
-                                   create: (_) =>
-                                       InstructorUpdateMocktestBloc(),
-                                 ),
-                               ],
-
-                               child: AddMockTestScreen(),
-                             ),
-                           ),
-                       );
-                       if (result == true) {
-                         fetchLessonList();
-                       }
-                     },
-                   ),
-
-                   /// LIST
-                   Expanded(
-                     child: ListView.separated(
-                       controller: _scrollController,
-                       padding: EdgeInsets.all(10),
-                       itemCount: hasMore ? allMocktests.length + 1 : allMocktests.length,
-                       separatorBuilder: (_, __) => SizedBox(height: 12),
-                       itemBuilder: (context, index) {
-                         if(index == allMocktests.length) {
-
-                           return const Padding(
-
-                             padding: EdgeInsets.all(16),
-
-                             child: Center(
-                               child:
-                               CircularProgressIndicator(),
-                             ),
-                           );
-                         }
-
-                         return InkWell(
-                           onTap: () {
-                             Navigator.push(
-                               context,
-                               MaterialPageRoute(
-                                 builder: (_) => MultiBlocProvider(
-                                   providers: [
-
-                                     BlocProvider(
-                                       create: (_) =>
-                                           InstructorTopicListBloc(),
-                                     ),
-
-                                     BlocProvider(
-                                       create: (_) =>
-                                           InstructorSubTopicListBloc(),
-                                     ),
-
-                                     BlocProvider(
-                                       create: (_) =>
-                                           InstructorStudentListBloc(),
-                                     ),
-
-                                     BlocProvider(
-                                       create: (_) =>
-                                           InstructorCreateMocktestBloc(),
-                                     ),
-                                     // Mocktest Edit
-                                     BlocProvider(
-                                       create: (_) =>
-                                           InstructorUpdateMocktestBloc(),
-                                     ),
-                                   ],
-                                   child: AddMockTestScreen(
-                                     mocktest: allMocktests[index],
+          child: Scaffold(
+                 backgroundColor: Color(0xFFE9E9E9),
+        
+                 body: Column(
+                   children: [
+                     /// HEADER
+                     AppHeader(
+                       title: "Mocktest",
+                       onBack: (){
+                         Navigator.pop(context, true);
+                       },
+                       showBack: widget.showBack,
+                       showAddButton: true,
+                       addButtonText: "Add Mocktest",
+                       onAdd: () async {
+        
+                         final result = await Navigator.push(context,
+                             MaterialPageRoute(
+                               //  builder: (_) => AddMockTestScreen(),
+                               builder: (_) => MultiBlocProvider(
+        
+                                 providers: [
+        
+                                   BlocProvider(
+                                     create: (_) =>
+                                         InstructorTopicListBloc(),
                                    ),
-                                 ),
+        
+                                   BlocProvider(
+                                     create: (_) =>
+                                         InstructorSubTopicListBloc(),
+                                   ),
+        
+                                   BlocProvider(
+                                     create: (_) =>
+                                         InstructorStudentListBloc(),
+                                   ),
+        
+                                   BlocProvider(
+                                     create: (_) =>
+                                         InstructorCreateMocktestBloc(),
+                                   ),
+                                   // Mocktest Edit
+                                   BlocProvider(
+                                     create: (_) =>
+                                         InstructorUpdateMocktestBloc(),
+                                   ),
+                                 ],
+        
+                                 child: AddMockTestScreen(),
                                ),
-                             );
-                           },
-                           child:  LessonCard(data: allMocktests[index]),
+                             ),
                          );
-                           // LessonCard(data: allMocktests[index]);
+                         if (result == true) {
+                           fetchLessonList();
+                         }
                        },
                      ),
-                   ),
-                 ],
+        
+                     /// LIST
+                     Expanded(
+                       child: allMocktests.isEmpty
+                           ? const Center(
+                         child: Text(
+                           "No Mocktest Found!",
+                           style: TextStyle(
+                             fontSize: 16,
+                             fontFamily: "InterSemiBold",
+                           ),
+                         ),
+                       ) : ListView.separated(
+                         controller: _scrollController,
+                         padding: EdgeInsets.all(10),
+                         itemCount: hasMore ? allMocktests.length + 1 : allMocktests.length,
+                         separatorBuilder: (_, __) => SizedBox(height: 12),
+                         itemBuilder: (context, index) {
+                           if(index == allMocktests.length) {
+        
+                             return const Padding(
+        
+                               padding: EdgeInsets.all(16),
+        
+                               child: Center(
+                                 child:
+                                 CircularProgressIndicator(),
+                               ),
+                             );
+                           }
+        
+                           return InkWell(
+                             onTap: () {
+                               Navigator.push(
+                                 context,
+                                 MaterialPageRoute(
+                                   builder: (_) => MultiBlocProvider(
+                                     providers: [
+        
+                                       BlocProvider(
+                                         create: (_) =>
+                                             InstructorTopicListBloc(),
+                                       ),
+        
+                                       BlocProvider(
+                                         create: (_) =>
+                                             InstructorSubTopicListBloc(),
+                                       ),
+        
+                                       BlocProvider(
+                                         create: (_) =>
+                                             InstructorStudentListBloc(),
+                                       ),
+        
+                                       BlocProvider(
+                                         create: (_) =>
+                                             InstructorCreateMocktestBloc(),
+                                       ),
+                                       // Mocktest Edit
+                                       BlocProvider(
+                                         create: (_) =>
+                                             InstructorUpdateMocktestBloc(),
+                                       ),
+                                     ],
+                                     child: AddMockTestScreen(
+                                       mocktest: allMocktests[index],
+                                     ),
+                                   ),
+                                 ),
+                               );
+                             },
+                             child:  LessonCard(data: allMocktests[index]),
+                           );
+                             // LessonCard(data: allMocktests[index]);
+                         },
+                       ),
+                     ),
+                   ],
+                 ),
                ),
-             ),
+      ),
     );
 
   }

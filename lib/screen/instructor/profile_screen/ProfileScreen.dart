@@ -39,10 +39,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
 
     /// 🔥 Set initial data (replace with API later)
-    nameController.text = "Amarjit Sharma";
-    emailController.text = "amar@email.com";
-    phoneController.text = "+91 9876543210";
-    addressController.text = "Kolkata, India";
+    // nameController.text = "Amarjit Sharma";
+    // emailController.text = "amar@email.com";
+    // phoneController.text = "+91 9876543210";
+    // addressController.text = "Kolkata, India";
+    nameController.text = "";
+    emailController.text = "";
+    phoneController.text = "";
+    addressController.text = "";
 
     fetchProfile();
   }

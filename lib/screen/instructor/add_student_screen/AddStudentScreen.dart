@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../../bloc/instructor/add_student/instructor_add_student_bloc.dart';
 import '../../../bloc/instructor/add_student/instructor_add_student_event.dart';
@@ -45,7 +46,9 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
       durationController.text = widget.student?.assignHour ?? "";
       dateController.text = widget.student?.startdate ?? "";
       priceController.text = widget.student!.amount.toString();
-      isPaid = widget.student!.paymentStatus as bool;
+      isPaid = widget.student!.paymentStatus
+          .toString()
+          .toLowerCase() == "paid";
     }
   }
 
@@ -90,24 +93,54 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
             AppInputField(controller: nameController, hintText: "Student Name"),
             SizedBox(height: 10),
 
-            AppInputField(controller: emailController, hintText: "Student Email Id"),
+            AppInputField(controller: emailController, hintText: "Student Email Id",keyboardType: TextInputType.emailAddress,),
             SizedBox(height: 10),
 
             AppInputField(
               controller: phoneController,
               hintText: "Student Phone Number",
               keyboardType: TextInputType.phone,
+              maxLength: 10,
             ),
             SizedBox(height: 10),
 
             AppInputField(controller: durationController, hintText: "Duration"),
             SizedBox(height: 10),
 
-            AppInputField(controller: dateController, hintText: "Start Date"),
+            //AppInputField(controller: dateController, hintText: "Start Date"),
+            GestureDetector(
+              onTap: () async {
+
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                );
+
+                if (pickedDate != null) {
+
+                  // dateController.text =
+                  // "${pickedDate.day.toString().padLeft(2, '0')}-"
+                  //     "${pickedDate.month.toString().padLeft(2, '0')}-"
+                  //     "${pickedDate.year}";
+
+                  dateController.text = DateFormat('yy-MM-dd').format(pickedDate);
+
+                }
+              },
+              child: AbsorbPointer(
+                child: AppInputField(
+                  controller: dateController,
+                  hintText: "Start Date",
+                  //  suffixIcon: const Icon(Icons.calendar_today),
+                ),
+              ),
+            ),
             SizedBox(height: 10),
 
             //Extra New Field
-            AppInputField(controller: ageController, hintText: "Age"),
+            AppInputField(controller: ageController, hintText: "Age",keyboardType: TextInputType.number,),
             SizedBox(height: 10),
 
             AppInputField(
@@ -289,7 +322,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                   );
 
                 }
-                Navigator.pop(context);
+                Navigator.pop(context,true);
               },
               textStyle: TextStyle(
                 fontFamily: "InterBold",

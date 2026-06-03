@@ -153,6 +153,8 @@ class _LessonScreenState extends State<LessonScreen> {
               /// SUCCESS
               if(state is InstructorLessonDeleteSuccess) {
 
+                print("DELETE SUCCESS");
+
                 LoaderHelper.hide(context);
 
                 Helper.showToast(
@@ -162,7 +164,15 @@ class _LessonScreenState extends State<LessonScreen> {
                   state.deleteResponse.message,
                 );
 
+
                 /// REFRESH LIST
+                //lessons.clear();
+
+                setState(() {
+                  lessons.clear();
+                });
+
+                fetchLessonList();
                 //fetchLessonList();
               }
 
@@ -180,165 +190,161 @@ class _LessonScreenState extends State<LessonScreen> {
           ),
         ],
 
-        child: Scaffold(
-          backgroundColor: Color(0xFFE9E9E9),
+        child: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
 
-          body: Column(
-            children: [
-              /// HEADER
-              AppHeader(
-                title: "Lesson",
-                showBack: widget.showBack,
-                showAddButton: true,
-                addButtonText: "Add Lesson",
-                onAdd: () async {
-                  // Create lesson dialog
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //
-                  //       builder: (_) =>
-                  //           MultiBlocProvider(providers:
-                  //           [
-                  //             BlocProvider(
-                  //               create: (context) => InstructorTopicListBloc(),
-                  //             ),
-                  //
-                  //             BlocProvider(
-                  //               create: (_) => InstructorSubTopicListBloc(),
-                  //             ),
-                  //
-                  //             BlocProvider(
-                  //               create: (_) =>
-                  //                   InstructorStudentListBloc(),
-                  //             ),
-                  //
-                  //             BlocProvider(
-                  //               create: (_) =>
-                  //                   InstructorCreateLessonBloc(),
-                  //             ),
-                  //             //Edit Lesson
-                  //             BlocProvider(
-                  //               create: (_) =>
-                  //                   InstructorLessonEditBloc(),
-                  //             ),
-                  //           ],
-                  //               child: AddLessonScreen()
-                  //           )
-                  //   ),
-                  // );
+              Navigator.pop(context, true);
+            },
+          child: Scaffold(
+            backgroundColor: Color(0xFFE9E9E9),
 
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MultiBlocProvider(
-                        providers: [
-                          BlocProvider(
-                            create: (context) => InstructorTopicListBloc(),
-                          ),
-
-                          BlocProvider(
-                            create: (_) => InstructorSubTopicListBloc(),
-                          ),
-
-                          BlocProvider(
-                            create: (_) =>
-                                InstructorStudentListBloc(),
-                          ),
-
-                          BlocProvider(
-                            create: (_) =>
-                                InstructorCreateLessonBloc(),
-                          ),
-                          //Edit Lesson
-                          BlocProvider(
-                            create: (_) =>
-                                InstructorLessonEditBloc(),
-                          ),
-                        ],
-                        child: AddLessonScreen(),
-                      ),
-                    ),
-                  );
-
-                  if (result == true) {
-                    fetchLessonList();
-                  }
-
-                },
-              ),
+            body: Column(
+              children: [
+                /// HEADER
+                AppHeader(
+                  title: "Lesson",
+                  showBack: widget.showBack,
+                  onBack: (){
+                    Navigator.pop(context, true);
+                  },
+                  showAddButton: true,
+                  addButtonText: "Add Lesson",
+                  onAdd: () async {
 
 
-
-              Expanded(
-                child: ListView.separated(
-
-                  controller: _scrollController,
-
-                  padding: EdgeInsets.all(10),
-
-                  itemCount: lessons.length + (hasMore ? 1 : 0),
-
-                  separatorBuilder: (_, __) => SizedBox(height: 12),
-
-                  itemBuilder: (context, index) {
-
-                    if(index == lessons.length) {
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    }
-
-                    return InkWell(
-                      onTap: () {
-                        //print("Tapped ${lessons[index].name}");
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => MultiBlocProvider(
-                              providers: [
-
-                                BlocProvider(
-                                  create: (_) => InstructorTopicListBloc(),
-                                ),
-
-                                BlocProvider(
-                                  create: (_) => InstructorSubTopicListBloc(),
-                                ),
-
-                                BlocProvider(
-                                  create: (_) => InstructorStudentListBloc(),
-                                ),
-
-                                BlocProvider(
-                                  create: (_) => InstructorCreateLessonBloc(),
-                                ),
-
-                                BlocProvider(
-                                  create: (_) => InstructorLessonEditBloc(),
-                                ),
-                              ],
-                              child: AddLessonScreen(
-                                lesson: lessons[index],
-                              ),
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MultiBlocProvider(
+                          providers: [
+                            BlocProvider(
+                              create: (context) => InstructorTopicListBloc(),
                             ),
-                          ),
-                        );
 
-                      },
-                      child: LessonCard(data: lessons[index]),
+                            BlocProvider(
+                              create: (_) => InstructorSubTopicListBloc(),
+                            ),
+
+                            BlocProvider(
+                              create: (_) =>
+                                  InstructorStudentListBloc(),
+                            ),
+
+                            BlocProvider(
+                              create: (_) =>
+                                  InstructorCreateLessonBloc(),
+                            ),
+                            //Edit Lesson
+                            BlocProvider(
+                              create: (_) =>
+                                  InstructorLessonEditBloc(),
+                            ),
+                          ],
+                          child: AddLessonScreen(),
+                        ),
+                      ),
                     );
 
-                     // LessonCard(data: lessons[index]);
+                    if (result == true) {
+                      fetchLessonList();
+                    }
+
                   },
                 ),
-              ),
-            ],
+
+
+
+                Expanded(
+                  child: lessons.isEmpty
+                      ? const Center(
+                    child: Text(
+                      "No Lesson Found!",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: "InterSemiBold",
+                      ),
+                    ),
+                  )
+                      :  ListView.separated(
+
+                    controller: _scrollController,
+
+                    padding: EdgeInsets.all(10),
+
+                    itemCount: lessons.length + (hasMore ? 1 : 0),
+
+                    separatorBuilder: (_, __) => SizedBox(height: 12),
+
+                    itemBuilder: (context, index) {
+
+                      if(index == lessons.length) {
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      return InkWell(
+                        onTap: () {
+                          //print("Tapped ${lessons[index].name}");
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MultiBlocProvider(
+                                providers: [
+
+                                  BlocProvider(
+                                    create: (_) => InstructorTopicListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorSubTopicListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorStudentListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorCreateLessonBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorLessonEditBloc(),
+                                  ),
+                                ],
+                                child: AddLessonScreen(
+                                  lesson: lessons[index],
+                                ),
+                              ),
+                            ),
+                          );
+
+                        },
+                        child: LessonCard(data: lessons[index],
+                          onRatingSubmitted: () {
+
+                            setState(() {
+                              lessons.clear();
+                            });
+
+                            fetchLessonList();
+                          },
+                        ),
+                      );
+
+                       // LessonCard(data: lessons[index]);
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         )
     );
@@ -351,8 +357,17 @@ class _LessonScreenState extends State<LessonScreen> {
 
     final userId = prefs.getString('user_id');
 
-    offset = 0;
-    hasMore = true;
+    setState(() {
+      lessons.clear();
+      offset = 0;
+      limit = 30;
+      hasMore = true;
+      isLoadingMore = false;
+    });
+
+    //
+    // offset = 0;
+    // hasMore = true;
 
     context.read<InstructorLessonListBloc>().add(
 
@@ -398,8 +413,11 @@ class _LessonScreenState extends State<LessonScreen> {
 
 class LessonCard extends StatelessWidget {
   final LessonData data;
+  final VoidCallback? onRatingSubmitted;
 
-  const LessonCard({super.key, required this.data});
+  const LessonCard({super.key, required this.data,
+    this.onRatingSubmitted,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -513,7 +531,9 @@ class LessonCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       GestureDetector(
-                        onTap: () async {
+                        onTap: data.rating != null
+                            ? null
+                            : ()  async {
 
                           final result = await Navigator.push(
                             context,
@@ -559,7 +579,9 @@ class LessonCard extends StatelessWidget {
                         child: Text(
                           "Edit",
                           style: TextStyle(
-                            color: HexColor("${AppColor.colorOfEditColour}"),
+                            color: data.rating != null
+                                ? Colors.grey
+                                : HexColor("${AppColor.colorOfEditColour}"),
                             fontFamily: "InterSemiBold",
                             fontSize: 13,
                           ),
@@ -605,7 +627,7 @@ class LessonCard extends StatelessWidget {
                   if (data.rating != null)
                   AppButton(
                     height: 34,
-                    text: "Give rating",
+                    text: data.rating != null ? "Rating Submitted" : "Give Rating",
                     gradientColors: [
                       Colors.grey,
                       Colors.grey,
@@ -624,11 +646,11 @@ class LessonCard extends StatelessWidget {
                     AppButton(
                       height: 34,
                       text: "Give rating",
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+
+                        final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
-
                             builder: (_) => MultiBlocProvider(
                               providers: [
                                 BlocProvider(
@@ -638,21 +660,26 @@ class LessonCard extends StatelessWidget {
                                   create: (_) => InstructorAboutUsBloc(),
                                 ),
                               ],
-
                               child: LessonGiveRatingScreen(
                                 subjectName: data.name,
-                                subTopics: data.subtopicId
+                                subTopics: data.subtopic_names
                                     .split(',')
-                                    .map((e) => RatingItem(
-                                  title: e,
-                                ),
-                                ).toList(),
+                                    .map((e) => RatingItem(title: e))
+                                    .toList(),
                                 studentUserId: data.userId,
                                 topicId: data.topicId,
+                                subTopicIds: data.subtopicId
+                                    .split(',')
+                                    .map((e) => RatingItem(title: e))
+                                    .toList(),
                               ),
                             ),
                           ),
                         );
+
+                        if (result == true) {
+                          onRatingSubmitted?.call();
+                        }
                       },
                       textStyle: TextStyle(
                         fontFamily: "InterBold",
@@ -767,7 +794,7 @@ class LessonCard extends StatelessWidget {
                   onTap: () {
                     //Navigator.pop(context);
                     //Helper.showToast(context, "Deleted successfully");
-                    Navigator.pop(context);
+                    Navigator.pop(context,true);
 
                     context.read<InstructorLessonDeleteBloc>()
                         .add(DeleteInstructorLesson(

@@ -60,8 +60,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final ScrollController _mockTestScrollController = ScrollController();
 
-  int totalStudents = 70;
-  double totalRevenue = 1270;
+  int totalStudents = 0;
+  double totalRevenue = 0;
   int _currentIndex = 0;
   double _scale = 1.0;
 
@@ -1040,21 +1040,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         Spacer(),
         AppButtonAnimation(
-          onTap: (){
+          onTap: () async {
             if(title=="Lesson") {
-              Navigator.push(
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //
+              //     // builder: (_) => BlocProvider(
+              //     //   create: (_) =>
+              //     //       InstructorLessonListBloc(),
+              //     //
+              //     //   child: LessonScreen(
+              //     //     showBack: true,
+              //     //   ),
+              //     // ),
+              //
+              //     builder: (_) => MultiBlocProvider(
+              //
+              //       providers: [
+              //
+              //         BlocProvider(
+              //
+              //           create: (_) =>
+              //               InstructorLessonListBloc(),
+              //         ),
+              //
+              //         BlocProvider(
+              //
+              //           create: (_) =>
+              //               InstructorLessonDeleteBloc(),
+              //         ),
+              //
+              //         BlocProvider(
+              //           create: (_) => InstructorRegBloc(),
+              //         ),
+              //
+              //         BlocProvider(
+              //           create: (_) => InstructorLoginBloc(),
+              //         ),
+              //
+              //       ],
+              //
+              //       child: LessonScreen(
+              //         showBack: true,
+              //       ),
+              //     ),
+              //
+              //   ),
+              // );
+
+              final result = await Navigator.push(
                 context,
                 MaterialPageRoute(
-
-                  // builder: (_) => BlocProvider(
-                  //   create: (_) =>
-                  //       InstructorLessonListBloc(),
-                  //
-                  //   child: LessonScreen(
-                  //     showBack: true,
-                  //   ),
-                  // ),
-
                   builder: (_) => MultiBlocProvider(
 
                     providers: [
@@ -1085,14 +1122,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       showBack: true,
                     ),
                   ),
-
                 ),
               );
+
+              if (result == true) {
+                fetchTodaysLesson();
+              }
+
             }else{
-              Navigator.push(
+              final result = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  //builder: (_) => MockTestScreen(showBack: true,),
                   builder: (_) =>
                       MultiBlocProvider(
 
@@ -1115,6 +1155,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                 ),
               );
+
+              if (result == true) {
+                fetchTodaysMocktest();
+              }
+
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     //builder: (_) => MockTestScreen(showBack: true,),
+              //     builder: (_) =>
+              //         MultiBlocProvider(
+              //
+              //           providers: [
+              //
+              //             BlocProvider(
+              //
+              //               create: (_) =>
+              //                   InstructorMocktestListBloc(),
+              //             ),
+              //
+              //             BlocProvider(
+              //
+              //               create: (_) =>
+              //                   InstructorMocktestDeleteBloc(),
+              //             ),
+              //           ],
+              //
+              //           child: MockTestScreen(showBack: true,),
+              //         ),
+              //   ),
+              // );
             }
           },
           child: Text('VIEW ALL', style: TextStyle(
@@ -1144,43 +1215,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget blueBox(String title, String iconPath) {
     return AppButtonAnimation(
-      onTap: (){
+      onTap: () async {
         if(title=="Student List") {
-          Navigator.push(
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              //builder: (_) => StudentListScreen(),
-              // builder: (_) => BlocProvider(
-              //   create: (_) => InstructorAddStudentBloc(),
-              //   child: StudentListScreen(),
-              // ),
-
               builder: (_) => MultiBlocProvider(
-
                 providers: [
-
                   BlocProvider(
-                    create: (_) =>
-                        InstructorAddStudentBloc(),
+                    create: (_) => InstructorAddStudentBloc(),
                   ),
-
                   BlocProvider(
-                    create: (_) =>
-                        InstructorStudentListBloc(),
+                    create: (_) => InstructorStudentListBloc(),
                   ),
-
                 ],
-
                 child: StudentListScreen(),
               ),
-
             ),
           );
+          if (result == true) {
+            fetchTotalStudentCount();
+          }
         }else if(title=="Invoice Preview") {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => InvoiceScreen(),
+              builder: (_) => MultiBlocProvider(providers: [
+                BlocProvider(
+                  create: (_) => InstructorStudentListBloc(),
+                ),
+              ], child: InvoiceScreen())
+
+                  //InvoiceScreen(),
             ),
           );
         }else if(title=="Upload Training Report") {

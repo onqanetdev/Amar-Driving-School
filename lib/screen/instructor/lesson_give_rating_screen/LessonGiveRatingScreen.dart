@@ -18,7 +18,8 @@ class LessonGiveRatingScreen extends StatefulWidget {
   final List<RatingItem> subTopics;
   final String studentUserId;
   final String topicId;
-  const LessonGiveRatingScreen({super.key, required this.subjectName, required this.subTopics, required this.studentUserId, required this.topicId});
+  final List<RatingItem> subTopicIds;
+  const LessonGiveRatingScreen({super.key, required this.subjectName, required this.subTopics, required this.studentUserId, required this.topicId, required this.subTopicIds});
 
   @override
   State<LessonGiveRatingScreen> createState() => _LessonGiveRatingScreenState();
@@ -54,7 +55,7 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
               state.reviewResponse.message,
             );
 
-            Navigator.pop(context);
+            Navigator.pop(context,true);
           }
 
           /// FAILURE
@@ -119,22 +120,15 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
                     }
 
                     /// CREATE RATINGS ARRAY
-                    final ratingsData =
+                    final ratingsData = List.generate(
+                      widget.subTopics.length,
+                          (index) => {
+                        "subtopicid": widget.subTopicIds[index].title,
+                        "rating": widget.subTopics[index].selected.toString(),
+                      },
+                    );
 
-                    widget.subTopics.map((item) {
-
-                      return {
-
-                        "subtopicid":
-                        item.title,
-
-                        "rating":
-                        item.selected.toString(),
-                      };
-
-                    }).toList();
-
-                    print(ratingsData);
+                    print("The Rating Data is ${ratingsData}");
 
                     /// GET INSTRUCTOR ID
                     final prefs = await SharedPreferences.getInstance();

@@ -74,7 +74,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
             state.instructorStudentAddResponse.message,
           );
 
-          Navigator.pop(context); // close dialog
+          Navigator.pop(context,true); // close dialog
         }
 
         if(state is InstructorAddStudentFailure) {
@@ -171,33 +171,60 @@ class _StudentListScreenState extends State<StudentListScreen> {
     );
   }
 
-  void showAddStudentDialog(BuildContext parentContext) {
+  // void showAddStudentDialog(BuildContext parentContext) {
+  //
+  //   showDialog(
+  //     context: parentContext,
+  //     barrierDismissible: false,
+  //
+  //     builder: (_) {
+  //
+  //       return BlocProvider.value(
+  //
+  //         value:
+  //         BlocProvider.of<InstructorAddStudentBloc>(
+  //           parentContext,
+  //         ),
+  //
+  //         child: Dialog(
+  //
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(20),
+  //           ),
+  //
+  //           child: AddStudentScreen(),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
-    showDialog(
-      context: parentContext,
-      barrierDismissible: false,
+   Future<void> showAddStudentDialog(
+       BuildContext parentContext,
+       ) async {
 
-      builder: (_) {
+     final result = await showDialog<bool>(
+       context: parentContext,
+       barrierDismissible: false,
+       builder: (_) {
+         return BlocProvider.value(
+           value: BlocProvider.of<InstructorAddStudentBloc>(
+             parentContext,
+           ),
+           child: Dialog(
+             shape: RoundedRectangleBorder(
+               borderRadius: BorderRadius.circular(20),
+             ),
+             child: AddStudentScreen(),
+           ),
+         );
+       },
+     );
 
-        return BlocProvider.value(
-
-          value:
-          BlocProvider.of<InstructorAddStudentBloc>(
-            parentContext,
-          ),
-
-          child: Dialog(
-
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-
-            child: AddStudentScreen(),
-          ),
-        );
-      },
-    );
-  }
+     if (result == true) {
+       fetchStudentList();
+     }
+   }
 
   Future<void> fetchStudentList() async {
 

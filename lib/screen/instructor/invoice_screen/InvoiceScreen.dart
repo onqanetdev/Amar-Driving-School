@@ -1,11 +1,17 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_event.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_state.dart';
 import '../../../common/app_color.dart';
 import '../../../model/StudentModel.dart';
+import '../../../model/instructor_student_list/instructor_student_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../../../widgets/app_input_textfield.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class InvoiceScreen extends StatefulWidget {
   const InvoiceScreen({super.key});
@@ -21,96 +27,186 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   final fileController = TextEditingController();
 
   ///  STUDENT LIST (MODEL)
-  List<StudentModel> students = [
-    StudentModel(
-      name: "Ravi Kumar",
-      email: "ravi@gmail.com",
-      phone: "9876543210",
-      duration: "4 to 6 month",
-      date: "18.04.2026",
-      amount: 1840,
-    ),
-    StudentModel(
-      name: "Amit Sharma",
-      email: "amit@gmail.com",
-      phone: "9123456780",
-      duration: "3 month",
-      date: "10.03.2026",
-      amount: 1500,
-    ),
-  ];
+  // List<StudentModel> students = [
+  //   StudentModel(
+  //     name: "Ravi Kumar",
+  //     email: "ravi@gmail.com",
+  //     phone: "9876543210",
+  //     duration: "4 to 6 month",
+  //     date: "18.04.2026",
+  //     amount: 1840,
+  //   ),
+  //   StudentModel(
+  //     name: "Amit Sharma",
+  //     email: "amit@gmail.com",
+  //     phone: "9123456780",
+  //     duration: "3 month",
+  //     date: "10.03.2026",
+  //     amount: 1500,
+  //   ),
+  // ];
+  //
+  // StudentModel? selectedStudent;
 
-  StudentModel? selectedStudent;
+  List<StudentData> students = [];
+  StudentData? selectedStudent;
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchStudentList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
+    return BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
+      listener: (context, state) {
 
-      body: Column(
-        children: [
+        if (state is InstructorStudentListSuccess) {
 
-          /// 🔹 HEADER
-          AppHeader(
-            title: "Upload Training Report",
-            showBack: true,
-          ),
+          setState(() {
+            students = state.studentListResponse.data;
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFE9E9E9),
 
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(12),
-              children: [
+        body: Column(
+          children: [
 
-                /// 🔹 CARD
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-
-                  child: Column(
-                    children: [
-
-                      /// 🔹 STUDENT DROPDOWN
-                      AppInputField(
-                        controller: nameController,
-                        hintText: "Student Name",
-                        readOnly: true,            // 🔥 disable typing
-                        onTap: showStudentList,    // 🔥 open dialog
-
-                        fillColor: AppColor.colorInputBg,
-                        borderColor: AppColor.colorInputBorder,
-                        focusedBorderColor: AppColor.colorInputFocusBorder,
-                        hintColor: AppColor.colorInputHint,
-
-                        suffixWidget: const Icon(
-                          Icons.keyboard_arrow_down,
-                          color: Colors.grey,
-                        ),
-                      ),
-
-                      const SizedBox(height: 15),
-
-                      /// 🔹 SUBMIT BUTTON
-                      AppButton(
-                        text: "SUBMIT",
-                        onTap: onSubmit,
-                        textStyle: const TextStyle(
-                          fontFamily: "InterBold",
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
+            /// 🔹 HEADER
+            AppHeader(
+              title: "Upload Training Report",
+              showBack: true,
             ),
-          ),
-        ],
+
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(12),
+                children: [
+
+                  /// 🔹 CARD
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+
+                    child: Column(
+                      children: [
+
+                        /// 🔹 STUDENT DROPDOWN
+                        AppInputField(
+                          controller: nameController,
+                          hintText: "Student Name",
+                          readOnly: true,            // 🔥 disable typing
+                          onTap: showStudentList,    // 🔥 open dialog
+
+                          fillColor: AppColor.colorInputBg,
+                          borderColor: AppColor.colorInputBorder,
+                          focusedBorderColor: AppColor.colorInputFocusBorder,
+                          hintColor: AppColor.colorInputHint,
+
+                          suffixWidget: const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.grey,
+                          ),
+                        ),
+
+                        const SizedBox(height: 15),
+
+                        /// 🔹 SUBMIT BUTTON
+                        AppButton(
+                          text: "SUBMIT",
+                          onTap: onSubmit,
+                          textStyle: const TextStyle(
+                            fontFamily: "InterBold",
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
+
+
+    //   Scaffold(
+    //   backgroundColor: const Color(0xFFE9E9E9),
+    //
+    //   body: Column(
+    //     children: [
+    //
+    //       /// 🔹 HEADER
+    //       AppHeader(
+    //         title: "Upload Training Report",
+    //         showBack: true,
+    //       ),
+    //
+    //       Expanded(
+    //         child: ListView(
+    //           padding: const EdgeInsets.all(12),
+    //           children: [
+    //
+    //             /// 🔹 CARD
+    //             Container(
+    //               padding: const EdgeInsets.all(15),
+    //               decoration: BoxDecoration(
+    //                 color: Colors.white,
+    //                 borderRadius: BorderRadius.circular(20),
+    //               ),
+    //
+    //               child: Column(
+    //                 children: [
+    //
+    //                   /// 🔹 STUDENT DROPDOWN
+    //                   AppInputField(
+    //                     controller: nameController,
+    //                     hintText: "Student Name",
+    //                     readOnly: true,            // 🔥 disable typing
+    //                     onTap: showStudentList,    // 🔥 open dialog
+    //
+    //                     fillColor: AppColor.colorInputBg,
+    //                     borderColor: AppColor.colorInputBorder,
+    //                     focusedBorderColor: AppColor.colorInputFocusBorder,
+    //                     hintColor: AppColor.colorInputHint,
+    //
+    //                     suffixWidget: const Icon(
+    //                       Icons.keyboard_arrow_down,
+    //                       color: Colors.grey,
+    //                     ),
+    //                   ),
+    //
+    //                   const SizedBox(height: 15),
+    //
+    //                   /// 🔹 SUBMIT BUTTON
+    //                   AppButton(
+    //                     text: "SUBMIT",
+    //                     onTap: onSubmit,
+    //                     textStyle: const TextStyle(
+    //                       fontFamily: "InterBold",
+    //                       fontSize: 12,
+    //                       color: Colors.white,
+    //                     ),
+    //                   ),
+    //                 ],
+    //               ),
+    //             )
+    //           ],
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+    // );
   }
 
   /// 🔥 STUDENT BOTTOM SHEET
@@ -186,6 +282,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           selectedStudent = student;
                           nameController.text = student.name;
                         });
+                        print("Selected Name => ${nameController.text}");
                         Navigator.pop(context);
                       },
                       child: Container(
@@ -292,5 +389,18 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     };
 
     print(data);
+  }
+
+  Future<void> fetchStudentList() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final userId = prefs.getString('user_id');
+
+    context.read<InstructorStudentListBloc>().add(
+      FetchInstructorStudentList(
+        instructureId: userId!,
+      ),
+    );
   }
 }

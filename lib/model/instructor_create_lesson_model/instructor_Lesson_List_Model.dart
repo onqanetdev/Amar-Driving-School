@@ -48,6 +48,7 @@ class LessonData {
   final dynamic rating;
   final String instructorId;
   final String status;
+  final String subtopic_names;
 
   LessonData({
 
@@ -66,6 +67,7 @@ class LessonData {
     required this.rating,
     required this.instructorId,
     required this.status,
+    required this.subtopic_names
   });
 
   factory LessonData.fromJson(
@@ -90,6 +92,7 @@ class LessonData {
       rating: json['rating'],
       instructorId: json['instructor_id'],
       status: json['status'],
+        subtopic_names: json['subtopic_names']
     );
   }
 }

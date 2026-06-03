@@ -44,7 +44,7 @@ class InstructorStudentListApiService {
       final decodedJson = jsonDecode(response.body);
 
       /// 🔥 SUCCESS CHECK
-      if(decodedJson['success'] == true) {
+      if(decodedJson['status'] == 200) {
 
         return InstructorStudentListModel
             .fromJson(decodedJson);
