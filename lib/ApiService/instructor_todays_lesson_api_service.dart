@@ -43,7 +43,16 @@ class InstructorTodaysLessonApiService {
       /// SUCCESS
       if(response.statusCode == 200) {
 
-        return InstructorTodaysLessonModel.fromJson(jsonData);
+        final model = InstructorTodaysLessonModel.fromJson(jsonData);
+
+        if (model.success == true) {
+
+          return model;
+
+        } else {
+
+          throw Exception(model.message);
+        }
 
       } else {
 

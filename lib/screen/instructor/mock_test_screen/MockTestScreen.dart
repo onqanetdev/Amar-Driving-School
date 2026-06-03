@@ -196,45 +196,7 @@ class _MockTestScreenState extends State<MockTestScreen> {
                      showAddButton: true,
                      addButtonText: "Add Mocktest",
                      onAdd: () async {
-                       // Create lesson dialog
-                       // Navigator.push(
-                       //   context,
-                       //   MaterialPageRoute(
-                       //   //  builder: (_) => AddMockTestScreen(),
-                       //     builder: (_) => MultiBlocProvider(
-                       //
-                       //       providers: [
-                       //
-                       //         BlocProvider(
-                       //           create: (_) =>
-                       //               InstructorTopicListBloc(),
-                       //         ),
-                       //
-                       //         BlocProvider(
-                       //           create: (_) =>
-                       //               InstructorSubTopicListBloc(),
-                       //         ),
-                       //
-                       //         BlocProvider(
-                       //           create: (_) =>
-                       //               InstructorStudentListBloc(),
-                       //         ),
-                       //
-                       //         BlocProvider(
-                       //           create: (_) =>
-                       //               InstructorCreateMocktestBloc(),
-                       //         ),
-                       //         // Mocktest Edit
-                       //         BlocProvider(
-                       //           create: (_) =>
-                       //               InstructorUpdateMocktestBloc(),
-                       //         ),
-                       //       ],
-                       //
-                       //       child: AddMockTestScreen(),
-                       //     ),
-                       //   ),
-                       // );
+
                        final result = await Navigator.push(context,
                            MaterialPageRoute(
                              //  builder: (_) => AddMockTestScreen(),
@@ -299,7 +261,49 @@ class _MockTestScreenState extends State<MockTestScreen> {
                            );
                          }
 
-                         return LessonCard(data: allMocktests[index]);
+                         return InkWell(
+                           onTap: () {
+                             Navigator.push(
+                               context,
+                               MaterialPageRoute(
+                                 builder: (_) => MultiBlocProvider(
+                                   providers: [
+
+                                     BlocProvider(
+                                       create: (_) =>
+                                           InstructorTopicListBloc(),
+                                     ),
+
+                                     BlocProvider(
+                                       create: (_) =>
+                                           InstructorSubTopicListBloc(),
+                                     ),
+
+                                     BlocProvider(
+                                       create: (_) =>
+                                           InstructorStudentListBloc(),
+                                     ),
+
+                                     BlocProvider(
+                                       create: (_) =>
+                                           InstructorCreateMocktestBloc(),
+                                     ),
+                                     // Mocktest Edit
+                                     BlocProvider(
+                                       create: (_) =>
+                                           InstructorUpdateMocktestBloc(),
+                                     ),
+                                   ],
+                                   child: AddMockTestScreen(
+                                     mocktest: allMocktests[index],
+                                   ),
+                                 ),
+                               ),
+                             );
+                           },
+                           child:  LessonCard(data: allMocktests[index]),
+                         );
+                           // LessonCard(data: allMocktests[index]);
                        },
                      ),
                    ),
@@ -487,46 +491,6 @@ class LessonCard extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //
-                          //     builder: (_) => MultiBlocProvider(
-                          //
-                          //       providers: [
-                          //
-                          //         BlocProvider(
-                          //           create: (_) =>
-                          //               InstructorTopicListBloc(),
-                          //         ),
-                          //
-                          //         BlocProvider(
-                          //           create: (_) =>
-                          //               InstructorSubTopicListBloc(),
-                          //         ),
-                          //
-                          //         BlocProvider(
-                          //           create: (_) =>
-                          //               InstructorStudentListBloc(),
-                          //         ),
-                          //
-                          //         BlocProvider(
-                          //           create: (_) =>
-                          //               InstructorCreateMocktestBloc(),
-                          //         ),
-                          //
-                          //         BlocProvider(
-                          //           create: (_) =>
-                          //               InstructorUpdateMocktestBloc(),
-                          //         ),
-                          //
-                          //       ],
-                          //
-                          //       child: AddMockTestScreen(mocktest: data,),
-                          //     ),
-                          //   ),
-                          //
-                          // );
 
                           final result = await Navigator.push(
                             context,

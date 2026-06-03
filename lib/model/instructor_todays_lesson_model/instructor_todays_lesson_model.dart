@@ -29,13 +29,15 @@ class InstructorTodaysLessonModel {
 
       message: json['message'],
 
-      data: List<TodaysLessonData>.from(
-
-        json['data'].map(
-
-              (x) => TodaysLessonData.fromJson(x),
+        data: json['data'] == null
+            ? []
+            : List<TodaysLessonData>.from(
+          json['data'].map(
+                (x) => TodaysLessonData.fromJson(x),
+          ),
         ),
-      ),
+
+
     );
   }
 

@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
               /// 🔥 SAVE USER DATA
               await prefs.setString(
                 'user_id',
-                state.instructRegResponseData.data.login_id as String,
+                state.instructRegResponseData.data.instructure_id.toString(),
               );
 
               _showMsg(state.instructRegResponseData.message);
@@ -136,8 +136,30 @@ class _LoginScreenState extends State<LoginScreen> {
               );
             }
 
+            // if (state is InstructorRegisterSuccess) {
+            //   LoaderHelper.hide(context);
+            //
+            //   _showMsg(state.instructRegResponseData.message);
+            //
+            //   /// Clear fields
+            //   _nameController.clear();
+            //   _emailController.clear();
+            //   _phoneController.clear();
+            //   _passwordController.clear();
+            //
+            //   /// Switch to Login mode
+            //   setState(() {
+            //     isRegister = false;
+            //     selectedRole = "instructor";
+            //     isLoading = false; // <-- IMPORTANT
+            //   });
+            // }
+
             if(state is InstructorRegisterFailure) {
               LoaderHelper.hide(context);
+              setState(() {
+                isLoading = false;
+              });
             }
           },
         ),
@@ -150,6 +172,9 @@ class _LoginScreenState extends State<LoginScreen> {
             }
 
             if(state is InstructorLoginSuccess) {
+              setState(() {
+                isLoading = false;
+              });
               LoaderHelper.hide(context);
               final prefs = await SharedPreferences.getInstance();
 

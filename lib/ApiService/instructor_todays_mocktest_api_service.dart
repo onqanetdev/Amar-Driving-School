@@ -46,8 +46,18 @@ class InstructorTodaysMocktestApiService {
       /// SUCCESS
       if(response.statusCode == 200) {
 
-        return InstructorTodaysMocktestModel
+        final model =
+        InstructorTodaysMocktestModel
             .fromJson(jsonData);
+
+        if (!model.success) {
+
+          throw Exception(
+            model.message,
+          );
+        }
+
+        return model;
 
       } else {
 

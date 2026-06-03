@@ -293,7 +293,48 @@ class _LessonScreenState extends State<LessonScreen> {
                       );
                     }
 
-                    return LessonCard(data: lessons[index]);
+                    return InkWell(
+                      onTap: () {
+                        //print("Tapped ${lessons[index].name}");
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MultiBlocProvider(
+                              providers: [
+
+                                BlocProvider(
+                                  create: (_) => InstructorTopicListBloc(),
+                                ),
+
+                                BlocProvider(
+                                  create: (_) => InstructorSubTopicListBloc(),
+                                ),
+
+                                BlocProvider(
+                                  create: (_) => InstructorStudentListBloc(),
+                                ),
+
+                                BlocProvider(
+                                  create: (_) => InstructorCreateLessonBloc(),
+                                ),
+
+                                BlocProvider(
+                                  create: (_) => InstructorLessonEditBloc(),
+                                ),
+                              ],
+                              child: AddLessonScreen(
+                                lesson: lessons[index],
+                              ),
+                            ),
+                          ),
+                        );
+
+                      },
+                      child: LessonCard(data: lessons[index]),
+                    );
+
+                     // LessonCard(data: lessons[index]);
                   },
                 ),
               ),
@@ -473,50 +514,6 @@ class LessonCard extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: () async {
-
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (_) =>
-                          //         MultiBlocProvider(
-                          //
-                          //           providers: [
-                          //
-                          //             BlocProvider(
-                          //               create: (_) =>
-                          //                   InstructorTopicListBloc(),
-                          //             ),
-                          //
-                          //             BlocProvider(
-                          //               create: (_) =>
-                          //                   InstructorSubTopicListBloc(),
-                          //             ),
-                          //
-                          //             BlocProvider(
-                          //               create: (_) =>
-                          //                   InstructorStudentListBloc(),
-                          //             ),
-                          //
-                          //             BlocProvider(
-                          //               create: (_) =>
-                          //                   InstructorCreateLessonBloc(),
-                          //             ),
-                          //
-                          //             //Edit
-                          //             BlocProvider(
-                          //               create: (_) =>
-                          //                   InstructorLessonEditBloc(),
-                          //             ),
-                          //           ],
-                          //
-                          //           child:
-                          //           AddLessonScreen(
-                          //             lesson: data
-                          //           ),
-                          //         ),
-                          //   ),
-                          // );
-                          // fetchLessonList();
 
                           final result = await Navigator.push(
                             context,

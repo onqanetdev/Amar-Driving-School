@@ -28,14 +28,14 @@ class InstructorTodaysMocktestModel {
 
       message: json['message'],
 
-      data: List<TodaysMocktestData>.from(
-
+      data: json['data'] == null
+          ? []
+          : List<TodaysMocktestData>.from(
         json['data'].map(
-
-              (x) =>
-              TodaysMocktestData.fromJson(x),
+              (x) => TodaysMocktestData.fromJson(x),
         ),
       ),
+
     );
   }
 

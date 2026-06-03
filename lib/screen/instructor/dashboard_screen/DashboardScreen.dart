@@ -20,6 +20,7 @@ import '../../../bloc/instructor/lesson_delete/instructor_lesson_delete_bloc.dar
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
 import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_bloc.dart';
+import '../../../bloc/instructor/mocktest_edit/instructor_update_mocktest_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_event.dart';
@@ -53,7 +54,9 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
 
   bool isLessonLoading = true;
+  String lessonEmptyMessage = "";
   bool isMockLoading = true;
+  String mockEmptyMessage = "";
 
   final ScrollController _mockTestScrollController = ScrollController();
 
@@ -61,6 +64,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   double totalRevenue = 1270;
   int _currentIndex = 0;
   double _scale = 1.0;
+
+
 
   /// ADD SCREENS LIST (ADD HERE)
   List<Widget> get _screens => [
@@ -70,14 +75,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Expanded(child: bodyContent()),
       ],
     ),
-    //LessonScreen(),
-    // BlocProvider(
-    //
-    //   create: (_) =>
-    //       InstructorLessonListBloc(),
-    //
-    //   child: LessonScreen(),
-    // ),
+
 
     MultiBlocProvider(
 
@@ -98,8 +96,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 BlocProvider(
                   create: (_) => InstructorLoginBloc(),
                 ),
-
-
       ],
 
       child: LessonScreen(),
@@ -120,6 +116,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           create: (_) =>
               InstructorMocktestDeleteBloc(),
         ),
+
+        BlocProvider(create: (_) => InstructorUpdateMocktestBloc(),),
+
       ],
 
       child: MockTestScreen(),
@@ -176,9 +175,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         listeners: [
 
-          BlocListener<
-              InstructorStudentCountBloc,
-              InstructorStudentCountState>(
+          BlocListener<InstructorStudentCountBloc, InstructorStudentCountState>(
 
             listener: (context, state) {
 
@@ -196,8 +193,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
           ),
 
-          BlocListener<
-              InstructorTotalRevenueBloc, InstructorTotalRevenueState>(
+          BlocListener<InstructorTotalRevenueBloc, InstructorTotalRevenueState>(
 
             listener: (context, state) {
 
@@ -233,9 +229,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   lessonList =
                       state.todaysLessonResponse.data;
 
+                  lessonEmptyMessage = "";
+
                   isLessonLoading = false;
                 });
 
+              }
+
+              if (state is InstructorTodaysLessonFailure) {
+
+                setState(() {
+
+                  lessonList.clear();
+
+                  lessonEmptyMessage =
+                      state.error.replaceAll(
+                        "Exception: ",
+                        "",
+                      );
+
+                  isLessonLoading = false;
+                });
               }
             },
           ),
@@ -252,9 +266,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   mockList =
                       state.todaysMocktestResponse.data;
 
+                  mockEmptyMessage = "";
+
                   isMockLoading = false;
                 });
 
+              }
+
+              if (state is InstructorTodaysMocktestFailure) {
+
+                setState(() {
+
+                  mockList.clear();
+
+                  mockEmptyMessage =
+                      state.error.replaceAll(
+                        "Exception: ",
+                        "",
+                      );
+
+                  isMockLoading = false;
+                });
               }
             },
           ),
@@ -704,7 +736,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return _lessonShimmer();
     }
 
-    if (lessonList.isEmpty) return SizedBox();
+    // if (lessonList.isEmpty) return SizedBox();
+
+    if (lessonList.isEmpty) {
+
+      return emptyCard(
+        lessonEmptyMessage.isEmpty
+            ? "No Lesson Found"
+            : lessonEmptyMessage,
+      );
+    }
 
     return SizedBox(
       height: 100, // 🔥 important for horizontal list
@@ -870,6 +911,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _mockTestList() {
     if (isMockLoading) {
       return _mockShimmer(); // ✅ FIXED
+    }
+
+    if (mockList.isEmpty) {
+
+      return emptyCard(
+        mockEmptyMessage.isEmpty
+            ? "Mocktest Not Found!"
+            : mockEmptyMessage,
+      );
     }
 
     return Container(
@@ -1303,6 +1353,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+
+  Widget emptyCard(String title) {
+
+    return Card(
+
+      elevation: 3,
+
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      child: Padding(
+
+        padding: const EdgeInsets.all(20),
+
+        child: Center(
+
+          child: Text(
+
+            title,
+
+            style: const TextStyle(
+              fontSize: 14,
+              fontFamily: "InterMedium",
+            ),
+          ),
+        ),
       ),
     );
   }

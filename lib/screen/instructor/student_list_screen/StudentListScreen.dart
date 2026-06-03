@@ -1,3 +1,7 @@
+import 'package:amar_driving_school/bloc/instructor/lesson_edit/instructor_lesson_edit_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/mocktest_edit/instructor_update_mocktest_bloc.dart';
+import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_bloc.dart';
 import 'package:amar_driving_school/common/app_color.dart';
 import 'package:amar_driving_school/common/convert_color.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
@@ -9,9 +13,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bloc/instructor/add_student/instructor_add_student_bloc.dart';
 import '../../../bloc/instructor/add_student/instructor_add_student_state.dart';
 
+import '../../../bloc/instructor/lesson_delete/instructor_lesson_delete_bloc.dart';
+import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_event.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_state.dart';
+import '../../../bloc/instructor/upload_training_report/instructor_upload_training_report_bloc.dart';
 import '../../../helper/helper.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../model/StudentModel.dart';
@@ -207,7 +214,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
     final userId =
     prefs.getString('user_id');
 
-    print(userId);
+    //print("Instructor Id 🌐🌐🌐${userId}");
 
     context.read<InstructorStudentListBloc>().add(
 
@@ -476,14 +483,46 @@ class StudentCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => LessonScreen(),
+              builder: (_) => MultiBlocProvider(providers: [
+                BlocProvider(
+                  create: (_) => InstructorLessonListBloc(),
+                ),
+                BlocProvider(
+                  create: (_) => InstructorLessonDeleteBloc(),
+                ),
+                BlocProvider(
+                  create: (_) => InstructorLessonEditBloc(),
+                ),
+              ],
+                  child:  LessonScreen())
+               //   LessonScreen(),
             ),
           );
         }else if(text=="Mocktest List") {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => MockTestScreen(),
+              builder: (_) => MultiBlocProvider(providers: [
+                BlocProvider(
+
+                  create: (_) =>
+                      InstructorMocktestListBloc(),
+                ),
+
+                BlocProvider(
+
+                  create: (_) =>
+                      InstructorMocktestDeleteBloc(),
+                ),
+
+                BlocProvider(create: (_) => InstructorMocktestDeleteBloc(),),
+
+                BlocProvider(create: (_) => InstructorUpdateMocktestBloc(),),
+              ],
+                child: MockTestScreen(),
+              )
+
+                  //MockTestScreen(),
             ),
           );
         }else if(text=="Mocktest Report") {
@@ -491,6 +530,12 @@ class StudentCard extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (_) => MockTestReportsScreen(),
+              //     MultiBlocProvider(providers: [
+              //
+              // ],
+              //     child: MockTestReportsScreen()
+              // )
+                  //MockTestReportsScreen(),
             ),
           );
         }else if(text=="Lesson Report") {
@@ -504,7 +549,20 @@ class StudentCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => UploadTrainingScreen(),
+              builder: (_) => MultiBlocProvider(providers: [
+                BlocProvider(
+                  create: (_) =>
+                      InstructorStudentListBloc(),
+                ),
+                BlocProvider(
+                  create: (_) =>
+                      InstructorUploadTrainingReportBloc(),
+                ),
+              ],
+                  child: UploadTrainingScreen()
+              )
+
+                  //UploadTrainingScreen(),
             ),
           );
         }

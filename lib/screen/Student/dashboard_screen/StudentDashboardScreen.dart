@@ -237,8 +237,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
             ),
 
             /// TODAY'S MOCKTEST LIST
-            BlocListener<
-                StudentTodaysMocktestListBloc, StudentTodaysMocktestListState>(
+            BlocListener<StudentTodaysMocktestListBloc, StudentTodaysMocktestListState>(
 
               listener: (context, state) {
 
