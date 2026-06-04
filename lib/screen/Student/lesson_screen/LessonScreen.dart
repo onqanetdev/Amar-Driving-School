@@ -1,3 +1,4 @@
+import 'package:amar_driving_school/bloc/student/real_review_list/student_real_lesson_review_bloc.dart';
 import 'package:amar_driving_school/screen/instructor/add_lesson_screen/AddLessonScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -536,11 +537,11 @@ class LessonCard extends StatelessWidget {
                             builder: (_) => MultiBlocProvider(
                               providers: [
                                 BlocProvider(
-                                  create: (_) => StudentLessonReviewBloc(),
+                                  create: (_) => StudentRealLessonReviewBloc(),
                                 ),
                               ],
 
-                              child: const LessonReportScreen(),
+                              child: LessonReportScreen(lessonTopic: data.topicId),
                             ),
                           ),
                       );

@@ -43,9 +43,6 @@ class _StudentListScreenState extends State<StudentListScreen> {
 
    List<StudentData> students = [];
 
-
-
-
   @override
   void initState() {
     super.initState();
@@ -424,6 +421,14 @@ class StudentCard extends StatelessWidget {
 
                   Text(
                     "Including Tax",
+                    style: TextStyle(
+                      fontFamily: "InterMedium",
+                      fontSize: 11,
+                      color: HexColor("${AppColor.colorAppGrayLight}"),
+                    ),
+                  ),
+
+                  Text("Login ID: ${data.loginId}",
                     style: TextStyle(
                       fontFamily: "InterMedium",
                       fontSize: 11,

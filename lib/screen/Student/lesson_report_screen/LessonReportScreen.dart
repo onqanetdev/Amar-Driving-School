@@ -1,18 +1,24 @@
+import 'package:amar_driving_school/bloc/student/real_review_list/student_real_lesson_review_bloc.dart';
+import 'package:amar_driving_school/bloc/student/real_review_list/student_real_lesson_review_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bloc/student/lesson_review/student_lesson_review_bloc.dart';
 import '../../../bloc/student/lesson_review/student_lesson_review_event.dart';
 import '../../../bloc/student/lesson_review/student_lesson_review_state.dart';
+import '../../../bloc/student/real_review_list/student_real_lesson_review_event.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../model/RatingItem.dart';
-import '../../../model/student_all_model/student_lesson_review.dart';
+//import '../../../model/student_all_model/student_lesson_review.dart';
+import '../../../model/student_all_model/student_real_lesson_review_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LessonReportScreen extends StatefulWidget {
-  const LessonReportScreen({super.key});
+
+  final String? lessonTopic;
+  const LessonReportScreen({super.key, this.lessonTopic});
 
   @override
   State<LessonReportScreen> createState() => _LessonReportScreenState();
@@ -61,36 +67,37 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
         listeners: [
 
           /// LESSON REVIEW LISTENER
-          BlocListener<StudentLessonReviewBloc, StudentLessonReviewState>(
+          BlocListener<StudentRealLessonReviewBloc, StudentRealLessonReviewState>(
 
             listener: (context, state) {
 
               /// LOADING
-              if(state is StudentLessonReviewLoading) {
+              if(state is StudentRealLessonReviewLoading) {
 
                 LoaderHelper.show(context);
               }
 
               /// SUCCESS
-              if(state is StudentLessonReviewSuccess) {
+              if(state is StudentRealLessonReviewSuccess) {
 
                 LoaderHelper.hide(context);
 
                 setState(() {
 
-                  sections =
-                      state
-                          .lessonReviewResponse
-                          .data;
+                  sections = state.lessonReviewResponse.data;
                 });
+
+                print("Sections List ${sections}");
               }
 
               /// FAILURE
               if(state is StudentLessonReviewFailure) {
 
+                print("The Failure");
+
                 LoaderHelper.hide(context);
 
-                print(state.error);
+                //print(state.error);
               }
             },
           ),
@@ -174,7 +181,7 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
   }
 
   /// 🔹 RATING ROW
-  Widget ratingRow(LessonSubtopic item) {
+  Widget ratingRow(LessonReviewSubtopic item) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -249,17 +256,23 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
 
     final prefs = await SharedPreferences.getInstance();
 
-    final studentCode =
-        prefs.getString("stud_user_id") ?? "";
+    final studentCode = prefs.getString("stud_user_id") ?? "";
 
     print('My Student Code is ${studentCode}');
+    print('My Lesson Topic id is ${widget.lessonTopic!}');
 
-    context.read<StudentLessonReviewBloc>().add(
+    // context.read<StudentLessonReviewBloc>().add(
+    //   FetchStudentLessonReview(
+    //     studentCode: studentCode,
+    //   ),
+    // );
 
-      FetchStudentLessonReview(
-        studentCode: studentCode,
+    context.read<StudentRealLessonReviewBloc>().add(
+      FetchStudentRealLessonReview(
+        studentCode: studentCode, topicId: widget.lessonTopic!,
       ),
     );
+
   }
 
 }

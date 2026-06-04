@@ -338,8 +338,8 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
         .add(
 
       FetchStudentMocktestReview(
-
         studentCode: studentCode,
+
       ),
     );
   }
