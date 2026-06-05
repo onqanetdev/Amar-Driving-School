@@ -2,6 +2,7 @@ import 'package:amar_driving_school/bloc/instructor/lesson_edit/instructor_lesso
 import 'package:amar_driving_school/bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/mocktest_edit/instructor_update_mocktest_bloc.dart';
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_bloc.dart';
+import 'package:amar_driving_school/bloc/student/lesson_list/student_lesson_list_bloc.dart';
 import 'package:amar_driving_school/bloc/student/lesson_review/student_lesson_review_bloc.dart';
 import 'package:amar_driving_school/common/app_color.dart';
 import 'package:amar_driving_school/common/convert_color.dart';
@@ -29,6 +30,7 @@ import '../../../widgets/app_header.dart';
 import '../add_student_screen/AddStudentScreen.dart';
 import '../lesson_report_screen/LessonReportScreen.dart';
 import '../lesson_screen/LessonScreen.dart';
+import '../lesson_screen/StudentWiseLessonScreen.dart';
 import '../upload_training_screen/UploadTrainingScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -168,33 +170,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
     );
   }
 
-  // void showAddStudentDialog(BuildContext parentContext) {
-  //
-  //   showDialog(
-  //     context: parentContext,
-  //     barrierDismissible: false,
-  //
-  //     builder: (_) {
-  //
-  //       return BlocProvider.value(
-  //
-  //         value:
-  //         BlocProvider.of<InstructorAddStudentBloc>(
-  //           parentContext,
-  //         ),
-  //
-  //         child: Dialog(
-  //
-  //           shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(20),
-  //           ),
-  //
-  //           child: AddStudentScreen(),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+
 
    Future<void> showAddStudentDialog(
        BuildContext parentContext,
@@ -516,7 +492,8 @@ class StudentCard extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => MultiBlocProvider(providers: [
                 BlocProvider(
-                  create: (_) => InstructorLessonListBloc(),
+                  //create: (_) => InstructorLessonListBloc(),
+                    create: (_) => StudentLessonListBloc()
                 ),
                 BlocProvider(
                   create: (_) => InstructorLessonDeleteBloc(),
@@ -525,7 +502,12 @@ class StudentCard extends StatelessWidget {
                   create: (_) => InstructorLessonEditBloc(),
                 ),
               ],
-                  child:  LessonScreen(showBack: true,))
+                  //child:  LessonScreen(showBack: true,)
+
+                  child: Studentwiselessonscreen(showBack: true,studentCode: data.userId,
+                    studentName: data.name,
+                  ),
+              )
                //   LessonScreen(),
             ),
           );

@@ -1,0 +1,843 @@
+
+
+import 'package:amar_driving_school/bloc/student/lesson_list/student_lesson_list_bloc.dart';
+import 'package:amar_driving_school/bloc/student/lesson_list/student_lesson_list_state.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../bloc/instructor/about_us/instructor_about_us_bloc.dart';
+import '../../../bloc/instructor/create_lesson/instructor_create_lesson_bloc.dart';
+import '../../../bloc/instructor/lesson_delete/instructor_lesson_delete_bloc.dart';
+import '../../../bloc/instructor/lesson_delete/instructor_lesson_delete_event.dart';
+import '../../../bloc/instructor/lesson_delete/instructor_lesson_delete_state.dart';
+import '../../../bloc/instructor/lesson_edit/instructor_lesson_edit_bloc.dart';
+import '../../../bloc/instructor/lesson_review/instructor_lesson_review_bloc.dart';
+import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_bloc.dart';
+import '../../../bloc/instructor/topic_list/instructor_topic_list_bloc.dart';
+import '../../../bloc/student/lesson_list/student_lesson_list_event.dart';
+import '../../../common/app_color.dart';
+import '../../../common/convert_color.dart';
+import '../../../helper/helper.dart';
+import '../../../helper/loader_helper.dart';
+import '../../../model/RatingItem.dart';
+import '../../../model/student_all_model/student_lesson_list_model.dart';
+import '../../../widgets/app_button.dart';
+import '../../../widgets/app_header.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../add_lesson_screen/AddLessonScreen.dart';
+import '../lesson_give_rating_screen/LessonGiveRatingScreen.dart';
+
+class Studentwiselessonscreen extends StatefulWidget {
+  final bool showBack;
+  final String? studentCode;
+  final String? studentName;
+  const Studentwiselessonscreen({super.key, this.showBack = false, this.studentCode, this.studentName});
+
+  @override
+  State<Studentwiselessonscreen> createState() => _StudentwiselessonscreenState();
+}
+
+class _StudentwiselessonscreenState extends State<Studentwiselessonscreen> {
+
+  List<StudentLessonData> lessons = [];
+
+  //This Section is for Load more
+  final ScrollController _scrollController = ScrollController();
+
+  int offset = 0;
+  int limit = 30;
+
+  bool isLoadingMore = false;
+  bool hasMore = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchLessonList();
+
+    //This Section is also for scrollView
+    _scrollController.addListener(() {
+
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200 &&
+          !isLoadingMore &&
+          hasMore) {
+
+        loadMoreLessons();
+      }
+    });
+
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return MultiBlocListener(
+
+        listeners: [
+
+          /// LESSON LIST
+
+
+          ///Lesson list
+          BlocListener<StudentLessonListBloc, StudentLessonListState>(
+
+            listener: (context, state) {
+
+              /// LOADING
+              if(state
+              is StudentLessonListLoading) {
+
+                LoaderHelper.show(context);
+              }
+
+              /// SUCCESS
+              if(state
+              is StudentLessonListSuccess) {
+
+                LoaderHelper.hide(context);
+
+                setState(() {
+
+                  if(offset == 0) {
+
+                    lessons.clear();
+                  }
+
+                  lessons.addAll(
+
+                    state.lessonListResponse.data,
+                  );
+
+                  isLoadingMore = false;
+
+                  if(state
+                      .lessonListResponse
+                      .data
+                      .length < limit) {
+
+                    hasMore = false;
+                  }
+                });
+              }
+
+              /// FAILURE
+              if(state
+              is StudentLessonListFailure) {
+
+                LoaderHelper.hide(context);
+
+                Helper.showToast(
+                  context,
+                  state.error,
+                );
+              }
+            },
+          ),
+
+          /// DELETE LESSON
+          BlocListener<InstructorLessonDeleteBloc, InstructorLessonDeleteState>(
+
+            listener: (context, state) {
+
+              /// LOADING
+              if(state is InstructorLessonDeleteLoading) {
+
+                LoaderHelper.show(context);
+              }
+
+              /// SUCCESS
+              if(state is InstructorLessonDeleteSuccess) {
+
+                print("DELETE SUCCESS");
+
+                LoaderHelper.hide(context);
+
+                Helper.showToast(
+
+                  context,
+
+                  state.deleteResponse.message,
+                );
+
+
+                /// REFRESH LIST
+                //lessons.clear();
+
+                setState(() {
+                  lessons.clear();
+                });
+
+                fetchLessonList();
+                //fetchLessonList();
+              }
+
+              /// FAILURE
+              if(state is InstructorLessonDeleteFailure) {
+
+                LoaderHelper.hide(context);
+
+                Helper.showToast(
+                  context,
+                  state.error,
+                );
+              }
+            },
+          ),
+        ],
+
+        child: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+
+            Navigator.pop(context, true);
+          },
+          child: Scaffold(
+            backgroundColor: Color(0xFFE9E9E9),
+
+            body: Column(
+              children: [
+                /// HEADER
+                AppHeader(
+                  title: "Lesson",
+                  showBack: widget.showBack,
+                  onBack: (){
+                    Navigator.pop(context, true);
+                  },
+                  showAddButton: true,
+                  addButtonText: "Add Lesson",
+                  onAdd: () async
+                  {
+
+
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MultiBlocProvider(
+                          providers: [
+                            BlocProvider(
+                              create: (context) => InstructorTopicListBloc(),
+                            ),
+
+                            BlocProvider(
+                              create: (_) => InstructorSubTopicListBloc(),
+                            ),
+
+                            BlocProvider(
+                              create: (_) =>
+                                  InstructorStudentListBloc(),
+                            ),
+
+                            BlocProvider(
+                              create: (_) =>
+                                  InstructorCreateLessonBloc(),
+                            ),
+                            //Edit Lesson
+                            BlocProvider(
+                              create: (_) =>
+                                  InstructorLessonEditBloc(),
+                            ),
+                          ],
+                          child: AddLessonScreen(
+                            studCode: widget.studentCode,
+                            studentName: widget.studentName,
+                          ),
+                        ),
+                      ),
+                    );
+
+                    if (result == true) {
+                      fetchLessonList();
+                    }
+
+                  },
+                ),
+
+
+
+                Expanded(
+                  child: lessons.isEmpty
+                      ? const Center(
+                    child: Text(
+                      "No Lesson Found!",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: "InterSemiBold",
+                      ),
+                    ),
+                  )
+                      :  ListView.separated(
+
+                    controller: _scrollController,
+
+                    padding: EdgeInsets.all(10),
+
+                    itemCount: lessons.length + (hasMore ? 1 : 0),
+
+                    separatorBuilder: (_, __) => SizedBox(height: 12),
+
+                    itemBuilder: (context, index) {
+
+                      if(index == lessons.length) {
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      return InkWell(
+                        onTap: () {
+                          //print("Tapped ${lessons[index].name}");
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MultiBlocProvider(
+                                providers: [
+
+                                  BlocProvider(
+                                    create: (_) => InstructorTopicListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorSubTopicListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorStudentListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorCreateLessonBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorLessonEditBloc(),
+                                  ),
+                                ],
+                              // child: Text('Demo'),
+                                child: AddLessonScreen(
+                                  lesson: lessons[index],
+                                  studentName: widget.studentName,
+                                  studCode: widget.studentCode,
+                                ),
+
+                              ),
+                            ),
+                          );
+
+                        },
+                        child: LessonCard(data: lessons[index],
+                          onRatingSubmitted: () {
+
+                            setState(() {
+                              lessons.clear();
+                            });
+
+                            fetchLessonList();
+                          },
+                        ),
+                      );
+
+                      // LessonCard(data: lessons[index]);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
+    );
+
+  }
+
+  Future<void> fetchLessonList() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final userId = prefs.getString('user_id');
+
+    setState(() {
+      lessons.clear();
+      offset = 0;
+      limit = 30;
+      hasMore = true;
+      isLoadingMore = false;
+    });
+
+    //
+    // offset = 0;
+    // hasMore = true;
+
+    context.read<StudentLessonListBloc>().add(
+
+      FetchStudentLessonList(
+
+        //instructorId: userId.toString(),
+        studentId: widget.studentCode!,
+        limit: limit.toString(),
+
+        offset: offset.toString(),
+      ),
+    );
+  }
+
+  Future<void> loadMoreLessons() async {
+
+    if(isLoadingMore) return;
+
+    setState(() {
+      isLoadingMore = true;
+    });
+
+    offset += 1;
+    limit += 30;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final userId = prefs.getString('user_id');
+
+    context.read<StudentLessonListBloc>().add(
+
+      FetchStudentLessonList(
+
+        //instructorId: userId.toString(),
+        studentId: widget.studentCode!,
+        limit: limit.toString(),
+
+        offset: offset.toString(),
+      ),
+    );
+  }
+}
+
+class LessonCard extends StatelessWidget {
+  final StudentLessonData data;
+  final VoidCallback? onRatingSubmitted;
+
+  const LessonCard({super.key, required this.data,
+    this.onRatingSubmitted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08), // 🔥 light shadow
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: Offset(0, 4), // shadow down
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          /// TOP ROW
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// LEFT SIDE
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// TITLE
+                    Text(
+                      data.name ?? '',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: "InterBold",
+                        color: HexColor("${AppColor.colourOfAdvanceCarDrive}"),
+                      ),
+                    ),
+                    Text("Student Id: ${data.userId}"),
+                    SizedBox(height: 6),
+
+                    /// DURATION
+                    Row(
+                      children: [
+                        Text(
+                          "Lesson Duration: ",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: "InterSemiBold",
+                            color: HexColor(AppColor.colorAppGray),
+                          ),
+                        ),
+                        Text(
+                          data.lessonDuration.toString(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: "InterSemiBold",
+                            color: HexColor("${AppColor.colorOfEditColour}"),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 4),
+
+                    /// DATE + TIME
+                    Row(
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.calendar_today, size: 14,
+                                color: HexColor(AppColor.colorAppGray)),
+                            SizedBox(width: 2),
+                            Text(
+                              data.classDate ?? '',
+                              overflow: TextOverflow.fade,
+                              style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
+                                fontFamily: "InterSemiBold",),
+                            ),
+                          ],
+                        ),
+                        SizedBox(width: 10),
+                        Row(
+                          children: [
+                            Icon(Icons.access_time, size: 14,
+                                color: HexColor(AppColor.colorAppGray)),
+                            SizedBox(width: 2),
+                            Text(
+                              data.lessonStart.toString(),
+                              overflow: TextOverflow.fade,
+                              style: TextStyle(fontSize: 12,color: HexColor(AppColor.colorOfEditColour),
+                                fontFamily: "InterSemiBold",),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(width: 10),
+
+              /// RIGHT SIDE
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ///   DELETE
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: data.rating != null
+                            ? null
+                            : ()  async {
+
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MultiBlocProvider(
+                                providers: [
+
+                                  BlocProvider(
+                                    create: (_) => InstructorTopicListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorSubTopicListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorStudentListBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorCreateLessonBloc(),
+                                  ),
+
+                                  BlocProvider(
+                                    create: (_) => InstructorLessonEditBloc(),
+                                  ),
+                                ],
+
+                                //child: Text('Additional'),
+
+                                child: AddLessonScreen(lesson: data,
+                                ),
+                              ),
+                            ),
+                          );
+
+                          if (result == true) {
+                            // refresh lesson list
+                            // easiest way:
+                            Navigator.pop(context, true);
+                          }
+
+                        },
+                        child: Text(
+                          "Edit",
+                          style: TextStyle(
+                            color: data.rating != null
+                                ? Colors.grey
+                                : HexColor("${AppColor.colorOfEditColour}"),
+                            fontFamily: "InterSemiBold",
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: Container(
+                          width: 1,
+                          height: 10,
+                          color: HexColor("${AppColor.colourOfDeleteBtn}"),
+                        ),
+                      ),
+
+                      GestureDetector(
+                        onTap: (){
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            isScrollControlled: true,
+                            builder: (_) {
+                              return _deleteBottomSheet(context);
+                            },
+                          );
+                        },
+                        child: Text(
+                          "Delete",
+                          style: TextStyle(
+                            color: HexColor("${AppColor.colourOfDeleteBtn}"),
+                            fontFamily: "InterSemiBold",
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 10),
+
+                  /// BUTTON
+
+                  if (data.rating != null)
+                    AppButton(
+                      height: 34,
+                      text: data.rating != null ? "Rating Submitted" : "Give Rating",
+                      gradientColors: [
+                        Colors.grey,
+                        Colors.grey,
+                      ],
+                      onTap: () {
+
+                      },
+                      textStyle: TextStyle(
+                        fontFamily: "InterBold",
+                        fontSize: 12,
+                        color: Colors.white,
+                      ),
+                    )
+
+                  else
+                    AppButton(
+                      height: 34,
+                      text: "Give rating",
+                      onTap: () async {
+
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MultiBlocProvider(
+                              providers: [
+                                BlocProvider(
+                                  create: (_) => InstructorLessonReviewBloc(),
+                                ),
+                                BlocProvider(
+                                  create: (_) => InstructorAboutUsBloc(),
+                                ),
+                              ],
+                              child: LessonGiveRatingScreen(
+                                subjectName: data.name ?? '',
+                                subTopics: (data.subtopicNames ?? '')
+                                    .split(',')
+                                    .map((e) => RatingItem(title: e))
+                                    .toList(),
+                                studentUserId: data.userId ?? '',
+                                topicId: data.topicId ?? '',
+                                subTopicIds: (data.subtopicId ?? '')
+                                    .split(',')
+                                    .map((e) => RatingItem(title: e))
+                                    .toList(),
+                              ),
+                            ),
+                          ),
+                        );
+
+                        if (result == true) {
+                          onRatingSubmitted?.call();
+                        }
+                      },
+                      textStyle: TextStyle(
+                        fontFamily: "InterBold",
+                        fontSize: 12,
+                        color: Colors.white,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _deleteBottomSheet(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        16 +
+            MediaQuery.of(context).viewPadding.bottom +
+            MediaQuery.of(context).viewInsets.bottom, // 🔥 FULL SAFE
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+
+          /// HANDLE
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+
+          /// ICON
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.delete,
+              color: HexColor("${AppColor.colourOfDeleteBtn}"),
+              size: 26,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          const Text(
+            "Delete Lesson",
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: "InterBold",
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            "Are you sure you want to delete this lesson?",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade600,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          Row(
+            children: [
+
+              /// CANCEL
+              Expanded(
+                child: InkWell(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    height: 45,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: HexColor(AppColor.colorInputBorder),
+                      ),
+                    ),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(fontFamily: "InterSemiBold"),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              /// DELETE
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    //Navigator.pop(context);
+                    //Helper.showToast(context, "Deleted successfully");
+                    Navigator.pop(context,true);
+
+                    context.read<InstructorLessonDeleteBloc>()
+                        .add(DeleteInstructorLesson(
+                      lessonId:
+                      data.lessonId ?? '',
+                    ),
+                    );
+                  },
+                  child: Container(
+                    height: 45,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: HexColor("${AppColor.colourOfDeleteBtn}"),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      "Delete",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: "InterBold",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -29,14 +29,17 @@ import '../../../model/SubCategoryModel.dart';
 import '../../../model/instructor_create_lesson_model/instructor_Lesson_List_Model.dart';
 import '../../../model/instructor_student_list/instructor_student_list_model.dart';
 import '../../../model/instructor_topic/instructor_sub_topic_list_model.dart';
+import '../../../model/student_all_model/student_lesson_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../../../widgets/app_input_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddLessonScreen extends StatefulWidget {
-  final LessonData? lesson;
-  const AddLessonScreen({super.key,this.lesson});
+  final StudentLessonData? lesson;
+  final String? studentName;
+  final String? studCode;
+  const AddLessonScreen({super.key,this.lesson, this.studentName, this.studCode});
 
   @override
   State<AddLessonScreen> createState() => _AddLessonScreenState();
@@ -83,16 +86,18 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
     // selectedCategory?.name = widget.lesson!.name;
     loadInitialData();
     //showStudentList();
+    print("Student Name is: ${widget.studentName}");
+    print("Student Code os (Operating System): ${widget.studCode}");
     if (widget.lesson != null) {
       /// 👉 EDIT MODE
       isEdit = true;
       print("The Edited File is ${isEdit}");
-      titleController.text = widget.lesson!.name;
-      dateController.text = widget.lesson!.classDate;
-      timeController.text = widget.lesson!.lessonStart!;
+      titleController.text = widget.lesson!.name ?? '';
+      dateController.text = widget.lesson!.classDate ?? '';
+      timeController.text = widget.lesson!.lessonStart ?? '';
       ///hourController.text = widget.lesson!.lessonStart!;
       /// PREFILL DURATION
-      durationController.text = widget.lesson!.lessonDuration!;
+      durationController.text = widget.lesson!.lessonDuration ?? '';
     }
   }
 
@@ -121,7 +126,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                 //allSelectedSubTopic = widget.lesson!.subtopicId.split(',').map((e) => e.trim()).toSet();
 
                 if (isEdit && !editDataLoaded) {
-                  allSelectedSubTopic = widget.lesson!.subtopicId.split(',').map((e) => e.trim()).toSet();
+                  allSelectedSubTopic = (widget.lesson!.subtopicId ?? '').split(',').map((e) => e.trim()).toSet();
                 }
 
                 // allSelectedSubTopic =
@@ -188,15 +193,14 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
                   context.read<InstructorSubTopicListBloc>().add(
                     FetchInstructorSubTopicList(
-                      topicId: widget.lesson!.topicId,
+                      topicId: widget.lesson!.topicId ?? '',
                     ),
                   );
 
                   addCategory();
 
                   allSelectedSubTopic =
-                      widget.lesson!.subtopicId
-                          .split(',')
+                      (widget.lesson!.subtopicId ?? '').split(',')
                           .map((e) => e.trim())
                           .toSet();
 
@@ -214,59 +218,61 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
           },
         ),
         //Bloc Listener for  Student List
-        BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
+        // BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
+        //
+        //   listener: (context, state) {
+        //
+        //     /// LOADING
+        //     if(state is InstructorStudentListLoading) {
+        //       LoaderHelper.show(context);
+        //     }
+        //
+        //     /// SUCCESS
+        //     if(state is InstructorStudentListSuccess) {
+        //
+        //       LoaderHelper.hide(context);
+        //
+        //       setState(() {
+        //
+        //         /// STORE API DATA
+        //         students =
+        //             state.studentListResponse.data;
+        //
+        //         if(students.isNotEmpty) {
+        //
+        //           selectedStudent =
+        //               students.firstWhere(
+        //
+        //                     (e) =>
+        //                 e.userId ==
+        //                     widget.lesson?.userId,
+        //
+        //                 orElse: () => students.first,
+        //               );
+        //
+        //           /// UPDATE TEXTFIELD
+        //           studentListController.text =
+        //               selectedStudent?.name ?? "";
+        //
+        //           print(
+        //             "Selected name is ${selectedStudent?.name}",
+        //           );
+        //
+        //           print(
+        //             "Controller text is ${studentListController.text}",
+        //           );
+        //         }
+        //       });
+        //     }
+        //
+        //     /// FAILURE
+        //     if(state is InstructorStudentListFailure) {
+        //       print('Student List  Failure 😞');
+        //     }
+        //   },
+        // ),
 
-          listener: (context, state) {
 
-            /// LOADING
-            if(state is InstructorStudentListLoading) {
-              LoaderHelper.show(context);
-            }
-
-            /// SUCCESS
-            if(state is InstructorStudentListSuccess) {
-
-              LoaderHelper.hide(context);
-
-              setState(() {
-
-                /// STORE API DATA
-                students =
-                    state.studentListResponse.data;
-
-                if(students.isNotEmpty) {
-
-                  selectedStudent =
-                      students.firstWhere(
-
-                            (e) =>
-                        e.userId ==
-                            widget.lesson?.userId,
-
-                        orElse: () => students.first,
-                      );
-
-                  /// UPDATE TEXTFIELD
-                  studentListController.text =
-                      selectedStudent?.name ?? "";
-
-                  print(
-                    "Selected name is ${selectedStudent?.name}",
-                  );
-
-                  print(
-                    "Controller text is ${studentListController.text}",
-                  );
-                }
-              });
-            }
-
-            /// FAILURE
-            if(state is InstructorStudentListFailure) {
-              print('Student List  Failure 😞');
-            }
-          },
-        ),
         // Bloc Listener for Add Lesson
         BlocListener<InstructorCreateLessonBloc, InstructorCreateLessonState>(
 
@@ -560,17 +566,17 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                               controller: studentListController,
                               hintText: "Student Name",
                               readOnly: true,            // 🔥 disable typing
-                              onTap: showStudentList,    // 🔥 open dialog
+                            //  onTap: showStudentList,    // 🔥 open dialog
 
                               fillColor: AppColor.colorInputBg,
                               borderColor: AppColor.colorInputBorder,
                               focusedBorderColor: AppColor.colorInputFocusBorder,
                               hintColor: AppColor.colorInputHint,
 
-                              suffixWidget: const Icon(
-                                Icons.keyboard_arrow_down,
-                                color: Colors.grey,
-                              ),
+                              // suffixWidget: const Icon(
+                              //   Icons.keyboard_arrow_down,
+                              //   color: Colors.grey,
+                              // ),
                             ),
 
                             const SizedBox(height: 10),
@@ -1039,7 +1045,8 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
       InstructorCreateLessonTapped(
 
-        userid: studentUserId.toString(),
+       // userid: studentUserId.toString(),
+        userid: widget.studCode!,
 
         instructorid: userId.toString(),
 
@@ -1066,7 +1073,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
     final userId = prefs.getString('user_id');
 
-    studentUserId = widget.lesson!.userId;
+    studentUserId = widget.lesson!.userId ?? '';
 
     /// 🔥 VALIDATIONS
 
@@ -1092,16 +1099,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
       return;
     }
 
-    // if(titleController.text.trim().isEmpty) {
-    //
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(
-    //       content: Text("Please enter lesson title"),
-    //     ),
-    //   );
-    //
-    //   return;
-    // }
+
 
     if(studentListController.text.trim().isEmpty) {
 
@@ -1285,15 +1283,17 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
     final userId =
     prefs.getString('user_id');
 
+    studentListController.text = widget.studentName ?? '';
+
     context.read<InstructorTopicListBloc>().add(
       FetchInstructorTopicList(),
     );
 
-    context.read<InstructorStudentListBloc>().add(
-      FetchInstructorStudentList(
-        instructureId: userId!,
-      ),
-    );
+    // context.read<InstructorStudentListBloc>().add(
+    //   FetchInstructorStudentList(
+    //     instructureId: userId!,
+    //   ),
+    // );
   }
   /// 🔥 STUDENT BOTTOM SHEET
   Future<void> showStudentList() async {
@@ -1366,7 +1366,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                       onTap: () {
                         setState(() {
                           selectedStudent = student;
-                          studentListController.text = student.name;
+                         // studentListController.text = student.name;
                           studentUserId = student.userId ;
                         });
                         Navigator.pop(context, true);

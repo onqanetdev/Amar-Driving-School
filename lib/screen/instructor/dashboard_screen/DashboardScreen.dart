@@ -100,7 +100,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
       ],
 
-      child: LessonScreen(),
+     child: Text(''),
+     // child: LessonScreen(),
     ),
 
     MultiBlocProvider(
