@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bloc/student/mocktest_list/student_mocktest_list_bloc.dart';
 import '../../../bloc/student/mocktest_list/student_mocktest_list_event.dart';
 import '../../../bloc/student/mocktest_list/student_mocktest_list_state.dart';
+import '../../../bloc/student/mocktest_real_review_list/student_real_mocktest_review_bloc.dart';
 import '../../../bloc/student/mocktest_review/student_mocktest_review_bloc.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
@@ -498,9 +499,9 @@ class LessonCard extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (_) => MultiBlocProvider(providers: [
                             BlocProvider(
-                              create: (_) => StudentMocktestReviewBloc(),
+                              create: (_) => StudentRealMocktestReviewBloc(),
                             ),
-                          ], child:  MockTestReportsScreen(),
+                          ], child:  MockTestReportsScreen(topicId: data.topicId,),
                           ),
 
                         ),

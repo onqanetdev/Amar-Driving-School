@@ -166,7 +166,7 @@ class _MockTestScreenState extends State<MockTestScreen> {
                 );
 
                 /// REFRESH LIST
-                //fetchLessonList();
+                fetchLessonList();
               }
 
               /// FAILURE

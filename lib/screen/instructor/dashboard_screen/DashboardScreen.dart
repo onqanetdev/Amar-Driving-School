@@ -6,6 +6,8 @@ import 'package:amar_driving_school/bloc/instructor/todays_mocktest/instructor_t
 import 'package:amar_driving_school/bloc/instructor/upload_training_report/instructor_upload_training_report_bloc.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
 import 'package:amar_driving_school/screen/instructor/lesson_screen/LessonScreen.dart';
+import 'package:amar_driving_school/screen/instructor/lesson_screen/TodaysLessonList.dart';
+import 'package:amar_driving_school/screen/instructor/mock_test_screen/TodaysMocktestScreen.dart';
 import 'package:amar_driving_school/screen/instructor/profile_screen/ProfileScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -749,7 +751,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return SizedBox(
       height: 100, // 🔥 important for horizontal list
-      child: ListView.builder(
+      child:
+      ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: lessonList.length,
         itemBuilder: (context, index) {
@@ -929,7 +932,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         color: Colors.white,
       ),
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: ListView.builder(
+      child:
+      ListView.builder(
         controller: _mockTestScrollController,
         scrollDirection: Axis.horizontal,
         itemCount: mockList.length,
@@ -1042,52 +1046,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         AppButtonAnimation(
           onTap: () async {
             if(title=="Lesson") {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //
-              //     // builder: (_) => BlocProvider(
-              //     //   create: (_) =>
-              //     //       InstructorLessonListBloc(),
-              //     //
-              //     //   child: LessonScreen(
-              //     //     showBack: true,
-              //     //   ),
-              //     // ),
-              //
-              //     builder: (_) => MultiBlocProvider(
-              //
-              //       providers: [
-              //
-              //         BlocProvider(
-              //
-              //           create: (_) =>
-              //               InstructorLessonListBloc(),
-              //         ),
-              //
-              //         BlocProvider(
-              //
-              //           create: (_) =>
-              //               InstructorLessonDeleteBloc(),
-              //         ),
-              //
-              //         BlocProvider(
-              //           create: (_) => InstructorRegBloc(),
-              //         ),
-              //
-              //         BlocProvider(
-              //           create: (_) => InstructorLoginBloc(),
-              //         ),
-              //
-              //       ],
-              //
-              //       child: LessonScreen(
-              //         showBack: true,
-              //       ),
-              //     ),
-              //
-              //   ),
-              // );
 
               final result = await Navigator.push(
                 context,
@@ -1099,28 +1057,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       BlocProvider(
 
                         create: (_) =>
-                            InstructorLessonListBloc(),
-                      ),
-
-                      BlocProvider(
-
-                        create: (_) =>
-                            InstructorLessonDeleteBloc(),
-                      ),
-
-                      BlocProvider(
-                        create: (_) => InstructorRegBloc(),
-                      ),
-
-                      BlocProvider(
-                        create: (_) => InstructorLoginBloc(),
+                            InstructorTodaysLessonBloc(),
                       ),
 
                     ],
 
-                    child: LessonScreen(
-                      showBack: true,
-                    ),
+                    child: Todayslessonlist(showBack: true,),
+
+                    // child: LessonScreen(
+                    //   showBack: true,
+                    // ),
                   ),
                 ),
               );
@@ -1139,19 +1085,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         providers: [
 
                           BlocProvider(
-
                             create: (_) =>
-                                InstructorMocktestListBloc(),
+                                InstructorTodaysMocktestBloc(),
                           ),
 
-                          BlocProvider(
-
-                            create: (_) =>
-                                InstructorMocktestDeleteBloc(),
-                          ),
+                          // BlocProvider(
+                          //
+                          //   create: (_) =>
+                          //       InstructorMocktestDeleteBloc(),
+                          // ),
                         ],
 
-                        child: MockTestScreen(showBack: true,),
+                        //child: MockTestScreen(showBack: true,),
+                        child: Todaysmocktestscreen(showBack: true,),
                       ),
                 ),
               );
@@ -1406,7 +1352,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Text(
                         '₹'+totalRevenue.toString(),
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 18,
                           fontFamily: 'InterBold',
                           color: HexColor(AppColor.colorOfAddStudent),
                         ),

@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/student/mocktest_real_review_list/student_real_mocktest_review_bloc.dart';
+import '../../../bloc/student/mocktest_real_review_list/student_real_mocktest_review_event.dart';
+import '../../../bloc/student/mocktest_real_review_list/student_real_mocktest_review_state.dart';
 import '../../../bloc/student/mocktest_review/student_mocktest_review_bloc.dart';
 import '../../../bloc/student/mocktest_review/student_mocktest_review_event.dart';
 import '../../../bloc/student/mocktest_review/student_mocktest_review_state.dart';
 import '../../../model/MockRatingItem.dart';
 import '../../../model/MockRatingSection.dart';
-import '../../../model/student_all_model/student_mocktest_review_model.dart';
+
+import '../../../model/student_all_model/student_real_mocktest_review_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
 class MockTestReportsScreen extends StatefulWidget {
-  const MockTestReportsScreen({super.key});
+  final String? topicId;
+  const MockTestReportsScreen({this.topicId,super.key});
 
   @override
   State<MockTestReportsScreen> createState() =>
@@ -60,11 +65,11 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
   Widget build(BuildContext context) {
     return MultiBlocListener(listeners: [
 
-      BlocListener<StudentMocktestReviewBloc, StudentMocktestReviewState>(
+      BlocListener<StudentRealMocktestReviewBloc, StudentRealMocktestReviewState>(
 
         listener: (context, state) {
 
-          if(state is StudentMocktestReviewLoading) {
+          if(state is StudentRealMocktestReviewLoading) {
 
             setState(() {
 
@@ -72,16 +77,13 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
             });
           }
 
-          if(state is StudentMocktestReviewSuccess) {
+          if(state is StudentRealMocktestReviewSuccess) {
 
             setState(() {
 
               isMocktestReviewLoading = false;
 
-              sections =
-                  state
-                      .mocktestReviewResponse
-                      .data;
+              sections = state.mocktestReviewResponse.data;
             });
 
             print(
@@ -90,7 +92,7 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
             );
           }
 
-          if(state is StudentMocktestReviewFailure) {
+          if(state is StudentRealMocktestReviewFailure) {
 
             setState(() {
 
@@ -334,12 +336,9 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
     final studentCode =
         prefs.getString("stud_user_id") ?? "";
 
-    context.read<StudentMocktestReviewBloc>()
-        .add(
-
-      FetchStudentMocktestReview(
+    context.read<StudentRealMocktestReviewBloc>().add(FetchStudentRealMocktestReview(
         studentCode: studentCode,
-
+       topicId: widget.topicId!,
       ),
     );
   }

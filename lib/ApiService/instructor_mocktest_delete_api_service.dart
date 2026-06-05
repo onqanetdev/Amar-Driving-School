@@ -9,7 +9,7 @@ class InstructorMocktestDeleteApiService {
 
   /// API URL
   final String apiUrl =
-      "https://amardrivingcrm.com/Beta/api/Mocktest/deletelesson";
+      "https://amardrivingcrm.com/Beta/api/Mocktest/deletemock";
 
   /// DELETE MOCKTEST
   Future<InstructorMocktestDeleteModel> deleteMocktest({

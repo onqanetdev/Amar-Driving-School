@@ -303,6 +303,14 @@ class StudentCard extends StatelessWidget {
                       ),
                     ),
 
+                    Text("Login ID: ${data.loginId}",
+                      style: TextStyle(
+                        fontFamily: "InterMedium",
+                        fontSize: 11,
+                        color: HexColor("${AppColor.colorAppGrayLight}"),
+                      ),
+                    ),
+
                     SizedBox(height: 4),
 
                     Row(
@@ -428,13 +436,13 @@ class StudentCard extends StatelessWidget {
                     ),
                   ),
 
-                  Text("Login ID: ${data.loginId}",
-                    style: TextStyle(
-                      fontFamily: "InterMedium",
-                      fontSize: 11,
-                      color: HexColor("${AppColor.colorAppGrayLight}"),
-                    ),
-                  ),
+                  // Text("Login ID: ${data.loginId}",
+                  //   style: TextStyle(
+                  //     fontFamily: "InterMedium",
+                  //     fontSize: 11,
+                  //     color: HexColor("${AppColor.colorAppGrayLight}"),
+                  //   ),
+                  // ),
                 ],
               ),
             ],
@@ -517,7 +525,7 @@ class StudentCard extends StatelessWidget {
                   create: (_) => InstructorLessonEditBloc(),
                 ),
               ],
-                  child:  LessonScreen())
+                  child:  LessonScreen(showBack: true,))
                //   LessonScreen(),
             ),
           );
@@ -542,7 +550,7 @@ class StudentCard extends StatelessWidget {
 
                 BlocProvider(create: (_) => InstructorUpdateMocktestBloc(),),
               ],
-                child: MockTestScreen(),
+                child: MockTestScreen(showBack: true,),
               )
 
                   //MockTestScreen(),
