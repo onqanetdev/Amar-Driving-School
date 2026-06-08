@@ -124,7 +124,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       ],
 
-      child: MockTestScreen(),
+      //child: MockTestScreen(),
+      child: Text('Text'),
     ),
 
     BlocProvider(

@@ -1,11 +1,13 @@
 class MockRatingItem {
   final String title;
+  final String id;
   int selectedRating;
   bool isEditable;
 
   MockRatingItem({
     required this.title,
-    this.selectedRating = 2, // 🔥 default = 30%
+    required this.id,
+    this.selectedRating = 0, // 🔥 default = 30%
     this.isEditable = false, // 🔒 locked initially
   });
 

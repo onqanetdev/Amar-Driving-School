@@ -4,6 +4,7 @@ import 'package:amar_driving_school/bloc/instructor/mocktest_edit/instructor_upd
 import 'package:amar_driving_school/bloc/instructor/mocktest_list/instructor_mocktest_list_bloc.dart';
 import 'package:amar_driving_school/bloc/student/lesson_list/student_lesson_list_bloc.dart';
 import 'package:amar_driving_school/bloc/student/lesson_review/student_lesson_review_bloc.dart';
+import 'package:amar_driving_school/bloc/student/mocktest_list/student_mocktest_list_bloc.dart';
 import 'package:amar_driving_school/common/app_color.dart';
 import 'package:amar_driving_school/common/convert_color.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
@@ -31,6 +32,7 @@ import '../add_student_screen/AddStudentScreen.dart';
 import '../lesson_report_screen/LessonReportScreen.dart';
 import '../lesson_screen/LessonScreen.dart';
 import '../lesson_screen/StudentWiseLessonScreen.dart';
+import '../mock_test_screen/StudentWiseMocktestScreen.dart';
 import '../upload_training_screen/UploadTrainingScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -504,7 +506,9 @@ class StudentCard extends StatelessWidget {
               ],
                   //child:  LessonScreen(showBack: true,)
 
-                  child: Studentwiselessonscreen(showBack: true,studentCode: data.userId,
+                  child: Studentwiselessonscreen(
+                    showBack: true,
+                    studentCode: data.userId,
                     studentName: data.name,
                   ),
               )
@@ -518,8 +522,9 @@ class StudentCard extends StatelessWidget {
               builder: (_) => MultiBlocProvider(providers: [
                 BlocProvider(
 
-                  create: (_) =>
-                      InstructorMocktestListBloc(),
+                  // create: (_) =>
+                  //     InstructorMocktestListBloc(),
+                  create: (_) => StudentMocktestListBloc(),
                 ),
 
                 BlocProvider(
@@ -532,7 +537,12 @@ class StudentCard extends StatelessWidget {
 
                 BlocProvider(create: (_) => InstructorUpdateMocktestBloc(),),
               ],
-                child: MockTestScreen(showBack: true,),
+                child: Studentwisemocktestscreen(
+                  showBack: true,
+                  studCode: data.userId,
+                  studentName: data.name,
+                ),
+               // child: MockTestScreen(showBack: true,),
               )
 
                   //MockTestScreen(),

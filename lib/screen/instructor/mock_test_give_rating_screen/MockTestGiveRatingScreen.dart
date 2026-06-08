@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MockTestGiveRatingScreen extends StatefulWidget {
   final String mocktestTitle;
   final List<MockRatingItem> ids;
+  final List<String> subTopicName;
   //final String userId;
   final String studentUserId;
   final String topicId;
@@ -25,7 +26,8 @@ class MockTestGiveRatingScreen extends StatefulWidget {
     required this.ids,
     //required this.userId,
     required this.studentUserId,
-    required this.topicId
+    required this.topicId,
+    required this.subTopicName,
   });
 
   @override
@@ -64,7 +66,7 @@ class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
               state.reviewResponse.message,
             );
 
-            Navigator.pop(context);
+            Navigator.pop(context,true);
           }
 
           /// FAILURE
@@ -135,12 +137,14 @@ class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
                         item.selectedRating - 1
                         ];
 
+                        print("The Selected Percentage is 🤖🤖🤖 ${percentage}");
+
                         return {
 
                           "subtopicid":
-                          item.title,
+                          item.id,
 
-                          "percentage":
+                          "rating":
                           percentage.toString(),
                         };
 

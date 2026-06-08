@@ -4,14 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bloc/student/mocktest_real_review_list/student_real_mocktest_review_bloc.dart';
 import '../../../bloc/student/mocktest_real_review_list/student_real_mocktest_review_event.dart';
 import '../../../bloc/student/mocktest_real_review_list/student_real_mocktest_review_state.dart';
-import '../../../bloc/student/mocktest_review/student_mocktest_review_bloc.dart';
-import '../../../bloc/student/mocktest_review/student_mocktest_review_event.dart';
-import '../../../bloc/student/mocktest_review/student_mocktest_review_state.dart';
-import '../../../model/MockRatingItem.dart';
-import '../../../model/MockRatingSection.dart';
-
 import '../../../model/student_all_model/student_real_mocktest_review_list_model.dart';
-import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
@@ -256,9 +249,12 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
               Expanded(
                 child: Row(
                   children: List.generate(5, (index) {
+                    final isSelected =
+                        (int.tryParse(item.rating ?? "0") ?? 0)
+                            == percentList[index];
                     final value = index + 1;
                    // final isSelected = item.selectedRating == value;
-                    final isSelected = item.rating != "N/A" && item.rating == value.toString();
+                    //final isSelected = item.rating != "N/A" && item.rating == value.toString();
                     return GestureDetector(
                       //onTap: item.isEditable
                        //   ? () {
@@ -456,34 +452,14 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
                               Row(
 
                                 children:
-                                List.generate(
-                                  5,
-                                      (index) {
-
+                                List.generate(5, (index) {
                                     return Container(
-
-                                      margin:
-                                      const EdgeInsets
-                                          .only(
-                                        right: 8,
-                                      ),
-
+                                      margin: const EdgeInsets.only(right: 8,),
                                       height: 42,
-
                                       width: 55,
-
-                                      decoration:
-                                      BoxDecoration(
-
-                                        color:
-                                        Colors
-                                            .white,
-
-                                        borderRadius:
-                                        BorderRadius
-                                            .circular(
-                                          8,
-                                        ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8,),
                                       ),
                                     );
                                   },
