@@ -21,6 +21,7 @@ import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_bloc
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_event.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_state.dart';
+import '../../../bloc/instructor/update_student_information/instructor_student_update_bloc.dart';
 import '../../../bloc/instructor/upload_training_report/instructor_upload_training_report_bloc.dart';
 import '../../../bloc/student/mocktest_review/student_mocktest_review_bloc.dart';
 import '../../../helper/helper.dart';
@@ -149,6 +150,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
 
                         return StudentCard(
                           data: data,
+                          onRefresh: fetchStudentList,
                         );
                       },
                     );
@@ -182,17 +184,30 @@ class _StudentListScreenState extends State<StudentListScreen> {
        context: parentContext,
        barrierDismissible: false,
        builder: (_) {
-         return BlocProvider.value(
-           value: BlocProvider.of<InstructorAddStudentBloc>(
-             parentContext,
-           ),
-           child: Dialog(
-             shape: RoundedRectangleBorder(
-               borderRadius: BorderRadius.circular(20),
+         return
+           MultiBlocProvider(
+             providers: [
+
+               /// Existing Add Student Bloc
+               BlocProvider.value(
+                 value: BlocProvider.of<InstructorAddStudentBloc>(
+                   parentContext,
+                 ),
+               ),
+
+               /// Student Update Bloc
+               BlocProvider(
+                 create: (_) => InstructorStudentUpdateBloc(),
+               ),
+
+             ],
+             child: Dialog(
+               shape: RoundedRectangleBorder(
+                 borderRadius: BorderRadius.circular(20),
+               ),
+               child: AddStudentScreen(),
              ),
-             child: AddStudentScreen(),
-           ),
-         );
+           );
        },
      );
 
@@ -220,8 +235,8 @@ class _StudentListScreenState extends State<StudentListScreen> {
 
 class StudentCard extends StatelessWidget {
   final StudentData data;
-
-  const StudentCard({super.key, required this.data});
+  final VoidCallback onRefresh;
+  const StudentCard({super.key, required this.data, required this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
@@ -346,23 +361,50 @@ class StudentCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       GestureDetector(
-                        onTap: (){
-                          showDialog(
+                        onTap: () async {
+
+                          final result = await showDialog(
                             context: context,
-                            builder: (_) => Dialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: AddStudentScreen(
-                                student: data, // 🔥 pass data
-                              ),
-                            ),
+                            builder: (_) {
+                              return MultiBlocProvider(providers: [
+                                /// Add Student Bloc
+                                BlocProvider.value(
+                                  value: context.read<InstructorAddStudentBloc>(),
+                                ),
+
+                                /// Update Student Bloc
+                                BlocProvider(
+                                  create: (_) => InstructorStudentUpdateBloc(),
+                                ),
+                              ],
+                                  child: Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: AddStudentScreen(
+                                    student: data, // 🔥 pass data
+                                  ),
+                                ),
+                              );
+                            }
+
+                            //     Dialog(
+                            //   shape: RoundedRectangleBorder(
+                            //     borderRadius: BorderRadius.circular(20),
+                            //   ),
+                            //   child: AddStudentScreen(
+                            //     student: data, // 🔥 pass data
+                            //   ),
+                            // ),
                           );
+
+                          if (result == true) {
+                            onRefresh();
+                          }
                         },
                         child: Text(
                           "Edit",
