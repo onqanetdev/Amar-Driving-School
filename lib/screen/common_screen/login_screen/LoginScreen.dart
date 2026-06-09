@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
               /// 🔥 SAVE USER DATA
               await prefs.setString(
                 'user_id',
-                state.instructRegResponseData.instructor.userId,
+                state.instructRegResponseData.instructor?.userId ?? "",
               );
 
               _showMsg(state.instructRegResponseData.message);
@@ -160,6 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
               setState(() {
                 isLoading = false;
               });
+              Helper.showToast(context, state.error,);
             }
           },
         ),
@@ -183,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
               /// 🔥 SAVE USER ID
               await prefs.setString(
                 'user_id',
-                state.responseInstructorLogin.instructor.userId! ,
+                state.responseInstructorLogin.instructor?.userId ?? " " ,
               );
 
               _showMsg(state.responseInstructorLogin.message);
@@ -230,6 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             if(state is InstructorLoginFailure) {
               LoaderHelper.hide(context);
+              Helper.showToast(context, state.error,);
             }
           },
         ),

@@ -6,20 +6,43 @@ import 'package:amar_driving_school/bloc/instructor/instructor_register_state.da
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class InstructorRegBloc extends Bloc<InstructorRegisterEvent, InstructorRegisterState> {
-  InstructorRegBloc (): super(InstructorRegisterInitial()) {
-    on<InstructorRegTapped>(
-        (event, emit) async {
-          emit(InstructorRegisterLoading());
-          //Try-catch
-          try {
-            final response = await InstructorRegisterApiService().registerAhead(event.name, event.email, event.phone, event.password );
-            emit(InstructorRegisterSuccess(instructRegResponseData: response));
-          } catch(e) {
+  InstructorRegBloc() : super(InstructorRegisterInitial()) {
+    on<InstructorRegTapped>((event, emit) async {
+        emit(InstructorRegisterLoading());
+        try {
+          final response =
+          await InstructorRegisterApiService()
+              .registerAhead(
+            event.name,
+            event.email,
+            event.phone,
+            event.password,
+          );
+          /// Registration Successful
+          if (response.success) {
             emit(
-                InstructorRegisterFailure(e.toString())
+              InstructorRegisterSuccess(
+                instructRegResponseData: response,
+              ),
+            );
+
+          } else {
+            /// API returned success = false
+            emit(
+              InstructorRegisterFailure(
+                response.message,
+              ),
             );
           }
+
+        } catch (e) {
+          emit(
+            InstructorRegisterFailure(
+              e.toString(),
+            ),
+          );
         }
+      },
     );
   }
 }

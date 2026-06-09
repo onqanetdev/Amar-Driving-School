@@ -6,20 +6,44 @@ import 'package:amar_driving_school/bloc/instructor/login_instructor/instructor_
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class InstructorLoginBloc extends Bloc<InstructorLoginEvent, InstructorLoginState> {
-  InstructorLoginBloc (): super(InstructorLoginInitial()) {
-    on<InstructorLoginTapped>(
-        (event, emit) async {
-          emit(InstructorLoginLoading());
-          // try-catch
-          try {
-            final response = await InstructorLoginApiService().loginAhead(event.email, event.password);
-            emit(InstructorLoginSuccess(responseInstructorLogin: response));
-          } catch (e){
+
+  InstructorLoginBloc() : super(InstructorLoginInitial()) {
+
+    on<InstructorLoginTapped>((event, emit) async {
+        emit(InstructorLoginLoading());
+        try {
+          final response =
+          await InstructorLoginApiService()
+              .loginAhead(
+            event.email,
+            event.password,
+          );
+          /// SUCCESS LOGIN
+          if (response.success) {
+
             emit(
-              InstructorLoginFailure(e.toString())
+              InstructorLoginSuccess(
+                responseInstructorLogin:
+                response,
+              ),
+            );
+          } else {
+            /// INVALID EMAIL/PASSWORD
+            emit(
+              InstructorLoginFailure(
+                response.message,
+              ),
             );
           }
+
+        } catch (e) {
+          emit(
+            InstructorLoginFailure(
+              e.toString(),
+            ),
+          );
         }
+      },
     );
   }
 }

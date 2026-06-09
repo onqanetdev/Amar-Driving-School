@@ -114,13 +114,13 @@ class InstructorLoginModel {
   final int status;
   final bool success;
   final String message;
-  final InstructorDetails instructor;
+  final InstructorDetails? instructor;
 
   InstructorLoginModel({
     required this.status,
     required this.success,
     required this.message,
-    required this.instructor,
+    this.instructor,
   });
 
   factory InstructorLoginModel.fromJson(Map<String, dynamic> json) {
@@ -128,7 +128,7 @@ class InstructorLoginModel {
       status: json['status'],
       success: json['success'],
       message: json['message'],
-      instructor: InstructorDetails.fromJson(json['instructor']),
+      instructor: json['instructor'] != null ? InstructorDetails.fromJson(json['instructor'],) : null,
     );
   }
 }
