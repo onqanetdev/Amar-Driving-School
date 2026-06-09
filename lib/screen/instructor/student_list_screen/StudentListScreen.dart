@@ -16,6 +16,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bloc/instructor/add_student/instructor_add_student_bloc.dart';
 import '../../../bloc/instructor/add_student/instructor_add_student_state.dart';
 
+import '../../../bloc/instructor/delete_student/instructor_student_delete_bloc.dart';
+import '../../../bloc/instructor/delete_student/instructor_student_delete_event.dart';
+import '../../../bloc/instructor/delete_student/instructor_student_delete_state.dart';
 import '../../../bloc/instructor/lesson_delete/instructor_lesson_delete_bloc.dart';
 import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
@@ -58,10 +61,165 @@ class _StudentListScreenState extends State<StudentListScreen> {
   @override
   Widget build(BuildContext context) {
 
-    return BlocListener<InstructorAddStudentBloc, InstructorAddStudentState>(
+    return MultiBlocListener(listeners: [
 
+      /// ADD STUDENT
+      BlocListener<
+          InstructorAddStudentBloc,
+          InstructorAddStudentState>(
+
+        listener: (context, state) {
+
+          if(state is InstructorAddStudentLoading) {
+            LoaderHelper.show(context);
+          }
+
+          if(state is InstructorAddStudentSuccess) {
+
+            LoaderHelper.hide(context);
+
+            Helper.showToast(
+              context,
+              state.instructorStudentAddResponse.message,
+            );
+
+            Navigator.pop(context,true);
+          }
+
+          if(state is InstructorAddStudentFailure) {
+
+            LoaderHelper.hide(context);
+
+            Helper.showToast(
+              context,
+              state.error,
+            );
+          }
+        },
+      ),
+
+      /// DELETE STUDENT
+      BlocListener<InstructorStudentDeleteBloc, InstructorStudentDeleteState>(
+
+        listener: (context, state) {
+
+          if(state is InstructorStudentDeleteLoading) {
+
+            LoaderHelper.show(context);
+          }
+
+          if(state is InstructorStudentDeleteSuccess) {
+
+            LoaderHelper.hide(context);
+
+            Helper.showToast(
+              context,
+              state.deleteResponse.message,
+            );
+
+            /// REFRESH LIST
+            fetchStudentList();
+          }
+
+          if(state is InstructorStudentDeleteFailure) {
+
+            LoaderHelper.hide(context);
+
+            Helper.showToast(
+              context,
+              state.error,
+            );
+          }
+        },
+      ),
+
+    ],
+        child: Scaffold(
+
+      backgroundColor: Color(0xFFE9E9E9),
+
+      body: Column(
+        children: [
+
+          AppHeader(
+            title: "Student List",
+            showBack: true,
+            showAddButton: true,
+            addButtonText: "Add Student",
+            onAdd: () {
+              showAddStudentDialog(context);
+            },
+          ),
+
+
+
+          Expanded(
+
+            child: BlocBuilder<InstructorStudentListBloc, InstructorStudentListState>(
+
+              builder: (context, state) {
+
+                /// LOADING
+                if(state is InstructorStudentListLoading) {
+
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                /// SUCCESS
+                if(state is InstructorStudentListSuccess) {
+
+                  students = state.studentListResponse.data;
+
+                  if(students.isEmpty) {
+
+                    return const Center(
+                      child: Text("No Students Found"),
+                    );
+                  }
+
+                  return ListView.separated(
+
+                    padding: const EdgeInsets.all(10),
+
+                    itemCount: state.studentListResponse.data.length,
+
+                    separatorBuilder: (_, __) =>
+                    const SizedBox(height: 12),
+
+                    itemBuilder: (context, index) {
+
+                      final data = state.studentListResponse.data[index];
+
+                      return StudentCard(
+                        data: data,
+                        onRefresh: fetchStudentList,
+                      );
+                    },
+                  );
+                }
+
+                /// FAILURE
+                if(state is InstructorStudentListFailure) {
+
+                  return Center(
+                    child: Text(state.error),
+                  );
+                }
+
+                return const SizedBox();
+              },
+            ),
+          ),
+        ],
+      ),
+    )
+    );
+
+
+      BlocListener<InstructorAddStudentBloc, InstructorAddStudentState>(
       listener: (context, state) {
-
         if(state is InstructorAddStudentLoading) {
 
           LoaderHelper.show(context);
@@ -381,6 +539,7 @@ class StudentCard extends StatelessWidget {
                                   create: (_) => InstructorStudentUpdateBloc(),
                                 ),
                               ],
+
                                   child: Dialog(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -406,7 +565,8 @@ class StudentCard extends StatelessWidget {
                             onRefresh();
                           }
                         },
-                        child: Text(
+                        child:
+                        Text(
                           "Edit",
                           style: TextStyle(
                             color: HexColor("${AppColor.colorOfEditColour}"),
@@ -416,6 +576,7 @@ class StudentCard extends StatelessWidget {
                         ),
                       ),
 
+                      //The Vertical Separator
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
                         child: Container(
@@ -425,12 +586,27 @@ class StudentCard extends StatelessWidget {
                         ),
                       ),
 
-                      Text(
-                        "Delete",
-                        style: TextStyle(
-                          color: HexColor("${AppColor.colourOfDeleteBtn}"),
-                          fontFamily: "InterSemiBold",
-                          fontSize: 13,
+                      //Delete Section
+
+                      GestureDetector(
+                        onTap: () {
+                          print("Tapped on Deleted");
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            isScrollControlled: true,
+                            builder: (_) {
+                              return _deleteBottomSheet(context);
+                            },
+                          );
+                        },
+                        child: Text(
+                          "Delete",
+                          style: TextStyle(
+                            color: HexColor("${AppColor.colourOfDeleteBtn}"),
+                            fontFamily: "InterSemiBold",
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],
@@ -569,11 +745,7 @@ class StudentCard extends StatelessWidget {
                   create: (_) => StudentMocktestListBloc(),
                 ),
 
-                BlocProvider(
-
-                  create: (_) =>
-                      InstructorMocktestDeleteBloc(),
-                ),
+                BlocProvider(create: (_) => InstructorMocktestDeleteBloc(),),
 
                 BlocProvider(create: (_) => InstructorMocktestDeleteBloc(),),
 
@@ -657,6 +829,136 @@ class StudentCard extends StatelessWidget {
             fontFamily: "InterMedium",
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _deleteBottomSheet(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        16 +
+            MediaQuery.of(context).viewPadding.bottom +
+            MediaQuery.of(context).viewInsets.bottom, // 🔥 FULL SAFE
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+
+          /// HANDLE
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+
+          /// ICON
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.delete,
+              color: HexColor("${AppColor.colourOfDeleteBtn}"),
+              size: 26,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          const Text(
+            "Delete Student",
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: "InterBold",
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            "Are you sure you want to delete this user?",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade600,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          Row(
+            children: [
+
+              /// CANCEL
+              Expanded(
+                child: InkWell(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    height: 45,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: HexColor(AppColor.colorInputBorder),
+                      ),
+                    ),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(fontFamily: "InterSemiBold"),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              /// DELETE
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    //Navigator.pop(context);
+                    //Helper.showToast(context, "Deleted successfully");
+                    Navigator.pop(context,true);
+                    context.read<InstructorStudentDeleteBloc>().add(
+                      InstructorStudentDeleteTapped(
+                        instructorId: data.instructureId,
+                        studentId: data.userId,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    height: 45,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: HexColor("${AppColor.colourOfDeleteBtn}"),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      "Delete",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: "InterBold",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

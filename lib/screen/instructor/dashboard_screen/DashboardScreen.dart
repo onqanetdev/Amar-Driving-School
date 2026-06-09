@@ -14,6 +14,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bloc/common/profile_bloc.dart';
 import '../../../bloc/instructor/add_student/instructor_add_student_bloc.dart';
+import '../../../bloc/instructor/delete_student/instructor_student_delete_bloc.dart';
 import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/instructor_revenue/instructor_total_revenue_bloc.dart';
 import '../../../bloc/instructor/instructor_revenue/instructor_total_revenue_event.dart';
@@ -1176,6 +1177,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   BlocProvider(
                     create: (_) => InstructorStudentListBloc(),
                   ),
+                  // Provider for delete Student
+                  BlocProvider(create: (_) => InstructorStudentDeleteBloc(),),
                 ],
                 child: StudentListScreen(),
               ),
