@@ -159,8 +159,6 @@ class _StudentListScreenState extends State<StudentListScreen> {
             },
           ),
 
-
-
           Expanded(
 
             child: BlocBuilder<InstructorStudentListBloc, InstructorStudentListState>(
@@ -697,7 +695,7 @@ class StudentCard extends StatelessWidget {
                       InstructorUploadTrainingReportBloc(),
                 ),
               ],
-                  child: UploadTrainingScreen()
+                  child: UploadTrainingScreen(studentName: data.name, studentCode: data.userId,)
               )
 
                   //UploadTrainingScreen(),

@@ -201,7 +201,6 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
           ),
 
           SizedBox(height: 10),
-
           /// ITEMS
           ...widget.subTopics.map((item) => ratingRow(item)).toList(),
         ],
@@ -212,59 +211,62 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
   Widget ratingRow(RatingItem item) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          /// TITLE
-          Expanded(
-            child: Text(
-              "${item.title}:",
-              style: TextStyle(
-                fontSize: 13,
-                fontFamily: "InterMedium",
-                color: Colors.black87,
-              ),
+          Text(
+            "${item.title}:",
+            style: const TextStyle(
+              fontSize: 13,
+              fontFamily: "InterMedium",
+              color: Colors.black87,
             ),
           ),
 
-          /// OPTIONS 1–5
-          Row(
+          const SizedBox(height: 8),
+
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: List.generate(5, (index) {
+
               final value = index + 1;
               final isSelected = item.selected == value;
 
               return GestureDetector(
                 onTap: () {
-                  print('Value is ${value}, for the item ${item.title}');
                   setState(() {
-                   item.selected = value;
+                    item.selected = value;
                   });
                 },
                 child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 4),
                   width: 32,
                   height: 32,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isSelected ? Color.fromARGB(255, 54, 113, 232) : Colors.grey.shade300,
+                    color: isSelected
+                        ? const Color.fromARGB(255, 54, 113, 232)
+                        : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     "$value",
                     style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black54,
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.black54,
                       fontFamily: "InterMedium",
                     ),
                   ),
                 ),
               );
             }),
-          )
+          ),
         ],
       ),
     );
   }
-
 
 
   void showRatingGuideDialog(BuildContext context) {

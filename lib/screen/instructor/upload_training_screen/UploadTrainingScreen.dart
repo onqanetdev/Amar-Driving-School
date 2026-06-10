@@ -19,7 +19,9 @@ import '../../../widgets/app_input_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UploadTrainingScreen extends StatefulWidget {
-  const UploadTrainingScreen({super.key});
+  final String? studentName;
+  final String? studentCode;
+  const UploadTrainingScreen({super.key, this.studentName, this.studentCode});
 
   @override
   State<UploadTrainingScreen> createState() =>
@@ -31,25 +33,7 @@ class _UploadTrainingScreenState extends State<UploadTrainingScreen> {
   final nameController = TextEditingController();
   final fileController = TextEditingController();
 
-  ///  STUDENT LIST (MODEL)
-  // List<StudentModel> students = [
-  //   StudentModel(
-  //     name: "Ravi Kumar",
-  //     email: "ravi@gmail.com",
-  //     phone: "9876543210",
-  //     duration: "4 to 6 month",
-  //     date: "18.04.2026",
-  //     amount: 1840,
-  //   ),
-  //   StudentModel(
-  //     name: "Amit Sharma",
-  //     email: "amit@gmail.com",
-  //     phone: "9123456780",
-  //     duration: "3 month",
-  //     date: "10.03.2026",
-  //     amount: 1500,
-  //   ),
-  // ];
+
 
   List<StudentData> students = [];
 
@@ -60,7 +44,12 @@ class _UploadTrainingScreenState extends State<UploadTrainingScreen> {
   void initState() {
     super.initState();
 
-    fetchStudentList();
+    if (widget.studentName != null && widget.studentCode != null) {
+
+      nameController.text = widget.studentName!;
+    } else {
+      fetchStudentList();
+    }
   }
 
   @override
@@ -180,17 +169,29 @@ class _UploadTrainingScreenState extends State<UploadTrainingScreen> {
                           controller: nameController,
                           hintText: "Student Name",
                           readOnly: true,            // 🔥 disable typing
-                          onTap: showStudentList,    // 🔥 open dialog
-
+                          //onTap: showStudentList,    // 🔥 open dialog
+                          onTap: (widget.studentName != null &&
+                              widget.studentCode != null)
+                              ? null
+                              : showStudentList,
                           fillColor: AppColor.colorInputBg,
                           borderColor: AppColor.colorInputBorder,
                           focusedBorderColor: AppColor.colorInputFocusBorder,
                           hintColor: AppColor.colorInputHint,
-
-                          suffixWidget: const Icon(
+                          suffixWidget: (widget.studentName != null &&
+                              widget.studentCode != null)
+                              ? const Icon(
+                            Icons.lock,
+                            color: Colors.grey,
+                          )
+                              : const Icon(
                             Icons.keyboard_arrow_down,
                             color: Colors.grey,
                           ),
+                          // suffixWidget: const Icon(
+                          //   Icons.keyboard_arrow_down,
+                          //   color: Colors.grey,
+                          // ),
                         ),
 
                         const SizedBox(height: 10),
@@ -485,14 +486,9 @@ class _UploadTrainingScreenState extends State<UploadTrainingScreen> {
     /// CALL EVENT
     context.read<InstructorUploadTrainingReportBloc>().add(
       UploadTrainingReport(
-
-        studentId:
-        selectedStudent!.userId,
-
+        studentId: widget.studentCode ?? selectedStudent!.userId,
         status: "1",
-
-        reportFile:
-        selectedFile!,
+        reportFile: selectedFile!,
       ),
     );
   }

@@ -10,6 +10,7 @@ import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_even
 import '../../../helper/helper.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../widgets/app_header.dart';
+import 'package:flutter/services.dart';
 
 class ContactUsScreen extends StatefulWidget {
 
@@ -186,17 +187,15 @@ class _ContactUsScreenState
                   const SizedBox(height: 16),
 
                   /// CONTACT
-                  buildField(
-
-                    controller:
-                    contactController,
-
-                    hint:
-                    "Contact Number",
-
-                    keyboardType:
-                    TextInputType.phone,
-                  ),
+                buildField(
+                  controller: contactController,
+                  hint: "Contact Number",
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
+                  ],
+                ),
 
                   const SizedBox(height: 16),
 
@@ -284,62 +283,91 @@ class _ContactUsScreenState
     );
   }
 
+  // Widget buildField({
+  //
+  //   required TextEditingControllercontroller,
+  //   required String hint,
+  //   int maxLines = 1,
+  //   TextInputType keyboardType =
+  //       TextInputType.text,
+  //
+  // }) {
+  //
+  //   return TextField(
+  //
+  //     controller: controller,
+  //
+  //     maxLines: maxLines,
+  //
+  //     keyboardType: keyboardType,
+  //
+  //     decoration: InputDecoration(
+  //
+  //       hintText: hint,
+  //
+  //       hintStyle: const TextStyle(
+  //
+  //         fontFamily: "InterMedium",
+  //
+  //         color: Colors.grey,
+  //       ),
+  //
+  //       filled: true,
+  //
+  //       fillColor: Colors.white,
+  //
+  //       contentPadding:
+  //       const EdgeInsets.symmetric(
+  //
+  //         horizontal: 16,
+  //
+  //         vertical: 18,
+  //       ),
+  //
+  //       border:
+  //       OutlineInputBorder(
+  //
+  //         borderRadius:
+  //         BorderRadius.circular(16),
+  //
+  //         borderSide: BorderSide.none,
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget buildField({
-
-    required TextEditingController
-    controller,
-
+    required TextEditingController controller,
     required String hint,
-
     int maxLines = 1,
-
-    TextInputType keyboardType =
-        TextInputType.text,
-
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
   }) {
-
     return TextField(
-
       controller: controller,
-
       maxLines: maxLines,
-
       keyboardType: keyboardType,
-
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
-
         hintText: hint,
-
         hintStyle: const TextStyle(
-
           fontFamily: "InterMedium",
-
           color: Colors.grey,
         ),
-
         filled: true,
-
         fillColor: Colors.white,
-
-        contentPadding:
-        const EdgeInsets.symmetric(
-
+        contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-
           vertical: 18,
         ),
-
-        border:
-        OutlineInputBorder(
-
-          borderRadius:
-          BorderRadius.circular(16),
-
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
       ),
     );
   }
+
 
   void submitContactUsForm() {
 
@@ -368,27 +396,76 @@ class _ContactUsScreenState
       return;
     }
 
-    if(emailController.text.trim().isEmpty) {
+    // if(emailController.text.trim().isEmpty) {
+    //
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //
+    //     const SnackBar(
+    //       content: Text("Please enter email"),
+    //     ),
+    //   );
+    //
+    //   return;
+    // }
 
+    /// EMAIL VALIDATION
+    final email = emailController.text.trim();
+
+    if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-
         const SnackBar(
           content: Text("Please enter email"),
         ),
       );
-
       return;
     }
 
-    if(contactController.text.trim().isEmpty) {
+    final emailRegex = RegExp(
+      r'^[\w\.-]+@([\w-]+\.)+[\w-]{2,4}$',
+    );
 
+    if (!emailRegex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-
         const SnackBar(
-          content: Text("Please enter contact"),
+          content: Text("Please enter a valid email address"),
         ),
       );
+      return;
+    }
 
+
+
+    // if(contactController.text.trim().isEmpty) {
+    //
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //
+    //     const SnackBar(
+    //       content: Text("Please enter contact"),
+    //     ),
+    //   );
+    //
+    //   return;
+    // }
+
+    /// PHONE VALIDATION
+    final contact = contactController.text.trim();
+
+    if (contact.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter contact number"),
+        ),
+      );
+      return;
+    }
+
+    /// Only 10 digits allowed
+    if (!RegExp(r'^[0-9]{10}$').hasMatch(contact)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter a valid 10-digit mobile number"),
+        ),
+      );
       return;
     }
 
