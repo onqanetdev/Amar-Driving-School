@@ -176,10 +176,25 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                 ),
                 SizedBox(height: 10),
 
-                AppInputField(controller: durationController, hintText: "Duration"),
+               // AppInputField(controller: durationController, hintText: "Duration"),
+                AppInputField(
+                  controller: durationController,
+                  hintText: "Duration",
+                  readOnly: true,
+                  onTap: pickDuration,
+                  fillColor: AppColor.colorInputBg,
+                  borderColor: AppColor.colorInputBorder,
+                  focusedBorderColor:
+                  AppColor.colorInputFocusBorder,
+                  hintColor: AppColor.colorInputHint,
+                  borderRadius: 10,
+                  obscureText: false,
+                ),
+
                 SizedBox(height: 10),
 
                 //AppInputField(controller: dateController, hintText: "Start Date"),
+
                 GestureDetector(
                   onTap: () async {
 
@@ -443,4 +458,33 @@ Future<void> fetchUpdateStudent() async {
     ),
   );
 }
+
+  Future<void> pickDuration() async {
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialEntryMode: TimePickerEntryMode.dial,
+      initialTime: TimeOfDay.now(),
+
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat: true,
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+
+      setState(() {
+
+        durationController.text =
+        "${picked.hour.toString().padLeft(2, '0')}:"
+            "${picked.minute.toString().padLeft(2, '0')}";
+
+      });
+    }
+  }
 }
