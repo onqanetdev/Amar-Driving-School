@@ -488,6 +488,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ]
 
+
           /// 🔥 LOGIN MODE
           else ...[
             if (selectedRole == "student") ...[
@@ -569,6 +570,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 onTap: (){
                   setState(() {
                     isRegister = !isRegister;
+                    /// Clear all fields whenever switching
+                    _nameController.clear();
+                    _emailController.clear();
+                    _phoneController.clear();
+                    _passwordController.clear();
+                    _codeController.clear();
                   });
                 },
                 child: Text(

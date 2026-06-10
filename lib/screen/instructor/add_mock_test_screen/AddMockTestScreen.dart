@@ -21,6 +21,7 @@ import '../../../bloc/instructor/topic_list/instructor_topic_list_event.dart';
 import '../../../bloc/instructor/topic_list/instructor_topic_list_state.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
+import '../../../helper/helper.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../model/CategoryModel.dart';
 import '../../../model/LessonModel.dart';
@@ -184,54 +185,6 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
           },
         ),
-        //Bloc Listener for  Student List
-        // BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
-        //
-        //   listener: (context, state) {
-        //
-        //     /// LOADING
-        //     if(state is InstructorStudentListLoading) {
-        //       LoaderHelper.show(context);
-        //     }
-        //
-        //     /// SUCCESS
-        //     if(state is InstructorStudentListSuccess) {
-        //
-        //       LoaderHelper.hide(context);
-        //
-        //       setState(() {
-        //
-        //         students =
-        //             state.studentListResponse.data;
-        //
-        //         if (students.isNotEmpty &&
-        //             widget.mocktest != null) {
-        //
-        //           selectedStudent =
-        //               students.firstWhere(
-        //
-        //                     (e) =>
-        //                 e.userId ==
-        //                     widget.mocktest!.userId,
-        //
-        //                 orElse: () => students.first,
-        //               );
-        //
-        //           studentListController.text =
-        //               selectedStudent?.name ?? "";
-        //
-        //           studentUserId =
-        //               selectedStudent?.userId ?? "";
-        //         }
-        //       });
-        //     }
-        //
-        //     /// FAILURE
-        //     if(state is InstructorStudentListFailure) {
-        //
-        //     }
-        //   },
-        // ),
         // Bloc Listener for Add Lesson
         BlocListener<InstructorCreateMocktestBloc, InstructorCreateMocktestState>(
 
@@ -247,15 +200,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
             if(state is InstructorCreateMocktestSuccess) {
 
               LoaderHelper.hide(context);
-
-              ScaffoldMessenger.of(context).showSnackBar(
-
-                SnackBar(
-                  content: Text(
-                    state.createMocktestResponse.message,
-                  ),
-                ),
-              );
+              Helper.showToast(context, state.createMocktestResponse.message);
 
               //Navigator.pop(context);
               Navigator.pop(context, true);
@@ -265,13 +210,8 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
             if(state is InstructorCreateMocktestFailure) {
 
               LoaderHelper.hide(context);
+              Helper.showToast(context, state.error,);
 
-              ScaffoldMessenger.of(context).showSnackBar(
-
-                SnackBar(
-                  content: Text(state.error),
-                ),
-              );
             }
           },
         ),
@@ -1254,152 +1194,6 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
     //   ),
     // );
   }
-  /// 🔥 STUDENT BOTTOM SHEET
-  // void showStudentList() {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     backgroundColor: Colors.transparent,
-  //     builder: (_) {
-  //       return Container(
-  //         height: MediaQuery.of(context).size.height * 0.5,
-  //         decoration: const BoxDecoration(
-  //           color: Colors.white,
-  //           borderRadius:
-  //           BorderRadius.vertical(top: Radius.circular(20)),
-  //         ),
-  //         child: Column(
-  //           children: [
-  //
-  //             /// 🔹 HANDLE + CLOSE
-  //             Padding(
-  //               padding: const EdgeInsets.all(10),
-  //               child: Row(
-  //                 children: [
-  //
-  //                   Expanded(
-  //                     child: Center(
-  //                       child: Container(
-  //                         width: 40,
-  //                         height: 4,
-  //                         decoration: BoxDecoration(
-  //                           color: Colors.grey.shade300,
-  //                           borderRadius: BorderRadius.circular(10),
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ),
-  //
-  //                   GestureDetector(
-  //                     onTap: () => Navigator.pop(context),
-  //                     child: const Icon(Icons.close),
-  //                   )
-  //                 ],
-  //               ),
-  //             ),
-  //
-  //             /// 🔹 TITLE
-  //             const Padding(
-  //               padding: EdgeInsets.symmetric(horizontal: 15),
-  //               child: Align(
-  //                 alignment: Alignment.centerLeft,
-  //                 child: Text(
-  //                   "Select Student",
-  //                   style: TextStyle(
-  //                     fontFamily: "InterBold",
-  //                     fontSize: 16,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //
-  //             const SizedBox(height: 10),
-  //
-  //             /// 🔹 STUDENT LIST
-  //             Expanded(
-  //               child: ListView.builder(
-  //                 itemCount: students.length,
-  //                 itemBuilder: (context, index) {
-  //                   final student = students[index];
-  //
-  //                   return GestureDetector(
-  //                     onTap: () {
-  //                       setState(() {
-  //                         selectedStudent = student;
-  //                         studentListController.text = student.name;
-  //                         studentUserId = student.userId ;
-  //                       });
-  //                       Navigator.pop(context);
-  //                     },
-  //                     child: Container(
-  //                       margin: const EdgeInsets.symmetric(
-  //                           horizontal: 12, vertical: 5),
-  //                       padding: const EdgeInsets.all(12),
-  //                       decoration: BoxDecoration(
-  //                         borderRadius: BorderRadius.circular(12),
-  //                         border: Border.all(
-  //                           color: Colors.grey.shade300,
-  //                         ),
-  //                       ),
-  //                       child: Row(
-  //                         children: [
-  //
-  //                           /// 🔹 AVATAR
-  //                           const CircleAvatar(
-  //                             radius: 18,
-  //                             child: Icon(Icons.person, size: 18),
-  //                           ),
-  //
-  //                           const SizedBox(width: 10),
-  //
-  //                           /// 🔹 DETAILS
-  //                           Expanded(
-  //                             child: Column(
-  //                               crossAxisAlignment:
-  //                               CrossAxisAlignment.start,
-  //                               children: [
-  //
-  //                                 Text(
-  //                                   student.name,
-  //                                   style: const TextStyle(
-  //                                     fontFamily: "InterBold",
-  //                                     fontSize: 14,
-  //                                   ),
-  //                                 ),
-  //
-  //                                 const SizedBox(height: 2),
-  //
-  //                                 Text(
-  //                                   student.phone,
-  //                                   style: TextStyle(
-  //                                     fontSize: 12,
-  //                                     color: Colors.grey.shade600,
-  //                                   ),
-  //                                 ),
-  //                               ],
-  //                             ),
-  //                           ),
-  //
-  //                           /// 🔹 AMOUNT
-  //                           Text(
-  //                             "₹${student.amount}",
-  //                             style: const TextStyle(
-  //                               fontFamily: "InterBold",
-  //                               color: Color.fromARGB(
-  //                                   255, 54, 113, 232),
-  //                             ),
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ),
-  //                   );
-  //                 },
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+
 }
 

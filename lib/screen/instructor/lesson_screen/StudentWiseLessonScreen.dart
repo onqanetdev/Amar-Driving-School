@@ -578,6 +578,8 @@ class LessonCard extends StatelessWidget {
                                 //child: Text('Additional'),
 
                                 child: AddLessonScreen(lesson: data,
+                                  studentName: data.studentName,
+                                  studCode: data.userId,
                                 ),
                               ),
                             ),

@@ -116,10 +116,7 @@ class _TodaysmocktestscreenState extends State<Todaysmocktestscreen>  {
 
               LoaderHelper.hide(context);
 
-              Helper.showToast(
-                context,
-                state.error,
-              );
+              //Helper.showToast(context, state.error,);
             }
           },
         ),

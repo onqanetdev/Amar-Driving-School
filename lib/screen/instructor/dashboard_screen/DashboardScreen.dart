@@ -101,7 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
       ],
 
-     child: Text(''),
+     child: Todayslessonlist(),
      // child: LessonScreen(),
     ),
 
@@ -126,7 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ],
 
       //child: MockTestScreen(),
-      child: Text('Text'),
+      child: Todaysmocktestscreen(),
     ),
 
     BlocProvider(

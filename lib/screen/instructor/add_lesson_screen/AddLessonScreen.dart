@@ -21,6 +21,7 @@ import '../../../bloc/instructor/topic_list/instructor_topic_list_event.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
 import '../../../helper/app_button_animation.dart';
+import '../../../helper/helper.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../model/CategoryModel.dart';
 import '../../../model/LessonModel.dart';
@@ -89,6 +90,8 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
     print("Student Name is: ${widget.studentName}");
     print("Student Code os (Operating System): ${widget.studCode}");
     if (widget.lesson != null) {
+
+
       /// 👉 EDIT MODE
       isEdit = true;
       print("The Edited File is ${isEdit}");
@@ -217,61 +220,6 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
             }
           },
         ),
-        //Bloc Listener for  Student List
-        // BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
-        //
-        //   listener: (context, state) {
-        //
-        //     /// LOADING
-        //     if(state is InstructorStudentListLoading) {
-        //       LoaderHelper.show(context);
-        //     }
-        //
-        //     /// SUCCESS
-        //     if(state is InstructorStudentListSuccess) {
-        //
-        //       LoaderHelper.hide(context);
-        //
-        //       setState(() {
-        //
-        //         /// STORE API DATA
-        //         students =
-        //             state.studentListResponse.data;
-        //
-        //         if(students.isNotEmpty) {
-        //
-        //           selectedStudent =
-        //               students.firstWhere(
-        //
-        //                     (e) =>
-        //                 e.userId ==
-        //                     widget.lesson?.userId,
-        //
-        //                 orElse: () => students.first,
-        //               );
-        //
-        //           /// UPDATE TEXTFIELD
-        //           studentListController.text =
-        //               selectedStudent?.name ?? "";
-        //
-        //           print(
-        //             "Selected name is ${selectedStudent?.name}",
-        //           );
-        //
-        //           print(
-        //             "Controller text is ${studentListController.text}",
-        //           );
-        //         }
-        //       });
-        //     }
-        //
-        //     /// FAILURE
-        //     if(state is InstructorStudentListFailure) {
-        //       print('Student List  Failure 😞');
-        //     }
-        //   },
-        // ),
-
 
         // Bloc Listener for Add Lesson
         BlocListener<InstructorCreateLessonBloc, InstructorCreateLessonState>(
@@ -289,14 +237,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
               LoaderHelper.hide(context);
 
-              ScaffoldMessenger.of(context).showSnackBar(
-
-                SnackBar(
-                  content: Text(
-                    state.createLessonResponse.message,
-                  ),
-                ),
-              );
+              Helper.showToast(context, state.createLessonResponse.message,);
 
              Navigator.pop(context, true);
             //   if (!isEdit) {
@@ -311,12 +252,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
               print('Create Failure 😞');
 
-              ScaffoldMessenger.of(context).showSnackBar(
-
-                SnackBar(
-                  content: Text(state.error),
-                ),
-              );
+              Helper.showToast(context, state.error,);
             }
           },
         ),
@@ -333,18 +269,9 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
               LoaderHelper.hide(context);
 
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(
+              Helper.showToast(context, state.lessonEditResponse.message,);
 
-                SnackBar(
 
-                  content: Text(
-                    state
-                        .lessonEditResponse
-                        .message,
-                  ),
-                ),
-              );
 
               /// OPTIONAL
               Navigator.pop(context, true);
@@ -354,19 +281,7 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
 
               LoaderHelper.hide(context);
 
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(
-
-                SnackBar(
-
-                  content: Text(
-                    state.error,
-                  ),
-
-                  backgroundColor:
-                  Colors.red,
-                ),
-              );
+              Helper.showToast(context, state.error,);
             }
           },
         ),

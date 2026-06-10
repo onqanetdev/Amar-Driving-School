@@ -50,6 +50,7 @@ class StudentListScreen extends StatefulWidget {
 class _StudentListScreenState extends State<StudentListScreen> {
 
    List<StudentData> students = [];
+   bool isStudentDeleted = false;
 
   @override
   void initState() {
@@ -64,12 +65,8 @@ class _StudentListScreenState extends State<StudentListScreen> {
     return MultiBlocListener(listeners: [
 
       /// ADD STUDENT
-      BlocListener<
-          InstructorAddStudentBloc,
-          InstructorAddStudentState>(
-
+      BlocListener<InstructorAddStudentBloc, InstructorAddStudentState>(
         listener: (context, state) {
-
           if(state is InstructorAddStudentLoading) {
             LoaderHelper.show(context);
           }
@@ -117,6 +114,8 @@ class _StudentListScreenState extends State<StudentListScreen> {
               state.deleteResponse.message,
             );
 
+            isStudentDeleted = true;
+
             /// REFRESH LIST
             fetchStudentList();
           }
@@ -134,7 +133,13 @@ class _StudentListScreenState extends State<StudentListScreen> {
       ),
 
     ],
-        child: Scaffold(
+
+        child: WillPopScope(
+            onWillPop: () async {
+              Navigator.pop(context, isStudentDeleted);
+              return false;
+            },
+            child: Scaffold(
 
       backgroundColor: Color(0xFFE9E9E9),
 
@@ -146,6 +151,9 @@ class _StudentListScreenState extends State<StudentListScreen> {
             showBack: true,
             showAddButton: true,
             addButtonText: "Add Student",
+            onBack: () {
+              Navigator.pop(context, isStudentDeleted);
+            },
             onAdd: () {
               showAddStudentDialog(context);
             },
@@ -215,120 +223,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
         ],
       ),
     )
-    );
-
-
-      BlocListener<InstructorAddStudentBloc, InstructorAddStudentState>(
-      listener: (context, state) {
-        if(state is InstructorAddStudentLoading) {
-
-          LoaderHelper.show(context);
-        }
-
-        if(state is InstructorAddStudentSuccess) {
-
-          LoaderHelper.hide(context);
-
-          Helper.showToast(
-            context,
-            state.instructorStudentAddResponse.message,
-          );
-
-          Navigator.pop(context,true); // close dialog
-        }
-
-        if(state is InstructorAddStudentFailure) {
-
-          LoaderHelper.hide(context);
-
-          Helper.showToast(
-            context,
-            state.error,
-          );
-        }
-      },
-
-      child: Scaffold(
-
-        backgroundColor: Color(0xFFE9E9E9),
-
-        body: Column(
-          children: [
-
-            AppHeader(
-              title: "Student List",
-              showBack: true,
-              showAddButton: true,
-              addButtonText: "Add Student",
-              onAdd: () {
-                showAddStudentDialog(context);
-              },
-            ),
-
-
-
-            Expanded(
-
-              child: BlocBuilder<InstructorStudentListBloc, InstructorStudentListState>(
-
-                builder: (context, state) {
-
-                  /// LOADING
-                  if(state is InstructorStudentListLoading) {
-
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  /// SUCCESS
-                  if(state is InstructorStudentListSuccess) {
-
-                     students = state.studentListResponse.data;
-
-                    if(students.isEmpty) {
-
-                      return const Center(
-                        child: Text("No Students Found"),
-                      );
-                    }
-
-                    return ListView.separated(
-
-                      padding: const EdgeInsets.all(10),
-
-                      itemCount: state.studentListResponse.data.length,
-
-                      separatorBuilder: (_, __) =>
-                      const SizedBox(height: 12),
-
-                      itemBuilder: (context, index) {
-
-                        final data = state.studentListResponse.data[index];
-
-                        return StudentCard(
-                          data: data,
-                          onRefresh: fetchStudentList,
-                        );
-                      },
-                    );
-                  }
-
-                  /// FAILURE
-                  if(state is InstructorStudentListFailure) {
-
-                    return Center(
-                      child: Text(state.error),
-                    );
-                  }
-
-                  return const SizedBox();
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+        )
     );
   }
 
