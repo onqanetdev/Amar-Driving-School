@@ -174,18 +174,7 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
     );
   }
 
-  /// 🔥 TOGGLE EDIT
-  // void toggleEditMode() {
-  //   setState(() {
-  //     isEditMode = !isEditMode;
-  //
-  //     for (var section in sections) {
-  //       for (var item in section.items) {
-  //         item.isEditable = isEditMode;
-  //       }
-  //     }
-  //   });
-  // }
+
 
   /// 🔹 SECTION UI
   Widget sectionUI(MocktestReviewData section) {
@@ -252,8 +241,10 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
                 child: Row(
                   children: List.generate(5, (index) {
                     final value = index + 1;
+                    final List<String> overallRating = ["20", "30", "50", "80", "100"];
                     //final isSelected = item.selectedRating == value;
-                    final isSelected = item.rating != "N/A" && item.rating == value.toString();
+                    final isSelected = item.rating != "N/A" && item.rating == overallRating[index];
+                    print("Selected Value is: ${isSelected}");
                     return GestureDetector(
                       // onTap: item.isEditable
                       //     ? () {
@@ -305,7 +296,9 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: Text(
-                   "${item.rating} %",
+                   // "${item.rating} %"
+                   //"H",
+                  getGrade(item.rating),
                   style: const TextStyle(
                     color: Colors.white,
                     fontFamily: "InterBold",
@@ -339,4 +332,20 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
     );
   }
 
+  String getGrade(String? rating) {
+    switch (rating) {
+      case "20":
+        return "E";
+      case "30":
+        return "D";
+      case "50":
+        return "C";
+      case "80":
+        return "B";
+      case "100":
+        return "A";
+      default:
+        return "-"; // For N/A, null, or unexpected values
+    }
+  }
 }
