@@ -62,7 +62,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ProfileBloc, ProfileState>(
+    return
+      BlocListener<ProfileBloc, ProfileState>(
 
         listener: (context, state) {
 

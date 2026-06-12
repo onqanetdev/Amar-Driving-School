@@ -11,7 +11,7 @@ import 'package:shimmer/shimmer.dart';
 
 class MockTestReportsScreen extends StatefulWidget {
   final String? topicId;
-  const MockTestReportsScreen({this.topicId,super.key});
+  const  MockTestReportsScreen({this.topicId,super.key});
 
   @override
   State<MockTestReportsScreen> createState() =>
@@ -306,7 +306,7 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: Text(
-                  "${item.rating} %",
+                  getGrade(item.rating),
                   style: const TextStyle(
                     color: Colors.white,
                     fontFamily: "InterBold",
@@ -337,6 +337,23 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
        topicId: widget.topicId!,
       ),
     );
+  }
+
+  String getGrade(String? rating) {
+    switch (rating) {
+      case "20":
+        return "E";
+      case "30":
+        return "D";
+      case "50":
+        return "C";
+      case "80":
+        return "B";
+      case "100":
+        return "A";
+      default:
+        return "-"; // For N/A, null, or unexpected values
+    }
   }
 
   Widget mocktestReviewShimmer() {

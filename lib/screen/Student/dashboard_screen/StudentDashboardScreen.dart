@@ -1,3 +1,4 @@
+import 'package:amar_driving_school/bloc/common/profile_bloc.dart';
 import 'package:amar_driving_school/helper/app_button_animation.dart';
 import 'package:amar_driving_school/screen/Student/profile_screen/ProfileScreen.dart';
 import 'package:amar_driving_school/screen/common_screen/login_screen/LoginScreen.dart';
@@ -8,6 +9,7 @@ import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
 import '../../../bloc/student/lesson_list/student_lesson_list_bloc.dart';
 import '../../../bloc/student/mocktest_list/student_mocktest_list_bloc.dart';
+import '../../../bloc/student/mocktest_real_review_list/student_real_mocktest_review_bloc.dart';
 import '../../../bloc/student/student_login/student_login_bloc.dart';
 import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_bloc.dart';
 import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_event.dart';
@@ -81,7 +83,14 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     ], child: MockTestScreen()
     ),
 
-    ProfileScreen(),
+    MultiBlocProvider(providers: [
+      BlocProvider(create: (_) =>
+          ProfileBloc(),
+      ),
+
+    ], child: ProfileScreen())
+
+   // ProfileScreen(),
   ];
 
 
@@ -1430,7 +1439,13 @@ class LessonCard extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => MockTestReportsScreen(),
+                          builder: (_) => MultiBlocProvider(providers: [
+                            BlocProvider(
+                              create: (_) => StudentRealMocktestReviewBloc(),
+                            ),
+                          ], child: MockTestReportsScreen(topicId: data.topicId,)
+                          )
+                              //MockTestReportsScreen(),
                         ),
                       );
 

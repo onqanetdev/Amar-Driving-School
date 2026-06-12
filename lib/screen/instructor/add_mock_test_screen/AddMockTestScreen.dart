@@ -130,6 +130,8 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
                   (widget.mocktest!.subtopicId ?? '').split(',')
                           .map((e) => e.trim())
                           .toSet();
+                  print("All Selected Sub topics Are After Refreshing : ${allSelectedSubTopic}");
+
                 }
               });
             }
@@ -342,6 +344,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
                                           onTap: () {
                                             setState(() {
                                               selectedCategories.remove(cat);
+                                              allSelectedSubTopic.clear();
                                             });
                                           },
                                           child: Icon(Icons.close, size: 18, color: Colors.red),
@@ -405,7 +408,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
                                                 }
 
-                                                print(allSelectedSubTopic);
+                                                print("All Subtopic Ids Are allSelectedSubTopic: ${allSelectedSubTopic}");
                                               });
 
 
@@ -1082,15 +1085,17 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
       return;
     }
 
-    print(
-      'Selected Sub Topics: $allSelectedSubTopic\n'
-          'Topic Id: ${selectedCategory?.id}\n'
-          'Date: ${dateController.text}\n'
-          'Time: ${timeController.text}\n'
-          'Duration: ${durationController.text}\n'
-          'Student Id: $studentUserId\n'
-          'Instructor Id: $userId',
-    );
+    // print(
+    //   'Selected Sub Topics: $allSelectedSubTopic\n'
+    //       'Topic Id: ${selectedCategory?.id}\n'
+    //       'Date: ${dateController.text}\n'
+    //       'Time: ${timeController.text}\n'
+    //       'Duration: ${durationController.text}\n'
+    //       'Student Id: $studentUserId\n'
+    //       'Instructor Id: $userId',
+    // );
+
+    print("All Selected Sub Topic Ids before Updating Are: ${allSelectedSubTopic}");
 
     context.read<InstructorUpdateMocktestBloc>().add(
 
@@ -1113,8 +1118,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
         topicId:
         selectedCategory!.id,
 
-        subtopicId:
-        allSelectedSubTopic.join(","),
+        subtopicId: allSelectedSubTopic.join(","),
       ),
     );
   }
