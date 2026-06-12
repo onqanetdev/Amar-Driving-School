@@ -269,25 +269,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     providers: [
 
-                      BlocProvider(
+                      BlocProvider(create: (_) => StudentTotalLessonCountBloc(),),
 
-                        create: (_) => StudentTotalLessonCountBloc(),
-                      ),
+                      BlocProvider(create: (_) => StudentTotalMocktestCountBloc(),),
 
-                      BlocProvider(
-                        create: (_) => StudentTotalMocktestCountBloc(),
-                      ),
+                      BlocProvider(create: (_) => StudentTodaysLessonListBloc(),),
 
-                      BlocProvider(
-
-                        create: (_) => StudentTodaysLessonListBloc(),
-                      ),
-
-                      BlocProvider(
-
-                        create: (_) =>
-                            StudentTodaysMocktestListBloc(),
-                      ),
+                      BlocProvider(create: (_) => StudentTodaysMocktestListBloc(),),
 
                     ],
 

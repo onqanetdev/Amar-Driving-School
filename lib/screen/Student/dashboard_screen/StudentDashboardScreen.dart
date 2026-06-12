@@ -57,6 +57,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   bool isLessonLoading = true;
   bool isMockLoading = true;
 
+  bool isTotalLessonLoading = true;
+  bool isTotalMocktestLoading = true;
   /// ADD SCREENS LIST (ADD HERE)
   List<Widget> get _screens => [
     Column(
@@ -97,19 +99,6 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   /// Dummy Data
 
   List<StudentTodaysLessonData> lessonList = [];
-
-
-   //List<StudentTodaysMocktestData> mockList = [ ];
-
-  // final List<LessonModel> lessons = List.generate(
-  //   5,
-  //       (index) => LessonModel(
-  //     name: "Car Drive Mocktest",
-  //     duration: "1hr",
-  //     date: "18.04.2026",
-  //     time: "10:30AM",
-  //   ),
-  // );
 
 
   List<StudentTodaysMocktestData> lessons = [ ];
@@ -154,16 +143,17 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 /// LOADING
                 if(state is StudentTotalLessonCountLoading) {
 
-                  LoaderHelper.show(context);
+                 // LoaderHelper.show(context);
+                  isTotalLessonLoading = true;
                 }
 
                 /// SUCCESS
                 if(state is StudentTotalLessonCountSuccess) {
 
-                  LoaderHelper.hide(context);
+                  //LoaderHelper.hide(context);
 
+                  isTotalLessonLoading = false;
                   setState(() {
-
                     totalLesson = state.totalLessonCountResponse.data.toString();
                   });
                 }
@@ -171,8 +161,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 /// FAILURE
                 if(state is StudentTotalLessonCountFailure) {
 
-                  LoaderHelper.hide(context);
-
+                 // LoaderHelper.hide(context);
+                  isTotalLessonLoading = false;
                   print(state.error);
                 }
               },
@@ -185,15 +175,15 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
 
                 /// LOADING
                 if(state is StudentTotalMocktestCountLoading) {
-
-                  LoaderHelper.show(context);
+                  //LoaderHelper.show(context);
+                  isTotalMocktestLoading = true;
                 }
 
                 /// SUCCESS
                 if(state is StudentTotalMocktestCountSuccess) {
 
-                  LoaderHelper.hide(context);
-
+                  //LoaderHelper.hide(context);
+                  isTotalMocktestLoading = false;
                   setState(() {
 
                     totalMocktest = state.totalMocktestCountResponse.data.toString();
@@ -203,8 +193,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 /// FAILURE
                 if(state is StudentTotalMocktestCountFailure) {
 
-                  LoaderHelper.hide(context);
-
+                 // LoaderHelper.hide(context);
+                  isTotalMocktestLoading = false;
                   print(state.error);
                 }
               },
@@ -217,29 +207,26 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
 
                 /// LOADING
                 if(state is StudentTodaysLessonListLoading) {
-
-                  LoaderHelper.show(context);
+                  //LoaderHelper.show(context);
+                  isLessonLoading = true;
                 }
 
                 /// SUCCESS
                 if(state is StudentTodaysLessonListSuccess) {
-
-                  LoaderHelper.hide(context);
+                 // LoaderHelper.hide(context);
+                  isLessonLoading = false;
                   print('Lesson List ----->${state.todaysLessonListResponse.data}');
                   setState(() {
                     lessonList = state.todaysLessonListResponse.data;
                   });
 
-                  print(
-                    "Lesson List Length = ${lessonList.length}",
-                  );
+                  print("Lesson List Length = ${lessonList.length}",);
                 }
 
                 /// FAILURE
                 if(state is StudentTodaysLessonListFailure) {
-
-                  LoaderHelper.hide(context);
-
+                  //LoaderHelper.hide(context);
+                  isLessonLoading = false;
                   print(state.error);
                 }
               },
@@ -253,14 +240,15 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 /// LOADING
                 if(state is StudentTodaysMocktestListLoading) {
 
-                  LoaderHelper.show(context);
+                  //LoaderHelper.show(context);
+                  isMockLoading = true;
                 }
 
                 /// SUCCESS
                 if(state is StudentTodaysMocktestListSuccess) {
 
-                  LoaderHelper.hide(context);
-
+                 // LoaderHelper.hide(context);
+                  isMockLoading = false;
                   setState(() {
 
                     lessons = state.todaysMocktestListResponse
@@ -270,9 +258,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
 
                 /// FAILURE
                 if(state is StudentTodaysMocktestListFailure) {
-
-                  LoaderHelper.hide(context);
-
+                  //LoaderHelper.hide(context);
+                  isMockLoading = false;
                   print(state.error);
                 }
               },
@@ -301,12 +288,6 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         backgroundColor: Color.fromARGB(255, 233, 233, 233),
 
         /// ---------------- BODY ----------------
-        /*body: Column(
-          children: [
-            _header(),
-            bodyContent(),
-          ],
-        ),*/
         body: _screens[_currentIndex],
 
         /// ---------------- BOTTOM NAV (UNCHANGED) ----------------
@@ -393,6 +374,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     ),
       );
   }
+
 
   Widget _exitDialog(BuildContext context) {
     return Dialog(

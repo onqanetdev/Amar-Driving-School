@@ -153,7 +153,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     fetchTotalStudentCount();
     fetchTotalRevenue();
     fetchTodaysLesson();
-
     fetchTodaysMocktest();
   }
 
@@ -205,13 +204,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               if(state
               is InstructorTotalRevenueSuccess) {
 
-
                 setState(() {
 
-                  totalRevenue =
-                      state.totalRevenueResponse
-                          .totalRevenue
-                          .toDouble();
+                  totalRevenue = state.totalRevenueResponse.totalRevenue.toDouble();
                 });
 
               }
