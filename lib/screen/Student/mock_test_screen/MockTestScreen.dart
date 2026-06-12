@@ -141,188 +141,119 @@ class _MockTestScreenState extends State<MockTestScreen> {
     );
   }
 
+
+
+
    Widget _mocktestShimmer() {
-
      return ListView.separated(
-
-       padding: const EdgeInsets.all(16),
-
+       padding: const EdgeInsets.all(10),
        itemCount: 5,
-
-       shrinkWrap: true,
-
-       physics:
-       const NeverScrollableScrollPhysics(),
-
-       separatorBuilder: (_, __) =>
-       const SizedBox(height: 12),
-
+       separatorBuilder: (_, __) => const SizedBox(height: 12),
        itemBuilder: (_, __) {
-
-         return Shimmer.fromColors(
-
-           baseColor: Colors.grey.shade300,
-
-           highlightColor:
-           Colors.grey.shade100,
-
-           child: Container(
-
-             padding:
-             const EdgeInsets.all(16),
-
-             decoration: BoxDecoration(
-
-               color: Colors.white,
-
-               borderRadius:
-               BorderRadius.circular(16),
-
-               boxShadow: const [
-
-                 BoxShadow(
-
-                   color: Colors.black12,
-
-                   blurRadius: 4,
-
-                   offset: Offset(0, 2),
-                 ),
-               ],
-             ),
-
-             child: Column(
-
-               crossAxisAlignment:
-               CrossAxisAlignment.start,
-
-               children: [
-
-                 /// TOPIC NAME
-                 Container(
-
-                   height: 16,
-
-                   width: 150,
-
-                   decoration: BoxDecoration(
-
-                     color: Colors.white,
-
-                     borderRadius:
-                     BorderRadius.circular(4),
-                   ),
-                 ),
-
-                 const SizedBox(height: 12),
-
-                 /// DATE + TIME
-                 Row(
-
+         return Container(
+           padding: const EdgeInsets.all(12),
+           decoration: BoxDecoration(
+             color: Colors.white,
+             borderRadius: BorderRadius.circular(15),
+             boxShadow: const [
+               BoxShadow(
+                 color: Colors.black12,
+                 blurRadius: 4,
+                 spreadRadius: 1,
+                 offset: Offset(0, 2),
+               ),
+             ],
+           ),
+           child: Row(
+             children: [
+               Expanded(
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
                    children: [
+                     shimmerBox(180, 16),
 
-                     Container(
+                     const SizedBox(height: 10),
 
-                       height: 12,
-
-                       width: 90,
-
-                       decoration:
-                       BoxDecoration(
-
-                         color: Colors.white,
-
-                         borderRadius:
-                         BorderRadius.circular(4),
-                       ),
+                     Row(
+                       children: [
+                         shimmerBox(100, 12),
+                         const SizedBox(width: 8),
+                         shimmerBox(40, 12),
+                       ],
                      ),
 
-                     const SizedBox(width: 20),
+                     const SizedBox(height: 10),
 
-                     Container(
+                     Row(
+                       children: [
+                         shimmerCircle(14),
+                         const SizedBox(width: 4),
+                         shimmerBox(70, 12),
 
-                       height: 12,
+                         const SizedBox(width: 16),
 
-                       width: 60,
-
-                       decoration:
-                       BoxDecoration(
-
-                         color: Colors.white,
-
-                         borderRadius:
-                         BorderRadius.circular(4),
-                       ),
+                         shimmerCircle(14),
+                         const SizedBox(width: 4),
+                         shimmerBox(45, 12),
+                       ],
                      ),
                    ],
                  ),
+               ),
 
-                 const SizedBox(height: 12),
+               const SizedBox(width: 10),
 
-                 /// DURATION
-                 Container(
-
-                   height: 12,
-
-                   width: 100,
-
-                   decoration:
-                   BoxDecoration(
-
-                     color: Colors.white,
-
-                     borderRadius:
-                     BorderRadius.circular(4),
-                   ),
-                 ),
-
-                 const SizedBox(height: 12),
-
-                 /// BOTTOM ROW
-                 Row(
-
-                   mainAxisAlignment:
-                   MainAxisAlignment.spaceBetween,
-
-                   children: [
-
-                     Container(
-
-                       height: 12,
-
-                       width: 70,
-
-                       decoration:
-                       BoxDecoration(
-
-                         color: Colors.white,
-
-                         borderRadius:
-                         BorderRadius.circular(4),
-                       ),
-                     ),
-
-                     Container(
-
-                       height: 24,
-
-                       width: 24,
-
-                       decoration:
-                       const BoxDecoration(
-
-                         color: Colors.white,
-
-                         shape: BoxShape.circle,
-                       ),
-                     ),
-                   ],
-                 ),
-               ],
-             ),
+               shimmerButton(),
+             ],
            ),
          );
        },
+     );
+   }
+
+
+   Widget shimmerBox(double width, double height) {
+     return Shimmer.fromColors(
+       baseColor: Colors.grey.shade300,
+       highlightColor: Colors.grey.shade100,
+       child: Container(
+         width: width,
+         height: height,
+         decoration: BoxDecoration(
+           color: Colors.white,
+           borderRadius: BorderRadius.circular(4),
+         ),
+       ),
+     );
+   }
+
+   Widget shimmerCircle(double size) {
+     return Shimmer.fromColors(
+       baseColor: Colors.grey.shade300,
+       highlightColor: Colors.grey.shade100,
+       child: Container(
+         width: size,
+         height: size,
+         decoration: const BoxDecoration(
+           color: Colors.white,
+           shape: BoxShape.circle,
+         ),
+       ),
+     );
+   }
+
+   Widget shimmerButton() {
+     return Shimmer.fromColors(
+       baseColor: Colors.grey.shade300,
+       highlightColor: Colors.grey.shade100,
+       child: Container(
+         width: 100,
+         height: 34,
+         decoration: BoxDecoration(
+           color: Colors.white,
+           borderRadius: BorderRadius.circular(8),
+         ),
+       ),
      );
    }
 
@@ -472,8 +403,6 @@ class LessonCard extends StatelessWidget {
                             ),
                           ],
                         ),
-
-
                       ],
                     ),
                   ],
