@@ -121,18 +121,8 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
               setState(() {
 
-                allSubCategories =
-                    state.subTopicListResponse.data;
+                allSubCategories = state.subTopicListResponse.data;
 
-                if (isEdit) {
-
-                  allSelectedSubTopic =
-                  (widget.mocktest!.subtopicId ?? '').split(',')
-                          .map((e) => e.trim())
-                          .toSet();
-                  print("All Selected Sub topics Are After Refreshing : ${allSelectedSubTopic}");
-
-                }
               });
             }
 
@@ -150,8 +140,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
 
               setState(() {
 
-                allCategories =
-                    state.topicListResponse.data;
+                allCategories = state.topicListResponse.data;
 
                 if (isEdit && !editDataLoaded) {
 
