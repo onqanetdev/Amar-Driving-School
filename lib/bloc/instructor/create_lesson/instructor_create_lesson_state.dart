@@ -31,3 +31,4 @@ class InstructorCreateLessonFailure
       this.error,
       );
 }
+

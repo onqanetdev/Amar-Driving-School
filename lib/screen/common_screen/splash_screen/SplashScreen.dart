@@ -13,9 +13,11 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../bloc/instructor/forget_password/instructor_forget_password_bloc.dart';
 import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
+import '../../../bloc/instructor/reset_password/instructor_reset_password_bloc.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
 import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_bloc.dart';
 import '../../../bloc/student/todays_mocktest_list/student_todays_mocktest_list_bloc.dart';
@@ -266,6 +268,15 @@ class _SplashScreenState extends State<SplashScreen> {
                 BlocProvider(
                   create: (_) =>
                       InstructorTotalRevenueBloc(),
+                ),
+
+                BlocProvider(
+                  create: (_) => InstructorForgotPasswordBloc(),
+                ),
+
+                //Bloc Provider for Reset password
+                BlocProvider(
+                  create: (_) => InstructorResetPasswordBloc(),
                 ),
 
               ],

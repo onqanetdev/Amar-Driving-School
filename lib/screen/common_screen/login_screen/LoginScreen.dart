@@ -12,10 +12,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import '../../../bloc/instructor/forget_password/instructor_forget_password_bloc.dart';
+import '../../../bloc/instructor/forget_password/instructor_forget_password_event.dart';
+import '../../../bloc/instructor/forget_password/instructor_forget_password_state.dart';
 import '../../../bloc/instructor/instructor_register_event.dart';
 import '../../../bloc/instructor/instructor_register_state.dart';
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_state.dart';
+import '../../../bloc/instructor/reset_password/instructor_reset_password_bloc.dart';
+import '../../../bloc/instructor/reset_password/instructor_reset_password_event.dart';
+import '../../../bloc/instructor/reset_password/instructor_reset_password_state.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
 import '../../../bloc/student/student_login/student_login_bloc.dart';
 import '../../../bloc/student/student_login/student_login_event.dart';
@@ -53,6 +59,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   /// Role
   String selectedRole = "instructor";
+
+  bool isOtpSent = false;
+
+  String forgetPassswordUser = "";
 
   @override
   void dispose() {
@@ -291,6 +301,98 @@ class _LoginScreenState extends State<LoginScreen> {
               LoaderHelper.hide(context);
 
               _showMsg(state.error);
+            }
+          },
+        ),
+
+        /// 🔥 Forget Password
+        BlocListener<InstructorForgotPasswordBloc, InstructorForgotPasswordState>(
+
+          listener: (context, state) {
+
+            if (state is InstructorForgotPasswordLoading) {
+
+              LoaderHelper.show(context);
+            }
+
+            if (state is InstructorForgotPasswordSuccess) {
+
+              LoaderHelper.hide(context);
+
+              Helper.showToast(context, state.forgotPasswordResponse.message ?? " ",);
+
+              forgetPassswordUser =
+                  state.forgotPasswordResponse.data?.userId ?? "";
+
+              Navigator.pop(context); // Close email dialog
+
+              setState(() {
+                isOtpSent = true;
+              });
+
+              _showForgotPasswordDialog(); // Reopen as OTP dialog
+
+              /// Update dialog state
+              // setState(() {
+              //   isOtpSent = true;
+              //   forgetPassswordUser = state.forgotPasswordResponse.data?.userId ?? "";
+              // });
+            }
+
+            if (state is InstructorForgotPasswordFailure) {
+
+              LoaderHelper.hide(context);
+
+              Helper.showToast(
+                context,
+                state.error,
+              );
+            }
+          },
+        ),
+
+        /// Reset Password bloc
+        BlocListener<InstructorResetPasswordBloc, InstructorResetPasswordState>(
+
+          listener: (context, state) {
+
+            /// 🔥 LOADING
+            if(state is InstructorResetPasswordLoading) {
+
+              LoaderHelper.show(context);
+            }
+
+            /// 🔥 SUCCESS
+            if(state is InstructorResetPasswordSuccess) {
+
+              LoaderHelper.hide(context);
+
+              Helper.showToast(
+                context,
+                state.resetPasswordResponse.message,
+              );
+
+              Navigator.pop(context);
+
+              isOtpSent = false;
+
+
+              /// Optional:
+              /// Clear controllers
+              /// Switch back to Login mode
+            }
+
+            /// 🔥 FAILURE
+            if(state is InstructorResetPasswordFailure) {
+
+              LoaderHelper.hide(context);
+
+              print('Reset Password Failure 😞');
+
+              Helper.showToast(
+                context,
+                state.error,
+              );
             }
           },
         ),
@@ -605,8 +707,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showForgotPasswordDialog() {
     final emailController = TextEditingController();
     final otpController = TextEditingController();
+    final newPasswordController = TextEditingController();
 
-    bool isOtpSent = false;
+    final parentContext = context;
+
+    //bool isOtpSent = false;
     bool isLoading = false;
 
     showDialog(
@@ -660,10 +765,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: 10,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
+
                       ),
 
                     /// 🔹 OTP FIELD
-                    if (isOtpSent)
+                    if (isOtpSent)...[
                       AppInputField(
                         controller: otpController,
                         hintText: "Enter OTP",
@@ -675,10 +781,30 @@ class _LoginScreenState extends State<LoginScreen> {
                         iconPath: 'assets/app_icons/ic_code.png',
                         borderRadius: 10,
                         keyboardType: TextInputType.number,
-                        maxLength: 6,
+                        maxLength: 4,
                         obscureText: false,
+                        onTap: () {},
                       ),
 
+                    const SizedBox(height: 10,),
+
+                    AppInputField(
+                      controller: newPasswordController,
+                      hintText: "New Password",
+                      fillColor: AppColor.colorInputBg,
+                      borderColor: AppColor.colorInputBorder,
+                      focusedBorderColor:
+                      AppColor.colorInputFocusBorder,
+                      hintColor: AppColor.colorInputHint,
+                      iconPath: 'assets/app_icons/ic_code.png',
+                      borderRadius: 10,
+                      keyboardType: TextInputType.number,
+                      maxLength: 10,
+                      obscureText: false,
+                      onTap: () {},
+                    ),
+
+                    ],
                     const SizedBox(height: 20),
 
                     /// 🔘 BUTTONS
@@ -721,6 +847,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                 : () async {
                               if (!isOtpSent) {
                                 final email = emailController.text.trim();
+                                //Forget Password
+                                //print("Email Sent");
+
+                                // parentContext.read<InstructorForgotPasswordBloc>().add(
+                                //   InstructorForgotPasswordTapped(
+                                //     email: emailController.text.trim(),
+                                //   ),
+                                // );
 
                                 if (email.isEmpty) {
                                   _showMsg("Enter email");
@@ -732,33 +866,50 @@ class _LoginScreenState extends State<LoginScreen> {
                                   return;
                                 }
 
-                                setStateDialog(() => isLoading = true);
+                                parentContext.read<InstructorForgotPasswordBloc>().add(
+                                  InstructorForgotPasswordTapped(
+                                    email: emailController.text.trim(),
+                                  ),
+                                );
 
-                                await Future.delayed(const Duration(seconds: 1));
+                                // setStateDialog(() => isLoading = true);
+                                //
+                                // await Future.delayed(const Duration(seconds: 1));
+                                //
+                                // setStateDialog(() {
+                                //   isLoading = false;
+                                //   isOtpSent = true;
+                                // });
 
-                                setStateDialog(() {
-                                  isLoading = false;
-                                  isOtpSent = true;
-                                });
-
-                                _showMsg("OTP sent to email");
+                                //_showMsg("OTP sent to email");
 
                               } else {
                                 final otp = otpController.text.trim();
-
                                 if (otp.isEmpty) {
                                   _showMsg("Enter OTP");
                                   return;
                                 }
 
-                                if (otp.length != 6) {
+                                if (otp.length != 4) {
                                   _showMsg("Enter valid OTP");
                                   return;
                                 }
 
-                                Navigator.pop(context);
+                                parentContext.read<InstructorResetPasswordBloc>().add(
 
-                                _showMsg("OTP verified");
+                                  InstructorResetPasswordTapped(
+
+                                    userId: forgetPassswordUser,
+
+                                    otp: otpController.text.trim(),
+
+                                    newPassword: newPasswordController.text.trim(),
+                                  ),
+                                );
+
+                                //Navigator.pop(context);
+
+                               // _showMsg("OTP verified");
                               }
                             },
                             textStyle: const TextStyle(
