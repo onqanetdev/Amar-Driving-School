@@ -23,6 +23,7 @@ import '../../../bloc/instructor/reset_password/instructor_reset_password_bloc.d
 import '../../../bloc/instructor/reset_password/instructor_reset_password_event.dart';
 import '../../../bloc/instructor/reset_password/instructor_reset_password_state.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
+import '../../../bloc/student/download_training_report/student_download_training_report_bloc.dart';
 import '../../../bloc/student/student_login/student_login_bloc.dart';
 import '../../../bloc/student/student_login/student_login_event.dart';
 import '../../../bloc/student/student_login/student_login_state.dart';
@@ -286,6 +287,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       BlocProvider(create: (_) => StudentTodaysLessonListBloc(),),
 
                       BlocProvider(create: (_) => StudentTodaysMocktestListBloc(),),
+
+                      BlocProvider(create: (_) => StudentDownloadTrainingReportBloc(),),
 
                     ],
 

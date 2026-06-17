@@ -15,6 +15,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bloc/common/profile_bloc.dart';
 import '../../../bloc/instructor/add_student/instructor_add_student_bloc.dart';
 import '../../../bloc/instructor/delete_student/instructor_student_delete_bloc.dart';
+import '../../../bloc/instructor/forget_password/instructor_forget_password_bloc.dart';
 import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/instructor_revenue/instructor_total_revenue_bloc.dart';
 import '../../../bloc/instructor/instructor_revenue/instructor_total_revenue_event.dart';
@@ -24,6 +25,7 @@ import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
 import '../../../bloc/instructor/mocktest_delete/instructor_mocktest_delete_bloc.dart';
 import '../../../bloc/instructor/mocktest_edit/instructor_update_mocktest_bloc.dart';
+import '../../../bloc/instructor/reset_password/instructor_reset_password_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_event.dart';
@@ -651,6 +653,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               /// ADD THIS
                               BlocProvider(
                                 create: (_) => StudentLoginBloc(),
+                              ),
+
+                              BlocProvider(
+                                create: (_) => InstructorForgotPasswordBloc(),
+                              ),
+
+                              //Bloc Provider for Reset password
+                              BlocProvider(
+                                create: (_) => InstructorResetPasswordBloc(),
                               ),
                             ],
                             child: const LoginScreen(),

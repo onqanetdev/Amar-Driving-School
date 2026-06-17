@@ -5,8 +5,13 @@ import 'package:amar_driving_school/screen/common_screen/login_screen/LoginScree
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/instructor/forget_password/instructor_forget_password_bloc.dart';
 import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
+import '../../../bloc/instructor/reset_password/instructor_reset_password_bloc.dart';
+import '../../../bloc/student/download_training_report/student_download_training_report_bloc.dart';
+import '../../../bloc/student/download_training_report/student_download_training_report_event.dart';
+import '../../../bloc/student/download_training_report/student_download_training_report_state.dart';
 import '../../../bloc/student/lesson_list/student_lesson_list_bloc.dart';
 import '../../../bloc/student/mocktest_list/student_mocktest_list_bloc.dart';
 import '../../../bloc/student/mocktest_real_review_list/student_real_mocktest_review_bloc.dart';
@@ -25,6 +30,7 @@ import '../../../bloc/student/total_mocktest_count/student_total_mocktest_count_
 import '../../../bloc/student/total_mocktest_count/student_total_mocktest_count_state.dart';
 import '../../../common/app_color.dart';
 import '../../../common/convert_color.dart';
+import '../../../helper/helper.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../model/LessonModel.dart';
 import '../../../model/MockTestModel.dart';
@@ -36,6 +42,13 @@ import '../lesson_screen/LessonScreen.dart';
 import '../mock_test_reports_screen/MockTestReportsScreen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
+
 
 class StudentDashboardScreen extends StatefulWidget {
   const StudentDashboardScreen({super.key});
@@ -264,6 +277,94 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 }
               },
             ),
+
+
+            //Downloading Student Report
+            BlocListener<StudentDownloadTrainingReportBloc, StudentDownloadTrainingReportState>(
+
+              listener: (context, state) async {
+
+                if (state is StudentDownloadTrainingReportLoading) {
+
+                  LoaderHelper.show(context);
+                }
+
+                if (state is StudentDownloadTrainingReportSuccess) {
+
+                  LoaderHelper.hide(context);
+
+                  Helper.showToast(
+                    context,
+                    state.downloadTrainingReportResponse.message,
+                  );
+
+                  // final fileData =
+                  //     state.downloadTrainingReportResponse.data;
+                  //
+                  // print("Filename: ${fileData?.filename}");
+                  // print("Path: ${fileData?.path}");
+
+                  /// Next Step:
+                  /// Save/Open PDF using
+                  /// fileData?.base64Data
+                  /// or launch fileData?.path
+
+                  final fileData =
+                      state.downloadTrainingReportResponse.data;
+
+                  if (fileData == null) {
+                    return;
+                  }
+
+                  try {
+
+                    /// Decode Base64
+                    final bytes =
+                    base64Decode(fileData.base64Data);
+
+                    /// Save to temporary directory
+                    final directory = await getTemporaryDirectory();
+
+                    final file = File(
+                      '${directory.path}/${fileData.filename}',
+                    );
+
+                    await file.writeAsBytes(bytes);
+
+                    /// Ask user where to save/share
+                    await SharePlus.instance.share(
+                      ShareParams(
+                        files: [
+                          XFile(file.path),
+                        ],
+                        text: 'Training Report',
+                      ),
+                    );
+
+                  } catch (e) {
+
+                    Helper.showToast(
+                      context,
+                      'Failed to save file',
+                    );
+
+                    print("PDF SAVE ERROR: $e");
+                  }
+
+                }
+
+                if (state is StudentDownloadTrainingReportFailure) {
+
+                  LoaderHelper.hide(context);
+
+                  Helper.showToast(
+                    context,
+                    state.error,
+                  );
+                }
+              },
+            ),
+
 
           ],
 
@@ -635,6 +736,16 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                               BlocProvider(
                                 create: (_) => StudentLoginBloc(),
                               ),
+
+                              BlocProvider(
+                                create: (_) => InstructorForgotPasswordBloc(),
+                              ),
+
+                              //Bloc Provider for Reset password
+                              BlocProvider(
+                                create: (_) => InstructorResetPasswordBloc(),
+                              ),
+
                             ],
                                 child: const LoginScreen(),
                             ),
@@ -1136,52 +1247,62 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
 
           ///Download Training Report
           Expanded(
-            child: Container(
-              // decoration: BoxDecoration(
-              //   color: Color.fromARGB(77, 158, 158, 158),
-              //   borderRadius: BorderRadius.circular(10),
-              // ),
 
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    colors: [
-                      Color.fromARGB(255, 54, 113, 232),
-                      Color.fromARGB(255, 3, 61, 175)
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter
+            child: GestureDetector(
+              onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+
+                final loginId = prefs.getString('user_id') ?? '';
+                print("Login Id : ${loginId}");
+
+                if (loginId.isEmpty) {
+
+                  Helper.showToast(context, "Login Id not found",);
+                  return;
+                }
+
+                context.read<StudentDownloadTrainingReportBloc>().add(
+                  StudentDownloadTrainingReportTapped(loginId: loginId,),
+                );
+
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 54, 113, 232),
+                        Color.fromARGB(255, 3, 61, 175)
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter
+                  ),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Image.asset(
-                  //   'assets/app_icons/database_schema.png',
-                  //   width: 30,
-                  //   color: HexColor(AppColor.colorOfAddStudent),
-                  // ),
-                  SizedBox(width: 8),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/app_icons/database_schema.png',
-                        width: 30,
-                        //color: HexColor(AppColor.colorOfAddStudent),
-                        color: Colors.white,
-                      ),
-                      Text('Download \nTraining Report',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white
+              
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(width: 8),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/app_icons/database_schema.png',
+                          width: 30,
+                          //color: HexColor(AppColor.colorOfAddStudent),
+                          color: Colors.white,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  )
-                ],
+                        Text('Download \nTraining Report',
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
           ),

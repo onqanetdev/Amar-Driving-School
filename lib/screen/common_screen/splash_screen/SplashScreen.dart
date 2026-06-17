@@ -19,6 +19,7 @@ import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
 import '../../../bloc/instructor/reset_password/instructor_reset_password_bloc.dart';
 import '../../../bloc/instructor/student_total_count/instructor_student_count_bloc.dart';
+import '../../../bloc/student/download_training_report/student_download_training_report_bloc.dart';
 import '../../../bloc/student/todays_lesson_list/student_todays_lesson_list_bloc.dart';
 import '../../../bloc/student/todays_mocktest_list/student_todays_mocktest_list_bloc.dart';
 import '../../../bloc/student/total_lesson_count/student_total_lesson_count_bloc.dart';
@@ -176,10 +177,11 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
 
                 BlocProvider(
-
                   create: (_) =>
                       StudentTodaysMocktestListBloc(),
                 ),
+
+                BlocProvider(create: (_) => StudentDownloadTrainingReportBloc(),),
               ],
 
               child: StudentDashboardScreen(),
