@@ -12,6 +12,7 @@ import 'package:amar_driving_school/screen/instructor/profile_screen/ProfileScre
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/common/invoice/user_invoice_dart.dart';
 import '../../../bloc/common/profile_bloc.dart';
 import '../../../bloc/instructor/add_student/instructor_add_student_bloc.dart';
 import '../../../bloc/instructor/delete_student/instructor_student_delete_bloc.dart';
@@ -1200,6 +1201,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               builder: (_) => MultiBlocProvider(providers: [
                 BlocProvider(
                   create: (_) => InstructorStudentListBloc(),
+                ),
+
+                BlocProvider(
+                  create: (_) => UserInvoiceBloc(),
                 ),
               ], child: InvoiceScreen())
 

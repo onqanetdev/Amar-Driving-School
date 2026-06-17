@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../bloc/common/invoice/user_invoice_dart.dart';
 import '../../../bloc/instructor/forget_password/instructor_forget_password_bloc.dart';
 import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/lesson_list/instructor_lesson_list_bloc.dart';
@@ -224,6 +225,10 @@ class _SplashScreenState extends State<SplashScreen> {
                     create: (_) =>
                         InstructorTodaysMocktestBloc(),
                   ),
+
+                  // BlocProvider(
+                  //   create: (_) => UserInvoiceBloc(),
+                  // ),
                 ],
 
                 child: const DashboardScreen(),

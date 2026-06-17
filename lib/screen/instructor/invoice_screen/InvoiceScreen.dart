@@ -1,10 +1,18 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
+import '../../../bloc/common/invoice/user_invoice_dart.dart';
+import '../../../bloc/common/invoice/user_invoice_event.dart';
+import '../../../bloc/common/invoice/user_invoice_state.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_bloc.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_event.dart';
 import '../../../bloc/instructor/student_list/instructor_student_list_state.dart';
 import '../../../common/app_color.dart';
+import '../../../helper/helper.dart';
+import '../../../helper/loader_helper.dart';
 import '../../../model/StudentModel.dart';
 import '../../../model/instructor_student_list/instructor_student_list_model.dart';
 import '../../../widgets/app_button.dart';
@@ -12,6 +20,10 @@ import '../../../widgets/app_header.dart';
 import '../../../widgets/app_input_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
+
 
 class InvoiceScreen extends StatefulWidget {
   const InvoiceScreen({super.key});
@@ -26,28 +38,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   final nameController = TextEditingController();
   final fileController = TextEditingController();
 
-  ///  STUDENT LIST (MODEL)
-  // List<StudentModel> students = [
-  //   StudentModel(
-  //     name: "Ravi Kumar",
-  //     email: "ravi@gmail.com",
-  //     phone: "9876543210",
-  //     duration: "4 to 6 month",
-  //     date: "18.04.2026",
-  //     amount: 1840,
-  //   ),
-  //   StudentModel(
-  //     name: "Amit Sharma",
-  //     email: "amit@gmail.com",
-  //     phone: "9123456780",
-  //     duration: "3 month",
-  //     date: "10.03.2026",
-  //     amount: 1500,
-  //   ),
-  // ];
-  //
-  // StudentModel? selectedStudent;
-
   List<StudentData> students = [];
   StudentData? selectedStudent;
 
@@ -60,7 +50,9 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
+    return MultiBlocListener(listeners: [
+      //Student List Bloc Listener
+      BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
       listener: (context, state) {
 
         if (state is InstructorStudentListSuccess) {
@@ -70,143 +62,199 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
           });
         }
       },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFE9E9E9),
-
-        body: Column(
-          children: [
-
-            /// 🔹 HEADER
-            AppHeader(
-              title: "Upload Training Report",
-              showBack: true,
-            ),
-
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(12),
-                children: [
-
-                  /// 🔹 CARD
-                  Container(
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-
-                    child: Column(
-                      children: [
-
-                        /// 🔹 STUDENT DROPDOWN
-                        AppInputField(
-                          controller: nameController,
-                          hintText: "Student Name",
-                          readOnly: true,            // 🔥 disable typing
-                          onTap: showStudentList,    // 🔥 open dialog
-
-                          fillColor: AppColor.colorInputBg,
-                          borderColor: AppColor.colorInputBorder,
-                          focusedBorderColor: AppColor.colorInputFocusBorder,
-                          hintColor: AppColor.colorInputHint,
-
-                          suffixWidget: const Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.grey,
-                          ),
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        /// 🔹 SUBMIT BUTTON
-                        AppButton(
-                          text: "SUBMIT",
-                          onTap: onSubmit,
-                          textStyle: const TextStyle(
-                            fontFamily: "InterBold",
-                            fontSize: 12,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
+
+      // BlocListener<UserInvoiceBloc, UserInvoiceState>(
+      //
+      //   listener: (context, state) {
+      //
+      //     if (state is UserInvoiceLoading) {
+      //
+      //       LoaderHelper.show(context);
+      //     }
+      //
+      //     if (state is UserInvoiceSuccess) {
+      //
+      //       LoaderHelper.hide(context);
+      //
+      //       Helper.showToast(
+      //         context,
+      //         state.userInvoiceResponse.message,
+      //       );
+      //
+      //       print(
+      //         state.userInvoiceResponse.path,
+      //       );
+      //     }
+      //
+      //     if (state is UserInvoiceFailure) {
+      //
+      //       LoaderHelper.hide(context);
+      //
+      //       Helper.showToast(
+      //         context,
+      //         state.error,
+      //       );
+      //     }
+      //   },
+      // ),
+
+      BlocListener<UserInvoiceBloc, UserInvoiceState>(
+
+        listener: (context, state) async {
+
+          if (state is UserInvoiceLoading) {
+
+            LoaderHelper.show(context);
+          }
+
+          if (state is UserInvoiceSuccess) {
+
+            LoaderHelper.hide(context);
+
+            Helper.showToast(
+              context,
+              state.userInvoiceResponse.message,
+            );
+
+            try {
+
+              final invoiceUrl =
+                  state.userInvoiceResponse.path;
+
+              /// Download PDF
+              final response = await http.get(Uri.parse(invoiceUrl));
+
+              if (response.statusCode != 200) {
+
+                Helper.showToast(
+                  context,
+                  "Failed to download invoice",
+                );
+
+                return;
+              }
+
+              /// Save to temp directory
+              final directory =
+              await getTemporaryDirectory();
+
+              final file = File(
+                '${directory.path}/invoice.pdf',
+              );
+
+              await file.writeAsBytes(
+                response.bodyBytes,
+              );
+
+              /// Show Save / Share dialog
+              await SharePlus.instance.share(
+
+                ShareParams(
+
+                  files: [
+                    XFile(file.path),
+                  ],
+
+                  text: 'Invoice',
+                ),
+              );
+
+            } catch (e) {
+
+              print(
+                "INVOICE DOWNLOAD ERROR => $e",
+              );
+
+              Helper.showToast(
+                context,
+                "Failed to save invoice",
+              );
+            }
+          }
+
+          if (state is UserInvoiceFailure) {
+
+            LoaderHelper.hide(context);
+
+            Helper.showToast(
+              context,
+              state.error,
+            );
+          }
+        },
+      ),
+
+    ],
+        child: Scaffold(
+          backgroundColor: const Color(0xFFE9E9E9),
+
+          body: Column(
+            children: [
+
+              /// 🔹 HEADER
+              AppHeader(
+                title: "Upload Training Report",
+                showBack: true,
+              ),
+
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(12),
+                  children: [
+
+                    /// 🔹 CARD
+                    Container(
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+
+                      child: Column(
+                        children: [
+
+                          /// 🔹 STUDENT DROPDOWN
+                          AppInputField(
+                            controller: nameController,
+                            hintText: "Student Name",
+                            readOnly: true,            // 🔥 disable typing
+                            onTap: showStudentList,    // 🔥 open dialog
+
+                            fillColor: AppColor.colorInputBg,
+                            borderColor: AppColor.colorInputBorder,
+                            focusedBorderColor: AppColor.colorInputFocusBorder,
+                            hintColor: AppColor.colorInputHint,
+
+                            suffixWidget: const Icon(
+                              Icons.keyboard_arrow_down,
+                              color: Colors.grey,
+                            ),
+                          ),
+
+                          const SizedBox(height: 15),
+
+                          /// 🔹 SUBMIT BUTTON
+                          AppButton(
+                            text: "SUBMIT",
+                            onTap: onSubmit,
+                            textStyle: const TextStyle(
+                              fontFamily: "InterBold",
+                              fontSize: 12,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
     );
 
-
-    //   Scaffold(
-    //   backgroundColor: const Color(0xFFE9E9E9),
-    //
-    //   body: Column(
-    //     children: [
-    //
-    //       /// 🔹 HEADER
-    //       AppHeader(
-    //         title: "Upload Training Report",
-    //         showBack: true,
-    //       ),
-    //
-    //       Expanded(
-    //         child: ListView(
-    //           padding: const EdgeInsets.all(12),
-    //           children: [
-    //
-    //             /// 🔹 CARD
-    //             Container(
-    //               padding: const EdgeInsets.all(15),
-    //               decoration: BoxDecoration(
-    //                 color: Colors.white,
-    //                 borderRadius: BorderRadius.circular(20),
-    //               ),
-    //
-    //               child: Column(
-    //                 children: [
-    //
-    //                   /// 🔹 STUDENT DROPDOWN
-    //                   AppInputField(
-    //                     controller: nameController,
-    //                     hintText: "Student Name",
-    //                     readOnly: true,            // 🔥 disable typing
-    //                     onTap: showStudentList,    // 🔥 open dialog
-    //
-    //                     fillColor: AppColor.colorInputBg,
-    //                     borderColor: AppColor.colorInputBorder,
-    //                     focusedBorderColor: AppColor.colorInputFocusBorder,
-    //                     hintColor: AppColor.colorInputHint,
-    //
-    //                     suffixWidget: const Icon(
-    //                       Icons.keyboard_arrow_down,
-    //                       color: Colors.grey,
-    //                     ),
-    //                   ),
-    //
-    //                   const SizedBox(height: 15),
-    //
-    //                   /// 🔹 SUBMIT BUTTON
-    //                   AppButton(
-    //                     text: "SUBMIT",
-    //                     onTap: onSubmit,
-    //                     textStyle: const TextStyle(
-    //                       fontFamily: "InterBold",
-    //                       fontSize: 12,
-    //                       color: Colors.white,
-    //                     ),
-    //                   ),
-    //                 ],
-    //               ),
-    //             )
-    //           ],
-    //         ),
-    //       ),
-    //     ],
-    //   ),
-    // );
   }
 
   /// 🔥 STUDENT BOTTOM SHEET
@@ -382,13 +430,13 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
   /// 🔥 SUBMIT
   void onSubmit() {
-    final data = {
-      "student_name": selectedStudent?.name,
-      "student_phone": selectedStudent?.phone,
-      "file": fileController.text,
-    };
+    print("Selected Student detials: ${selectedStudent?.userId ?? ''}");
 
-    print(data);
+    context.read<UserInvoiceBloc>().add(
+      UserInvoiceTapped(
+        stdId: selectedStudent?.userId ?? '',
+      ),
+    );
   }
 
   Future<void> fetchStudentList() async {

@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import '../../../bloc/common/invoice/user_invoice_dart.dart';
 import '../../../bloc/instructor/forget_password/instructor_forget_password_bloc.dart';
 import '../../../bloc/instructor/forget_password/instructor_forget_password_event.dart';
 import '../../../bloc/instructor/forget_password/instructor_forget_password_state.dart';
@@ -231,6 +232,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         create: (_) => InstructorTodaysMocktestBloc(),
                       ),
 
+                      // BlocProvider(
+                      //   create: (_) => UserInvoiceBloc(),
+                      // ),
+
                     ],
 
                     child: const DashboardScreen(),
@@ -289,6 +294,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       BlocProvider(create: (_) => StudentTodaysMocktestListBloc(),),
 
                       BlocProvider(create: (_) => StudentDownloadTrainingReportBloc(),),
+
+
 
                     ],
 

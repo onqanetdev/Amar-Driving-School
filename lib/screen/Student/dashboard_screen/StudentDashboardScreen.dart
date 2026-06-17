@@ -5,6 +5,7 @@ import 'package:amar_driving_school/screen/common_screen/login_screen/LoginScree
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/common/invoice/user_invoice_dart.dart';
 import '../../../bloc/instructor/forget_password/instructor_forget_password_bloc.dart';
 import '../../../bloc/instructor/instructor_register_bloc.dart';
 import '../../../bloc/instructor/login_instructor/instructor_login_bloc.dart';
@@ -99,11 +100,12 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     ),
 
     MultiBlocProvider(providers: [
-      BlocProvider(create: (_) =>
-          ProfileBloc(),
-      ),
+      BlocProvider(create: (_) => ProfileBloc(),),
 
-    ], child: ProfileScreen())
+      BlocProvider(create: (_) => UserInvoiceBloc(),),
+
+    ],
+        child: ProfileScreen())
 
    // ProfileScreen(),
   ];
