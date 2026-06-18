@@ -218,7 +218,8 @@ class _TodayslessonlistState extends State<Todayslessonlist> {
 
                       return Container(
                         width: MediaQuery.of(context).size.width * 0.85, // 🔥 card width
-                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        //margin: EdgeInsets.symmetric(horizontal: 10),
+                        margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -406,7 +407,6 @@ class _TodayslessonlistState extends State<Todayslessonlist> {
       ),
     );
   }
-
 
 }
 

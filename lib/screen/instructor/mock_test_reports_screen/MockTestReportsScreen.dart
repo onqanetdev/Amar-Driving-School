@@ -154,17 +154,17 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
                 const SizedBox(height: 20),
 
                 /// 🔹 SUBMIT
-                AppButton(
-                  text: "SUBMIT",
-                  onTap: onSubmit,
-                  textStyle: const TextStyle(
-                    fontFamily: "InterBold",
-                    fontSize: 12,
-                    color: Colors.white,
-                  ),
-                ),
-
-                const SizedBox(height: 20),
+                // AppButton(
+                //   text: "SUBMIT",
+                //   onTap: onSubmit,
+                //   textStyle: const TextStyle(
+                //     fontFamily: "InterBold",
+                //     fontSize: 12,
+                //     color: Colors.white,
+                //   ),
+                // ),
+                //
+                // const SizedBox(height: 20),
               ],
             ),
           ),

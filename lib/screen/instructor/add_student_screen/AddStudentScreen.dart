@@ -111,6 +111,9 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
           }
 
           if (state is InstructorStudentUpdateSuccess) {
+
+            print("Student Updated Sucessfully !!!!!");
+
             Helper.showToast(
               context,
               state.updateResponse.message,
@@ -408,7 +411,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                       );
 
                     }
-                    Navigator.pop(context,true);
+                   // Navigator.pop(context,true);
                   },
                   textStyle: TextStyle(
                     fontFamily: "InterBold",

@@ -444,17 +444,10 @@ class StudentCard extends StatelessWidget {
                               );
                             }
 
-                            //     Dialog(
-                            //   shape: RoundedRectangleBorder(
-                            //     borderRadius: BorderRadius.circular(20),
-                            //   ),
-                            //   child: AddStudentScreen(
-                            //     student: data, // 🔥 pass data
-                            //   ),
-                            // ),
                           );
 
                           if (result == true) {
+                            print("After Editing Updating the Student List 🧨🧨🧨🧨");
                             onRefresh();
                           }
                         },

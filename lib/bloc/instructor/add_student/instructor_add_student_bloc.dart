@@ -39,10 +39,9 @@ class InstructorAddStudentBloc extends Bloc<InstructorAddStudentEvent, Instructo
           );
 
         } catch(e) {
-
           emit(
             InstructorAddStudentFailure(
-              e.toString(),
+              e.toString().replaceFirst('Exception: ', ''),
             ),
           );
         }

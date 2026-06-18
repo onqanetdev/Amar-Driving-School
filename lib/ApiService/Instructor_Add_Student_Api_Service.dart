@@ -1,5 +1,4 @@
 
-
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -57,8 +56,7 @@ class InstructorAddStudentApiService {
       print("RAW RESPONSE: ${response.body}");
 
       /// 🔥 DECODE RESPONSE
-      final decodedJson =
-      jsonDecode(response.body);
+      final decodedJson = jsonDecode(response.body);
 
       /// 🔥 CHECK API SUCCESS
       if(decodedJson['success'] == true) {
@@ -68,14 +66,19 @@ class InstructorAddStudentApiService {
 
       } else {
 
-        throw Exception(
-          decodedJson['message'],
-        );
+        String errorMessage = "Something went wrong";
+
+        if (decodedJson['message'] is Map &&
+            decodedJson['message']['email'] != null) {
+          errorMessage = decodedJson['message']['email'].toString();
+        }
+
+        throw Exception(errorMessage);
       }
 
     } catch(e, stackTrace) {
 
-      print("🔥 API ERROR: $e");
+      print("🔥 API ERROR: ${e}");
 
       print("🔥 STACKTRACE: $stackTrace");
 

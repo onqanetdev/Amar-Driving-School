@@ -1116,32 +1116,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 fetchTodaysMocktest();
               }
 
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     //builder: (_) => MockTestScreen(showBack: true,),
-              //     builder: (_) =>
-              //         MultiBlocProvider(
-              //
-              //           providers: [
-              //
-              //             BlocProvider(
-              //
-              //               create: (_) =>
-              //                   InstructorMocktestListBloc(),
-              //             ),
-              //
-              //             BlocProvider(
-              //
-              //               create: (_) =>
-              //                   InstructorMocktestDeleteBloc(),
-              //             ),
-              //           ],
-              //
-              //           child: MockTestScreen(showBack: true,),
-              //         ),
-              //   ),
-              // );
             }
           },
           child: Text('VIEW ALL', style: TextStyle(
@@ -1193,6 +1167,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           );
           if (result == true) {
             fetchTotalStudentCount();
+            fetchTotalRevenue();
+          } else {
+            fetchTotalRevenue();
+            fetchTodaysLesson();
+            fetchTodaysMocktest();
           }
         }else if(title=="Invoice Preview") {
           Navigator.push(
