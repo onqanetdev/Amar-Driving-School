@@ -314,6 +314,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 readOnly: false,
                               ),
 
+                              // const SizedBox(height: 12),
+                              //
+                              // /// PHONE
+                              // AppInputField(
+                              //   controller: phoneController,
+                              //   hintText: "Phone",
+                              //   fillColor: AppColor.colorInputBg,
+                              //   borderColor: AppColor.colorInputBorder,
+                              //   focusedBorderColor: AppColor.colorInputFocusBorder,
+                              //   hintColor: AppColor.colorInputHint,
+                              //   iconPath: 'assets/app_icons/telephone.png',
+                              //   borderRadius: 10,
+                              //   obscureText: false,
+                              //   keyboardType: TextInputType.phone,
+                              //   readOnly: true,
+                              // ),
+
                               const SizedBox(height: 12),
 
                               /// PHONE
@@ -331,24 +348,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 readOnly: true,
                               ),
 
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 16),
 
-                              /// Invoice Download
-                              AppInputField(
-                                controller: invoiceDownloadController,
-                                hintText: "Invoice Download",
-                                fillColor: AppColor.colorInputBg,
-                                borderColor: AppColor.colorInputBorder,
-                                focusedBorderColor: AppColor.colorInputFocusBorder,
-                                hintColor: AppColor.colorInputHint,
-                                iconPath: 'assets/app_icons/download.png',
-                                borderRadius: 10,
-                                obscureText: false,
-                                keyboardType: TextInputType.text,
-                                readOnly: true,
+                              Divider(
+                                color: Colors.grey.shade300,
+                                thickness: 1,
+                              ),
+
+                              InkWell(
+                                borderRadius: BorderRadius.circular(12),
                                 onTap: () async {
 
-                                  final prefs = await SharedPreferences.getInstance();
+                                  final prefs =
+                                  await SharedPreferences.getInstance();
 
                                   final userId =
                                       prefs.getString("stud_user_id") ?? "";
@@ -359,34 +371,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   );
                                 },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                    horizontal: 4,
+                                  ),
+                                  child: Row(
+                                    children: [
+
+                                      Icon(
+                                        Icons.download_outlined,
+                                        size: 24,
+                                        color: HexColor(
+                                          AppColor.colourOfAdvanceCarDrive,
+                                        ),
+                                      ),
+
+                                      const SizedBox(width: 12),
+
+                                      const Expanded(
+                                        child: Text(
+                                          "Download Invoice",
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontFamily: "InterMedium",
+                                          ),
+                                        ),
+                                      ),
+
+                                      Icon(
+                                        Icons.arrow_forward_ios,
+                                        size: 16,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
 
-                              const SizedBox(height: 20),
                             ],
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                       // const SizedBox(height: 20),
 
-                        /// 🔷 EDIT BUTTON
-                        // AppButton(
-                        //   text: "Edit Profile",
-                        //   onTap: () {
-                        //     /*Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (_) => const EditProfileScreen(),
-                        //   ),
-                        // );*/
-                        //   },
-                        //   textStyle: const TextStyle(
-                        //     fontFamily: "InterBold",
-                        //     fontSize: 12,
+                        /// 🔷 CARD NO 2
+                        // Container(
+                        //   padding: const EdgeInsets.all(16),
+                        //   decoration: BoxDecoration(
                         //     color: Colors.white,
+                        //     borderRadius: BorderRadius.circular(16),
+                        //     boxShadow: [
+                        //       BoxShadow(
+                        //         color: Colors.grey.withOpacity(0.2),
+                        //         blurRadius: 10,
+                        //       )
+                        //     ],
+                        //   ),
+                        //   child: Column(
+                        //     children: [
+                        //       /// Invoice Download
+                        //       AppInputField(
+                        //         controller: invoiceDownloadController,
+                        //         hintText: "Invoice Download",
+                        //         fillColor: AppColor.colorInputBg,
+                        //         borderColor: AppColor.colorInputBorder,
+                        //         focusedBorderColor: AppColor.colorInputFocusBorder,
+                        //         hintColor: AppColor.colorInputHint,
+                        //         iconPath: 'assets/app_icons/download.png',
+                        //         borderRadius: 10,
+                        //         obscureText: false,
+                        //         keyboardType: TextInputType.text,
+                        //         readOnly: true,
+                        //         onTap: () async {
+                        //
+                        //           final prefs = await SharedPreferences.getInstance();
+                        //
+                        //           final userId =
+                        //               prefs.getString("stud_user_id") ?? "";
+                        //
+                        //           context.read<UserInvoiceBloc>().add(
+                        //             UserInvoiceTapped(
+                        //               stdId: userId,
+                        //             ),
+                        //           );
+                        //         },
+                        //       ),
+                        //
+                        //       // const SizedBox(height: 20),
+                        //     ],
                         //   ),
                         // ),
-                        //
-                        // const SizedBox(height: 20),
                       ],
                     ),
                   ),
@@ -394,6 +469,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
+          //SizedBox(height: 30,),
+
         ],
       ),
     )

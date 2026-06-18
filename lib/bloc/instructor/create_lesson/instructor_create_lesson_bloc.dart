@@ -1,5 +1,4 @@
 
-
 import 'package:amar_driving_school/ApiService/instructor_create_lesson_api_service.dart';
 import 'package:amar_driving_school/bloc/instructor/create_lesson/instructor_create_lesson_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,10 +7,7 @@ import 'instructor_create_lesson_event.dart';
 
 class InstructorCreateLessonBloc extends Bloc<InstructorCreateLessonEvent, InstructorCreateLessonState> {
 
-  InstructorCreateLessonBloc()
-      : super(
-    InstructorCreateLessonInitial(),
-  ) {
+  InstructorCreateLessonBloc() : super(InstructorCreateLessonInitial(),) {
 
     on<InstructorCreateLessonTapped>(
           (event, emit) async {
@@ -43,11 +39,10 @@ class InstructorCreateLessonBloc extends Bloc<InstructorCreateLessonEvent, Instr
             ),
           );
 
-        } catch(e) {
-
+        } catch (e) {
           emit(
             InstructorCreateLessonFailure(
-              e.toString(),
+              e.toString().replaceFirst('Exception: ', ''),
             ),
           );
         }
