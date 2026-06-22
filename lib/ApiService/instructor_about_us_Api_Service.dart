@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/profile_extras/instructor_about_us_model.dart';
@@ -22,9 +23,10 @@ class InstructorAboutUsApiService {
 
     try {
 
-      final response = await http.post(
+      final response = await ApiHelper.post(
 
-        Uri.parse(apiUrl),
+        //Uri.parse(apiUrl),
+        url: apiUrl,
 
         body: {
 

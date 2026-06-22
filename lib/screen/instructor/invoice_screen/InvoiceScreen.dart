@@ -55,11 +55,30 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       BlocListener<InstructorStudentListBloc, InstructorStudentListState>(
       listener: (context, state) {
 
+        if(state
+        is InstructorStudentListLoading) {
+
+          LoaderHelper.show(context);
+        }
+
         if (state is InstructorStudentListSuccess) {
+
+          LoaderHelper.hide(context);
 
           setState(() {
             students = state.studentListResponse.data;
           });
+        }
+
+        if(state
+        is InstructorStudentListFailure) {
+
+          LoaderHelper.hide(context);
+
+          Helper.showToast(
+            context,
+            state.error,
+          );
         }
       },
       ),

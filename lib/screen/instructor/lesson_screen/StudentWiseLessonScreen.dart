@@ -675,6 +675,10 @@ class LessonCard extends StatelessWidget {
                                 BlocProvider(
                                   create: (_) => InstructorAboutUsBloc(),
                                 ),
+
+                                BlocProvider(
+                                  create: (_) => InstructorSubTopicListBloc(),
+                                ),
                               ],
                               child: LessonGiveRatingScreen(
                                 subjectName: data.name ?? '',

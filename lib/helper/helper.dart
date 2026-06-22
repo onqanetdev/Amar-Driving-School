@@ -186,20 +186,49 @@ class Helper{
     return false;
   }
 
+  // static Future<void> LaunchAppStore(String url) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //
+  //   await prefs.setInt(
+  //     "last_store_open_time",
+  //     DateTime.now().millisecondsSinceEpoch,
+  //   );
+  //
+  //   final Uri uri = Uri.parse(url);
+  //
+  //   if (await canLaunchUrl(uri)) {
+  //     await launchUrl(uri, mode: LaunchMode.externalApplication);
+  //   } else {
+  //     debugPrint("Could not launch store URL: $url");
+  //   }
+  // }
+
   static Future<void> LaunchAppStore(String url) async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setInt(
-      "last_store_open_time",
-      DateTime.now().millisecondsSinceEpoch,
-    );
+      await prefs.setInt(
+        "last_store_open_time",
+        DateTime.now().millisecondsSinceEpoch,
+      );
 
-    final Uri uri = Uri.parse(url);
+      final Uri uri = Uri.parse(url.trim());
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      debugPrint("Could not launch store URL: $url");
+      debugPrint("URL = [$url]");
+      debugPrint("URI = ${Uri.parse(url.trim())}");
+
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      // await launchUrl(
+      //   Uri.parse("https://apps.apple.com/in/app/breakfix/id6751707222"),
+      //   mode: LaunchMode.inAppBrowserView,
+      // );
+
+    } catch (e) {
+      debugPrint("Launch error: $e");
     }
   }
 

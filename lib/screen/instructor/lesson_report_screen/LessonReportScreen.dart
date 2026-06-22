@@ -187,21 +187,22 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
   Widget ratingRow(LessonSubtopic item) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
           /// TITLE
-          Expanded(
-            child: Text(
-              "${item.subtopicName}:",
-              style: const TextStyle(
-                fontSize: 13,
-                fontFamily: "InterMedium",
-                color: Colors.black87,
-              ),
+          Text(
+            "${item.subtopicName}:",
+            style: const TextStyle(
+              fontSize: 13,
+              fontFamily: "InterMedium",
+              color: Colors.black87,
             ),
           ),
 
+          const SizedBox(height: 10),
           /// OPTIONS
           Row(
             children: List.generate(5, (index) {

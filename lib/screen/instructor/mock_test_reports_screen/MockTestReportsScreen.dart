@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../bloc/student/mocktest_review/student_mocktest_review_bloc.dart';
 import '../../../bloc/student/mocktest_review/student_mocktest_review_event.dart';
 import '../../../bloc/student/mocktest_review/student_mocktest_review_state.dart';
+import '../../../helper/loader_helper.dart';
 import '../../../model/MockRatingItem.dart';
 import '../../../model/MockRatingSection.dart';
 import '../../../model/student_all_model/student_mocktest_review_model.dart';
@@ -78,6 +79,8 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
 
           if(state is StudentMocktestReviewLoading) {
 
+            LoaderHelper.show(context);
+
             setState(() {
 
               isMocktestReviewLoading = true;
@@ -85,6 +88,8 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
           }
 
           if(state is StudentMocktestReviewSuccess) {
+
+            LoaderHelper.hide(context);
 
             setState(() {
 
@@ -101,6 +106,8 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
           }
 
           if(state is StudentMocktestReviewFailure) {
+
+            LoaderHelper.hide(context);
 
             setState(() {
 

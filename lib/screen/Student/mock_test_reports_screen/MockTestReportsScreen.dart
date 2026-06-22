@@ -356,155 +356,91 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
     }
   }
 
+
   Widget mocktestReviewShimmer() {
-
     return ListView.builder(
-
-      padding: const EdgeInsets.all(16),
-
-      itemCount: 2,
-
+      padding: const EdgeInsets.all(10),
+      itemCount: 3,
       itemBuilder: (_, index) {
-
         return Shimmer.fromColors(
-
           baseColor: Colors.grey.shade300,
-
           highlightColor: Colors.grey.shade100,
-
           child: Container(
-
-            margin: const EdgeInsets.only(
-              bottom: 20,
-            ),
-
-            padding: const EdgeInsets.all(20),
-
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-
               color: Colors.white,
-
-              borderRadius:
-              BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(20),
             ),
-
             child: Column(
-
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
 
                 /// TOPIC TITLE
                 Container(
-
-                  height: 24,
-
-                  width: 220,
-
+                  height: 20,
+                  width: 180,
                   decoration: BoxDecoration(
-
                     color: Colors.white,
-
-                    borderRadius:
-                    BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 12),
 
-                /// SUBTOPIC ROWS
-                ...List.generate(3, (i) {
-
+                /// SUBTOPICS
+                ...List.generate(3, (rowIndex) {
                   return Padding(
-
-                    padding:
-                    const EdgeInsets.only(
-                      bottom: 30,
-                    ),
-
-                    child: Row(
-
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
-
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
 
-                        Expanded(
-
-                          child: Column(
-
-                            crossAxisAlignment:
-                            CrossAxisAlignment
-                                .start,
-
-                            children: [
-
-                              /// SUBTOPIC NAME
-                              Container(
-
-                                height: 18,
-
-                                width: 150,
-
-                                decoration:
-                                BoxDecoration(
-
-                                  color:
-                                  Colors.white,
-
-                                  borderRadius:
-                                  BorderRadius
-                                      .circular(
-                                    4,
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(
-                                height: 16,
-                              ),
-
-                              /// PERCENTAGE BUTTONS
-                              Row(
-
-                                children:
-                                List.generate(5, (index) {
-                                    return Container(
-                                      margin: const EdgeInsets.only(right: 8,),
-                                      height: 42,
-                                      width: 55,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(8,),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(
-                          width: 20,
-                        ),
-
-                        /// GRADE CIRCLE
+                        /// SUBTOPIC NAME
                         Container(
-
-                          height: 70,
-
-                          width: 70,
-
-                          decoration:
-                          const BoxDecoration(
-
+                          height: 14,
+                          width: 140,
+                          decoration: BoxDecoration(
                             color: Colors.white,
-
-                            shape:
-                            BoxShape.circle,
+                            borderRadius: BorderRadius.circular(4),
                           ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        /// BUTTONS + GRADE
+                        Row(
+                          children: [
+
+                            Expanded(
+                              child: Row(
+                                children: List.generate(5, (i) {
+                                  return Container(
+                                    margin: const EdgeInsets.only(right: 6),
+                                    height: 28,
+                                    width: 42,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                      BorderRadius.circular(6),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ),
+
+                            const SizedBox(width: 8),
+
+                            /// GRADE CIRCLE
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

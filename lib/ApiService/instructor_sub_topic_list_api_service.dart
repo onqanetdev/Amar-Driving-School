@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/instructor_topic/instructor_sub_topic_list_model.dart';
@@ -26,7 +27,8 @@ class InstructorSubTopicListApiService {
 
     try {
 
-      final response = await http.post(url,
+      final response = await ApiHelper.post(
+        url: baseUrl,
         body: {
 
           'topicid': topicId,

@@ -2,8 +2,10 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:http/http.dart' as http;
 
+import '../helper/network_helper.dart';
 import '../model/instructor_mocktest_review/instructor_mocktest_review_model.dart';
 
 class InstructorMocktestReviewApiService {
@@ -13,34 +15,117 @@ class InstructorMocktestReviewApiService {
       "https://amardrivingcrm.com/Beta/api/Mocktest/mocktestreview";
 
   /// SUBMIT MOCKTEST REVIEW
-  Future<InstructorMocktestReviewModel>  submitMocktestReview({
+  // Future<InstructorMocktestReviewModel>  submitMocktestReview({
+  //
+  //   required String instructorId,
+  //
+  //   required String studentId,
+  //
+  //   required String topicId,
+  //
+  //   required List<Map<String, dynamic>>
+  //   ratingsData,
+  //
+  // })
+  //
+  // async {
+  //
+  //   try {
+  //
+  //     final body = {
+  //
+  //       "instractorid": instructorId,
+  //
+  //       "studentid": studentId,
+  //
+  //       "topicid": topicId,
+  //
+  //       "ratings_data": ratingsData,
+  //     };
+  //
+  //     print("📌 MOCKTEST REVIEW BODY");
+  //
+  //     print(jsonEncode(body));
+  //
+  //     final response = await http.post(
+  //
+  //       Uri.parse(apiUrl),
+  //
+  //       headers: {
+  //
+  //         "Content-Type":
+  //         "application/json",
+  //       },
+  //
+  //       body: jsonEncode(body),
+  //     );
+  //
+  //     print("📌 MOCKTEST REVIEW API");
+  //
+  //     print(
+  //       "📌 STATUS CODE: ${response.statusCode}",
+  //     );
+  //
+  //     print(
+  //       "📌 RAW RESPONSE: ${response.body}",
+  //     );
+  //
+  //     final jsonData =
+  //     jsonDecode(response.body);
+  //
+  //     /// SUCCESS
+  //     if(response.statusCode == 200 &&
+  //         jsonData['success'] == true) {
+  //
+  //       return InstructorMocktestReviewModel
+  //           .fromJson(jsonData);
+  //
+  //     } else {
+  //
+  //       throw Exception(
+  //         jsonData['message'],
+  //       );
+  //     }
+  //
+  //   } catch(e, stackTrace) {
+  //
+  //     print("🔥 API ERROR: $e");
+  //
+  //     print(
+  //       "🔥 STACKTRACE: $stackTrace",
+  //     );
+  //
+  //     rethrow;
+  //   }
+  // }
+
+
+  Future<InstructorMocktestReviewModel> submitMocktestReview({
 
     required String instructorId,
-
     required String studentId,
-
     required String topicId,
-
-    required List<Map<String, dynamic>>
-    ratingsData,
+    required List<Map<String, dynamic>> ratingsData,
 
   }) async {
 
     try {
 
+      /// INTERNET CHECK
+      if (!await NetworkHelper.isInternetAvailable()) {
+        throw Exception("No Internet Connection");
+      }
+
       final body = {
 
         "instractorid": instructorId,
-
         "studentid": studentId,
-
         "topicid": topicId,
-
         "ratings_data": ratingsData,
+
       };
 
       print("📌 MOCKTEST REVIEW BODY");
-
       print(jsonEncode(body));
 
       final response = await http.post(
@@ -49,49 +134,45 @@ class InstructorMocktestReviewApiService {
 
         headers: {
 
-          "Content-Type":
-          "application/json",
+          "Content-Type": "application/json",
+
         },
 
         body: jsonEncode(body),
+
       );
 
       print("📌 MOCKTEST REVIEW API");
+      print("📌 STATUS CODE: ${response.statusCode}");
+      print("📌 RAW RESPONSE: ${response.body}");
 
-      print(
-        "📌 STATUS CODE: ${response.statusCode}",
-      );
+      final jsonData = jsonDecode(response.body);
 
-      print(
-        "📌 RAW RESPONSE: ${response.body}",
-      );
-
-      final jsonData =
-      jsonDecode(response.body);
-
-      /// SUCCESS
-      if(response.statusCode == 200 &&
+      if (response.statusCode == 200 &&
           jsonData['success'] == true) {
 
-        return InstructorMocktestReviewModel
-            .fromJson(jsonData);
+        return InstructorMocktestReviewModel.fromJson(
+          jsonData,
+        );
 
       } else {
 
         throw Exception(
           jsonData['message'],
         );
+
       }
 
-    } catch(e, stackTrace) {
+    } catch (e, stackTrace) {
 
       print("🔥 API ERROR: $e");
-
-      print(
-        "🔥 STACKTRACE: $stackTrace",
-      );
+      print("🔥 STACKTRACE: $stackTrace");
 
       rethrow;
+
     }
   }
+
+
 }
+

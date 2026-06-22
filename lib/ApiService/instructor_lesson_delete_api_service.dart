@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/instructor_lesson_delete_model/instructor_lesson_delete_model.dart';
@@ -20,10 +21,9 @@ class InstructorLessonDeleteApiService {
 
     try {
 
-      final response = await http.post(
-
-        Uri.parse(apiUrl),
-
+      final response = await ApiHelper.post(
+       // Uri.parse(apiUrl),
+        url: apiUrl,
         body: {
 
           "lessonid": lessonId,

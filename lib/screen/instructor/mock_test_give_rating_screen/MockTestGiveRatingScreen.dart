@@ -6,9 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bloc/instructor/about_us/instructor_about_us_bloc.dart';
 import '../../../bloc/instructor/about_us/instructor_about_us_event.dart';
 import '../../../bloc/instructor/mocktest_review/instructor_mocktest_review_event.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_bloc.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_event.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_state.dart';
 import '../../../helper/helper.dart';
+import '../../../helper/loader_helper.dart';
 import '../../../model/MockRatingItem.dart';
 import '../../../model/MockRatingSection.dart';
+import '../../../model/instructor_topic/instructor_sub_topic_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../rating_guide_screen/rating_guide_screen.dart';
@@ -36,49 +41,95 @@ class MockTestGiveRatingScreen extends StatefulWidget {
 }
 
 class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
-
-
   final percentList = [20,30, 50, 80, 100];
+  List<SubTopicData> apiSubTopics = [];
+
+  @override
+  void initState() {
+    super.initState();
+    print("Topic id 🦖🦖🦖🦖 ${widget.topicId}");
+    print("Subtopic Names 🦖🦖🦖🦖 ${widget.subTopicName}");
+    context.read<InstructorSubTopicListBloc>().add(
+      FetchInstructorSubTopicList(
+        topicId: widget.topicId,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
 
-    return BlocListener<InstructorMocktestReviewBloc, InstructorMocktestReviewState>(
+    return
+      MultiBlocListener(listeners: [
+        BlocListener<InstructorMocktestReviewBloc, InstructorMocktestReviewState>(
 
-        listener: (context, state) {
+          listener: (context, state) {
 
-          /// LOADING
-          if(state is InstructorMocktestReviewLoading) {
+            /// LOADING
+            if(state is InstructorMocktestReviewLoading) {
 
-            Helper.showToast(
-              context,
-              "Submitting review...",
-            );
-          }
+              Helper.showToast(
+                context,
+                "Submitting review...",
+              );
+            }
 
-          /// SUCCESS
-          if(state is InstructorMocktestReviewSuccess) {
+            /// SUCCESS
+            if(state is InstructorMocktestReviewSuccess) {
 
-            Helper.showToast(
+              Helper.showToast(
 
-              context,
+                context,
 
-              state.reviewResponse.message,
-            );
+                state.reviewResponse.message,
+              );
 
-            Navigator.pop(context,true);
-          }
+              Navigator.pop(context,true);
+            }
 
-          /// FAILURE
-          if(state is InstructorMocktestReviewFailure) {
+            /// FAILURE
+            if(state is InstructorMocktestReviewFailure) {
 
-            Helper.showToast(
-              context,
-              state.error,
-            );
-          }
-        },
-      child: Scaffold(
+              Helper.showToast(
+                context,
+                state.error,
+              );
+            }
+          },
+        ),
+        BlocListener<InstructorSubTopicListBloc, InstructorSubTopicListState>(
+          listener: (context, state) async {
+
+            if(state is InstructorSubTopicListLoading) {
+              LoaderHelper.show(context);
+            }
+
+            if(state is InstructorSubTopicListSuccess) {
+              LoaderHelper.hide(context);
+              setState(() {
+                apiSubTopics = state.subTopicListResponse.data;
+              });
+
+              print("========== UI SUBTOPICS ==========");
+              for (final item in widget.ids) {
+                print("UI Name -> ${item.title}");
+              }
+
+              print("========== API SUBTOPICS ==========");
+              for (final item in apiSubTopics) {
+                print("API Name -> ${item.name}");
+                print("API Slug -> ${item.slug}");
+                print("-------------------");
+              }
+            }
+
+            if(state is InstructorSubTopicListFailure) {
+              LoaderHelper.hide(context);
+            }
+          },
+        )
+      ],
+          child: Scaffold(
         backgroundColor: Color.fromARGB(255, 233, 233, 233),
         body: Column(
           children: [
@@ -100,9 +151,9 @@ class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
               child: ListView(
                 padding: EdgeInsets.all(10),
                 children: [
-                 // ...sections.map((section) => sectionUI(section)),
+                  // ...sections.map((section) => sectionUI(section)),
                   sectionUI(widget.mocktestTitle),
-                 // ratingRow(widget.mocktestTitle),
+                  // ratingRow(widget.mocktestTitle),
                   SizedBox(height: 20),
 
                   /// SUBMIT
@@ -124,33 +175,60 @@ class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
                       }
 
                       /// CREATE RATINGS ARRAY
-                      final ratingsData =
+                      // final ratingsData = widget.ids.map((item) {
+                      //
+                      //   /// selectedRating = 1..5
+                      //   /// convert into percentage
+                      //
+                      //   final percentage =
+                      //
+                      //   percentList[
+                      //   item.selectedRating - 1
+                      //   ];
+                      //
+                      //   print("The Selected Percentage is 🤖🤖🤖 ${percentage}");
+                      //
+                      //   return {
+                      //
+                      //     "subtopicid":
+                      //     item.id,
+                      //
+                      //     "rating":
+                      //     percentage.toString(),
+                      //   };
+                      //
+                      // }).toList();
 
-                      widget.ids.map((item) {
+                        final ratingsData = apiSubTopics
+                            .where((apiItem) => widget.ids.any(
+                              (uiItem) =>
+                          uiItem.title.trim().toLowerCase() ==
+                              apiItem.slug!.trim().toLowerCase(),
+                        ))
+                            .map((apiItem) {
 
-                        /// selectedRating = 1..5
-                        /// convert into percentage
+                          final uiItem = widget.ids.firstWhere(
+                                (e) =>
+                            e.title.trim().toLowerCase() ==
+                                apiItem.slug!.trim().toLowerCase(),
+                          );
 
-                        final percentage =
+                          final percentage =
+                          percentList[uiItem.selectedRating - 1];
 
-                        percentList[
-                        item.selectedRating - 1
-                        ];
+                          print(
+                              "Matched -> UI: ${uiItem.title} | API Slug: ${apiItem.slug} | API ID: ${apiItem.id} | Rating: $percentage");
 
-                        print("The Selected Percentage is 🤖🤖🤖 ${percentage}");
+                          return {
+                            "subtopicid": apiItem.id,
+                            "rating": percentage.toString(),
+                          };
 
-                        return {
+                        }).toList();
 
-                          "subtopicid":
-                          item.id,
+                        print("All My Submitted Rating Data are ⌚️ $ratingsData");
 
-                          "rating":
-                          percentage.toString(),
-                        };
 
-                      }).toList();
-
-                      print("All My Submitted Rating Data are ⌚️${ratingsData}");
 
                       /// GET INSTRUCTOR ID
                       final prefs = await SharedPreferences.getInstance();
@@ -189,9 +267,8 @@ class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
             ),
           ],
         ),
-      ),
-    );
-
+      )
+      );
   }
   void showRatingGuideDialog(BuildContext context) {
     showDialog(

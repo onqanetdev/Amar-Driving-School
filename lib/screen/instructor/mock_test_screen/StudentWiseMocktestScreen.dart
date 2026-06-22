@@ -651,6 +651,9 @@ class LessonCard extends StatelessWidget {
                               BlocProvider(
                                 create: (_) => InstructorMocktestReviewBloc(),
                               ),
+                              BlocProvider(
+                                create: (_) => InstructorSubTopicListBloc(),
+                              ),
                             ],
                               child:
                               MockTestGiveRatingScreen(mocktestTitle: data.name ?? '',

@@ -135,11 +135,15 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
         BlocListener<InstructorTopicListBloc, InstructorTopicListState>(
           listener: (context, state) async {
 
+            if (state is InstructorTopicListLoading) {
+              LoaderHelper.show(context);
+            }
+
 
             if (state is InstructorTopicListSuccess) {
 
+              LoaderHelper.hide(context);
               setState(() {
-
                 allCategories = state.topicListResponse.data;
 
                 if (isEdit && !editDataLoaded) {
@@ -173,6 +177,17 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
                 }
               });
             }
+
+            if (state is InstructorTopicListFailure) {
+              LoaderHelper.hide(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.error),
+                ),
+              );
+            }
+
 
           },
         ),
@@ -282,22 +297,16 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
                           children: [
 
                             dropdownBox(),
-                            const SizedBox(height: 10),
+                            //const SizedBox(height: 10),
 
                             selectedCategory?.name == null?
-                            Visibility(
-                              child: subcategoryBox(),
-                              visible: false,
-                            ): Visibility(
-                              child: subcategoryBox(),
-                              visible: true,
-                            ),
+                            SizedBox(height: 0,): subcategoryBox(),
 
-                            const SizedBox(height: 10),
+                            //const SizedBox(height: 10),
 
                             ...selectedCategories.map((cat) {
                               return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
+                                margin: const EdgeInsets.only(bottom: 12,top: 12),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF5F5F5),
@@ -643,6 +652,7 @@ class _AddMockTestScreenState extends State<AddMockTestScreen> {
       },
       child: Container(
         height: 45,
+        margin: EdgeInsets.only(top: 10),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: HexColor(AppColor.colorInputBg), // same as input

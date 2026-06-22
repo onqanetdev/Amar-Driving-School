@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/instructor_reset_password_model/instructor_reset_password_model.dart';
@@ -26,9 +27,9 @@ class InstructorResetPasswordApiService {
 
     try {
 
-      final response = await http.post(
+      final response = await ApiHelper.post(
 
-        url,
+       url:  apiUrl,
 
         body: {
 

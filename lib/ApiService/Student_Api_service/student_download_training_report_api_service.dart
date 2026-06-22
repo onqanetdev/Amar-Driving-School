@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:http/http.dart' as http;
 
 import '../../model/student_all_model/student_download_file_model.dart';
@@ -25,10 +26,9 @@ class StudentDownloadTrainingReportApiService {
 
     try {
 
-      final response = await http.post(
-
-        url,
-
+      final response = await ApiHelper.post(
+        //url,
+        url: apiUrl,
         body: {
 
           'loginid': loginId,

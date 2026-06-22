@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/instructor_student_delete/instructor_student_delete.dart';
@@ -22,9 +23,10 @@ class InstructorStudentDeleteApiService {
 
       print("📌 DELETE STUDENT API");
 
-      final response = await http.post(
+      final response = await ApiHelper.post(
 
-        Uri.parse(baseUrl),
+        //Uri.parse(baseUrl),
+        url: baseUrl,
 
         body: {
 

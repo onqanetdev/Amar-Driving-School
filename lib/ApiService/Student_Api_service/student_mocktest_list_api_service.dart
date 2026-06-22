@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:http/http.dart' as http;
 
 import '../../model/student_all_model/student_mocktest_list_model.dart';
@@ -23,10 +24,9 @@ class StudentMocktestListApiService {
 
     try {
 
-      final response = await http.post(
-
-        Uri.parse(apiUrl),
-
+      final response = await ApiHelper.post(
+        //Uri.parse(apiUrl),
+        url: apiUrl,
         body: {
 
           "studentid": studentId,

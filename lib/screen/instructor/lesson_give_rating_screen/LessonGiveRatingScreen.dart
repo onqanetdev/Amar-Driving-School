@@ -7,7 +7,12 @@ import '../../../bloc/instructor/about_us/instructor_about_us_event.dart';
 import '../../../bloc/instructor/lesson_review/instructor_lesson_review_bloc.dart';
 import '../../../bloc/instructor/lesson_review/instructor_lesson_review_event.dart';
 import '../../../bloc/instructor/lesson_review/instructor_lesson_review_state.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_bloc.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_event.dart';
+import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_state.dart';
+import '../../../helper/loader_helper.dart';
 import '../../../model/RatingItem.dart';
+import '../../../model/instructor_topic/instructor_sub_topic_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import '../rating_guide_screen/rating_guide_screen.dart';
@@ -26,15 +31,27 @@ class LessonGiveRatingScreen extends StatefulWidget {
 }
 
 class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
-
+  List<SubTopicData> apiSubTopics = [];
+  @override
+  void initState() {
+    super.initState();
+    print("Topic id 🦖🦖🦖🦖 ${widget.topicId}");
+    print("Subtopic Names 🦖🦖🦖🦖 ${widget.subTopics}");
+    context.read<InstructorSubTopicListBloc>().add(
+      FetchInstructorSubTopicList(
+        topicId: widget.topicId,
+      ),
+    );
+  }
 
 
   @override
   Widget build(BuildContext context) {
     return
+    MultiBlocListener(listeners: [
       BlocListener<InstructorLessonReviewBloc, InstructorLessonReviewState>(
 
-          listener: (context, state) {
+        listener: (context, state) {
 
           /// LOADING
           if(state is InstructorLessonReviewLoading) {
@@ -47,6 +64,7 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
 
           /// SUCCESS
           if(state is InstructorLessonReviewSuccess) {
+
 
             Helper.showToast(
 
@@ -68,6 +86,39 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
           }
         },
 
+      ),
+      BlocListener<InstructorSubTopicListBloc, InstructorSubTopicListState>(
+        listener: (context, state) async {
+
+          if(state is InstructorSubTopicListLoading) {
+            LoaderHelper.show(context);
+          }
+
+          if(state is InstructorSubTopicListSuccess) {
+            LoaderHelper.hide(context);
+            setState(() {
+              apiSubTopics = state.subTopicListResponse.data;
+            });
+
+            print("========== UI SUBTOPICS ==========");
+            for (final item in widget.subTopics) {
+              print("UI Name -> ${item.title}");
+            }
+
+            print("========== API SUBTOPICS ==========");
+            for (final item in apiSubTopics) {
+              print("API Name -> ${item.name}");
+              print("API Slug -> ${item.slug}");
+              print("-------------------");
+            }
+          }
+
+          if(state is InstructorSubTopicListFailure) {
+            LoaderHelper.hide(context);
+          }
+        },
+      )
+    ],
       child: Scaffold(
       backgroundColor: Color(0xFFE9E9E9),
 
@@ -101,34 +152,59 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
                 AppButton(
                   text: "SUBMIT",
                   onTap: () async {
+                    //
+                    // /// VALIDATION
+                    // for (var item
+                    // in widget.subTopics) {
+                    //
+                    //   if(item.selected == 0) {
+                    //
+                    //     Helper.showToast(
+                    //
+                    //       context,
+                    //
+                    //       "Please rate ${item.title}",
+                    //     );
+                    //
+                    //     return;
+                    //   }
+                    // }
+                    //
+                    // /// CREATE RATINGS ARRAY
+                    // final ratingsData = List.generate(
+                    //   widget.subTopics.length,
+                    //       (index) => {
+                    //     "subtopicid": widget.subTopicIds[index].title,
+                    //     "rating": widget.subTopics[index].selected.toString(),
+                    //   },
+                    // );
+                    //
+                    // print("The Rating Data is ${ratingsData}");
 
-                    /// VALIDATION
-                    for (var item
-                    in widget.subTopics) {
+                    final ratingsData = apiSubTopics
+                        .where((apiItem) => widget.subTopics.any(
+                          (uiItem) =>
+                      uiItem.title.trim().toLowerCase() ==
+                          apiItem.slug!.trim().toLowerCase(),
+                    ))
+                        .map((apiItem) {
+                      final uiItem = widget.subTopics.firstWhere(
+                            (e) =>
+                        e.title.trim().toLowerCase() ==
+                            apiItem.slug!.trim().toLowerCase(),
+                      );
 
-                      if(item.selected == 0) {
+                      // print("Matched -> UI: ${uiItem.title} | API Slug: ${apiItem.slug} | Rating: ${uiItem.selected}");
 
-                        Helper.showToast(
+                      return {
+                        "subtopicid": apiItem.id,
+                        "rating": uiItem.selected.toString(),
+                      };
+                    })
+                        .toList();
 
-                          context,
+                    // print("Ratings Data 🦖🦖🦖🦖 $ratingsData");
 
-                          "Please rate ${item.title}",
-                        );
-
-                        return;
-                      }
-                    }
-
-                    /// CREATE RATINGS ARRAY
-                    final ratingsData = List.generate(
-                      widget.subTopics.length,
-                          (index) => {
-                        "subtopicid": widget.subTopicIds[index].title,
-                        "rating": widget.subTopics[index].selected.toString(),
-                      },
-                    );
-
-                    print("The Rating Data is ${ratingsData}");
 
                     /// GET INSTRUCTOR ID
                     final prefs = await SharedPreferences.getInstance();
@@ -140,18 +216,18 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
                     context.read<InstructorLessonReviewBloc>()
                         .add(SubmitInstructorLessonReview(
 
-                        instructorId:
-                        instructorId.toString(),
+                      instructorId:
+                      instructorId.toString(),
 
-                        studentId:
-                        widget.studentUserId,
+                      studentId:
+                      widget.studentUserId,
 
-                        topicId:
-                        widget.topicId,
+                      topicId:
+                      widget.topicId,
 
-                        ratingsData:
-                        ratingsData,
-                      ),
+                      ratingsData:
+                      ratingsData,
+                    ),
                     );
                   } ,//On tap ending
                   textStyle: TextStyle(

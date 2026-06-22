@@ -47,6 +47,7 @@ class _UploadTrainingScreenState extends State<UploadTrainingScreen> {
     if (widget.studentName != null && widget.studentCode != null) {
 
       nameController.text = widget.studentName!;
+
     } else {
       fetchStudentList();
     }
@@ -459,17 +460,17 @@ class _UploadTrainingScreenState extends State<UploadTrainingScreen> {
     // print(data);
 
     /// VALIDATION
-    if(selectedStudent == null) {
-
-      Helper.showToast(
-
-        context,
-
-        "Please select student",
-      );
-
-      return;
-    }
+    // if(selectedStudent == null || widget.studentCode == null) {
+    //
+    //   Helper.showToast(
+    //
+    //     context,
+    //
+    //     "Please select student",
+    //   );
+    //
+    //   return;
+    // }
 
     if(selectedFile == null) {
 

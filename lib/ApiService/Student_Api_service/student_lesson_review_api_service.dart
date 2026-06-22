@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:http/http.dart' as http;
 
 import '../../model/student_all_model/student_lesson_review.dart';
@@ -21,10 +22,9 @@ class StudentLessonReviewApiService {
 
     try {
 
-      final response = await http.post(
-
-        Uri.parse(apiUrl),
-
+      final response = await ApiHelper.post(
+        //Uri.parse(apiUrl),
+        url: apiUrl,
         body: {
 
           "stdnt_code": studentCode,

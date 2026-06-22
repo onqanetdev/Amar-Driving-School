@@ -53,10 +53,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkAppVersion() async {
 
+    debugPrint("🔥 _checkAppVersion called");
+
     try {
 
       final response = await http
-          .get(Uri.parse(ApiService.APP_VERSION_CHECK))
+          .post(Uri.parse(ApiService.APP_VERSION_CHECK))
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) {
@@ -85,6 +87,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
       currentVersion="1.0.0";
       latestVersion="1.0.0";
+
+      print("App version: ${latestVersion}");
+      print("My ios link is: ${link}");
 
       final needUpdate =
       Helper.IsUpdateAvailable(context, currentVersion, latestVersion);

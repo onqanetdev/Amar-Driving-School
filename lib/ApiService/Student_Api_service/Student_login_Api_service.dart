@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:amar_driving_school/model/student_login/student_login_res_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,7 +15,9 @@ class StudentLoginApiService {
     final url = Uri.parse(baseUrl);
     print('Logged In');
     try {
-      final response = await http.post( url,
+      final response = await ApiHelper.post(
+          //url,
+        url: baseUrl,
           body: {
             'loginid': loginId
           }

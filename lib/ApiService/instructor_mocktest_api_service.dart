@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:amar_driving_school/ApiService/helper%20class/ApiHelper.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/instructor_update_mocktest_model/instructor_update_mocktest_model.dart';
@@ -27,10 +28,8 @@ class MocktestUpdateApiService {
 
       print("📌 UPDATE MOCKTEST API");
 
-      final response = await http.post(
-
-        Uri.parse(baseUrl),
-
+      final response = await ApiHelper.post(
+        url: baseUrl,
         body: {
 
           "userid": userid,

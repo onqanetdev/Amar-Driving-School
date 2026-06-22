@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'package:amar_driving_school/model/instructor_register/instructor_register_model.dart';
 import 'package:http/http.dart' as http ;
 
+import 'helper class/ApiHelper.dart';
+
 class InstructorRegisterApiService {
   //Url String
   final String baseUrl = "https://amardrivingcrm.com/Beta/api/Auth/reginstructor";
@@ -14,7 +16,7 @@ class InstructorRegisterApiService {
   final url = Uri.parse(baseUrl);
   print('It is Getting registered');
   try {
-    final response = await http.post( url,
+    final response = await ApiHelper.post( url: baseUrl,
       body: {
       'name': instrucName,
         'email': instrucEmail,
