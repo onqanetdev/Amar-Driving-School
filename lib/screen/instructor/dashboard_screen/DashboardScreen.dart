@@ -71,7 +71,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
   double _scale = 1.0;
 
-
+  bool isUploadReport = false;
 
   /// ADD SCREENS LIST (ADD HERE)
   List<Widget> get _screens => [
@@ -1136,8 +1136,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Expanded(child: blueBox("Student List",'assets/app_icons/test_drive_steering.png')),
           SizedBox(width: 6,),
           Expanded(child: blueBox("Invoice Preview",'assets/app_icons/assign_mocktest.png')),
+          if (isUploadReport)...[
           SizedBox(width: 6,),
-          Expanded(child: blueBox("Upload Training Report",'assets/app_icons/checklist.png')),
+          Expanded(child: blueBox("Upload Training Report",'assets/app_icons/checklist.png')),]
         ],
       ),
     );

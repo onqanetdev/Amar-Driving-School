@@ -73,6 +73,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
 
   bool isTotalLessonLoading = true;
   bool isTotalMocktestLoading = true;
+  bool isDownloadReport = false;
   /// ADD SCREENS LIST (ADD HERE)
   List<Widget> get _screens => [
     Column(
@@ -1248,6 +1249,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           SizedBox(width: 10),
 
           ///Download Training Report
+          if (isDownloadReport)
           Expanded(
 
             child: GestureDetector(

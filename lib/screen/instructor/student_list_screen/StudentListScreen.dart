@@ -52,6 +52,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
    List<StudentData> students = [];
    bool isStudentDeleted = false;
 
+
   @override
   void initState() {
     super.initState();
@@ -287,6 +288,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
 class StudentCard extends StatelessWidget {
   final StudentData data;
   final VoidCallback onRefresh;
+  final bool isUploadTrainingReport = false;
   const StudentCard({super.key, required this.data, required this.onRefresh});
 
   @override
@@ -581,6 +583,7 @@ class StudentCard extends StatelessWidget {
               actionBtn(context,"Mocktest List"),
               actionBtn(context,"Lesson Report"),
               actionBtn(context,"Mocktest Report"),
+              if (isUploadTrainingReport)
               actionBtn(context,"Upload Training Report"),
             ],
           )
