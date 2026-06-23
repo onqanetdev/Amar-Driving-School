@@ -116,7 +116,7 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
                 child:
                 isMocktestReviewLoading
 
-                    ? mocktestReviewShimmer()
+                    ? _mocktestShimmer()
 
                     : sections.isEmpty
 
@@ -356,101 +356,212 @@ class _MockTestReportsScreenState extends State<MockTestReportsScreen> {
     }
   }
 
+  // Widget mocktestReviewShimmer() {
+  //   return ListView.builder(
+  //     padding: const EdgeInsets.all(10),
+  //     itemCount: 3,
+  //     itemBuilder: (_, index) {
+  //       return Shimmer.fromColors(
+  //         baseColor: Colors.grey.shade300,
+  //         highlightColor: Colors.grey.shade100,
+  //         child: Container(
+  //           margin: const EdgeInsets.only(bottom: 12),
+  //           padding: const EdgeInsets.all(12),
+  //           decoration: BoxDecoration(
+  //             color: Colors.white,
+  //             borderRadius: BorderRadius.circular(20),
+  //           ),
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //
+  //               /// TOPIC TITLE
+  //               Container(
+  //                 height: 20,
+  //                 width: 180,
+  //                 decoration: BoxDecoration(
+  //                   color: Colors.white,
+  //                   borderRadius: BorderRadius.circular(6),
+  //                 ),
+  //               ),
+  //
+  //               const SizedBox(height: 12),
+  //
+  //               /// SUBTOPICS
+  //               ...List.generate(3, (rowIndex) {
+  //                 return Padding(
+  //                   padding: const EdgeInsets.only(bottom: 14),
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     children: [
+  //
+  //                       /// SUBTOPIC NAME
+  //                       Container(
+  //                         height: 14,
+  //                         width: 140,
+  //                         decoration: BoxDecoration(
+  //                           color: Colors.white,
+  //                           borderRadius: BorderRadius.circular(4),
+  //                         ),
+  //                       ),
+  //
+  //                       const SizedBox(height: 8),
+  //
+  //                       /// BUTTONS + GRADE
+  //                       Row(
+  //                         children: [
+  //
+  //                           Expanded(
+  //                             child: Row(
+  //                               children: List.generate(5, (i) {
+  //                                 return Container(
+  //                                   margin: const EdgeInsets.only(right: 6),
+  //                                   height: 28,
+  //                                   width: 42,
+  //                                   decoration: BoxDecoration(
+  //                                     color: Colors.white,
+  //                                     borderRadius:
+  //                                     BorderRadius.circular(6),
+  //                                   ),
+  //                                 );
+  //                               }),
+  //                             ),
+  //                           ),
+  //
+  //                           const SizedBox(width: 8),
+  //
+  //                           /// GRADE CIRCLE
+  //                           Container(
+  //                             width: 32,
+  //                             height: 32,
+  //                             decoration: const BoxDecoration(
+  //                               color: Colors.white,
+  //                               shape: BoxShape.circle,
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 );
+  //               }),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
-  Widget mocktestReviewShimmer() {
-    return ListView.builder(
+  Widget _mocktestShimmer() {
+    return ListView.separated(
       padding: const EdgeInsets.all(10),
-      itemCount: 3,
-      itemBuilder: (_, index) {
-        return Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+      itemCount: 5,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (_, __) {
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4,
+                spreadRadius: 1,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    shimmerBox(180, 16),
 
-                /// TOPIC TITLE
-                Container(
-                  height: 20,
-                  width: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
+                    const SizedBox(height: 10),
 
-                const SizedBox(height: 12),
-
-                /// SUBTOPICS
-                ...List.generate(3, (rowIndex) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-
-                        /// SUBTOPIC NAME
-                        Container(
-                          height: 14,
-                          width: 140,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        /// BUTTONS + GRADE
-                        Row(
-                          children: [
-
-                            Expanded(
-                              child: Row(
-                                children: List.generate(5, (i) {
-                                  return Container(
-                                    margin: const EdgeInsets.only(right: 6),
-                                    height: 28,
-                                    width: 42,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius:
-                                      BorderRadius.circular(6),
-                                    ),
-                                  );
-                                }),
-                              ),
-                            ),
-
-                            const SizedBox(width: 8),
-
-                            /// GRADE CIRCLE
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ],
-                        ),
+                        shimmerBox(100, 12),
+                        const SizedBox(width: 8),
+                        shimmerBox(40, 12),
                       ],
                     ),
-                  );
-                }),
-              ],
-            ),
+
+                    const SizedBox(height: 10),
+
+                    Row(
+                      children: [
+                        shimmerCircle(14),
+                        const SizedBox(width: 4),
+                        shimmerBox(70, 12),
+
+                        const SizedBox(width: 16),
+
+                        shimmerCircle(14),
+                        const SizedBox(width: 4),
+                        shimmerBox(45, 12),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              shimmerButton(),
+            ],
           ),
         );
       },
+    );
+  }
+
+  Widget shimmerBox(double width, double height) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+    );
+  }
+
+  Widget shimmerCircle(double size) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+
+  Widget shimmerButton() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        width: 100,
+        height: 34,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
     );
   }
 }

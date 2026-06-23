@@ -14,6 +14,7 @@ import '../../../model/student_all_model/student_real_lesson_review_list_model.d
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 
 class LessonReportScreen extends StatefulWidget {
 
@@ -29,16 +30,7 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
   /// 🔥 EDIT MODE
   bool isEditMode = false;
 
-  // List<RatingSection> sections = [
-  //
-  //   RatingSection(
-  //     title: "Pre-Drive Checks:",
-  //     items: [
-  //       RatingItem(title: "Vehicle approach"),
-  //       RatingItem(title: "Start-up drill"),
-  //     ],
-  //   ),
-  // ];
+  bool isLoading = true;
 
   List<LessonReviewData> sections = [];
 
@@ -73,17 +65,25 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
 
               /// LOADING
               if(state is StudentRealLessonReviewLoading) {
+                //LoaderHelper.show(context);
+                setState(() {
+                  isLoading = true;
+                });
 
-                LoaderHelper.show(context);
               }
 
               /// SUCCESS
               if(state is StudentRealLessonReviewSuccess) {
 
-                LoaderHelper.hide(context);
+                // LoaderHelper.hide(context);
+                //
+                // setState(() {
+                //
+                //   sections = state.lessonReviewResponse.data;
+                // });
 
                 setState(() {
-
+                  isLoading = false;
                   sections = state.lessonReviewResponse.data;
                 });
 
@@ -93,10 +93,13 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
               /// FAILURE
               if(state is StudentLessonReviewFailure) {
 
-                print("The Failure");
+                //print("The Failure");
 
-                LoaderHelper.hide(context);
+                //LoaderHelper.hide(context);
 
+                setState(() {
+                  isLoading = false;
+                });
                 //print(state.error);
               }
             },
@@ -119,7 +122,9 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
 
           /// 🔹 LIST
           Expanded(
-            child: ListView(
+            child: isLoading
+                ? _mocktestShimmer()
+                : ListView(
               padding: const EdgeInsets.all(10),
               children: [
 
@@ -184,20 +189,24 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
   Widget ratingRow(LessonReviewSubtopic item) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
+      /// Changing this Row to Column
+
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
           /// TITLE
-          Expanded(
-            child: Text(
-              "${item.subtopicName}:",
-              style: const TextStyle(
-                fontSize: 13,
-                fontFamily: "InterMedium",
-                color: Colors.black87,
-              ),
+          Text(
+            "${item.subtopicName}:",
+            style: const TextStyle(
+              fontSize: 13,
+              fontFamily: "InterMedium",
+              color: Colors.black87,
             ),
           ),
+
+          SizedBox(height: 10,),
 
           /// OPTIONS
           Row(
@@ -272,7 +281,118 @@ class _LessonReportScreenState extends State<LessonReportScreen> {
         studentCode: studentCode, topicId: widget.lessonTopic!,
       ),
     );
+  }
 
+  Widget _mocktestShimmer() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(10),
+      itemCount: 5,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (_, __) {
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4,
+                spreadRadius: 1,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    shimmerBox(180, 16),
+
+                    const SizedBox(height: 10),
+
+                    Row(
+                      children: [
+                        shimmerBox(100, 12),
+                        const SizedBox(width: 8),
+                        shimmerBox(40, 12),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Row(
+                      children: [
+                        shimmerCircle(14),
+                        const SizedBox(width: 4),
+                        shimmerBox(70, 12),
+
+                        const SizedBox(width: 16),
+
+                        shimmerCircle(14),
+                        const SizedBox(width: 4),
+                        shimmerBox(45, 12),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              shimmerButton(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget shimmerBox(double width, double height) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+    );
+  }
+
+  Widget shimmerCircle(double size) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+
+  Widget shimmerButton() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        width: 100,
+        height: 34,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
   }
 
 }
