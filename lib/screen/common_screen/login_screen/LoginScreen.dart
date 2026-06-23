@@ -295,8 +295,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       BlocProvider(create: (_) => StudentDownloadTrainingReportBloc(),),
 
-
-
                     ],
 
                     child: StudentDashboardScreen(),
@@ -531,7 +529,7 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: 15),
 
           /// 🔥 REGISTER MODE
-          if (isRegister) ...[
+          if (isRegister && (selectedRole == "instructor")) ...[
             AppInputField(
               controller: _nameController,
               hintText: "Full Name",

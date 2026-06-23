@@ -43,12 +43,11 @@ class MockTestGiveRatingScreen extends StatefulWidget {
 class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
   final percentList = [20,30, 50, 80, 100];
   List<SubTopicData> apiSubTopics = [];
-
+  final Map<String, TextEditingController> feedbackControllers = {};
   @override
   void initState() {
     super.initState();
-    print("Topic id 🦖🦖🦖🦖 ${widget.topicId}");
-    print("Subtopic Names 🦖🦖🦖🦖 ${widget.subTopicName}");
+
     context.read<InstructorSubTopicListBloc>().add(
       FetchInstructorSubTopicList(
         topicId: widget.topicId,
@@ -106,21 +105,21 @@ class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
 
             if(state is InstructorSubTopicListSuccess) {
               LoaderHelper.hide(context);
+              // setState(() {
+              //   apiSubTopics = state.subTopicListResponse.data;
+              // });
+
               setState(() {
                 apiSubTopics = state.subTopicListResponse.data;
+
+                for (var item in widget.ids) {
+                  feedbackControllers.putIfAbsent(
+                    item.title,
+                        () => TextEditingController(),
+                  );
+                }
               });
 
-              print("========== UI SUBTOPICS ==========");
-              for (final item in widget.ids) {
-                print("UI Name -> ${item.title}");
-              }
-
-              print("========== API SUBTOPICS ==========");
-              for (final item in apiSubTopics) {
-                print("API Name -> ${item.name}");
-                print("API Slug -> ${item.slug}");
-                print("-------------------");
-              }
             }
 
             if(state is InstructorSubTopicListFailure) {
@@ -175,30 +174,6 @@ class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
                       }
 
                       /// CREATE RATINGS ARRAY
-                      // final ratingsData = widget.ids.map((item) {
-                      //
-                      //   /// selectedRating = 1..5
-                      //   /// convert into percentage
-                      //
-                      //   final percentage =
-                      //
-                      //   percentList[
-                      //   item.selectedRating - 1
-                      //   ];
-                      //
-                      //   print("The Selected Percentage is 🤖🤖🤖 ${percentage}");
-                      //
-                      //   return {
-                      //
-                      //     "subtopicid":
-                      //     item.id,
-                      //
-                      //     "rating":
-                      //     percentage.toString(),
-                      //   };
-                      //
-                      // }).toList();
-
                         final ratingsData = apiSubTopics
                             .where((apiItem) => widget.ids.any(
                               (uiItem) =>
@@ -216,19 +191,17 @@ class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
                           final percentage =
                           percentList[uiItem.selectedRating - 1];
 
-                          print(
-                              "Matched -> UI: ${uiItem.title} | API Slug: ${apiItem.slug} | API ID: ${apiItem.id} | Rating: $percentage");
+                          print("Matched -> UI: ${uiItem.title} | API Slug: ${apiItem.slug} | API ID: ${apiItem.id} | Rating: $percentage");
 
                           return {
                             "subtopicid": apiItem.id,
+                            "msg": feedbackControllers[uiItem.title]?.text.trim() ?? "",
                             "rating": percentage.toString(),
                           };
 
                         }).toList();
 
                         print("All My Submitted Rating Data are ⌚️ $ratingsData");
-
-
 
                       /// GET INSTRUCTOR ID
                       final prefs = await SharedPreferences.getInstance();
@@ -427,9 +400,52 @@ class _MockTestGiveRatingScreenState extends State<MockTestGiveRatingScreen> {
               ),
             ],
           ),
+
+          SizedBox(height: 5),
+          /// Custom TextField
+          if (item.selectedRating > 0)
+            Container(
+              height: 110,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: Colors.grey.shade300,
+                ),
+              ),
+              child: TextField(
+                controller: feedbackControllers[item.title],
+                maxLines: null,
+                expands: true,
+                textAlignVertical: TextAlignVertical.top,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: "Share your feedback (optional)",
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 14,
+                    fontFamily: "InterRegular",
+                  ),
+                  counterText: "",
+                ),
+                maxLength: 500,
+              ),
+            ),
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    for (final controller in feedbackControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 }
 

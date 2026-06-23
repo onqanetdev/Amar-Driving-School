@@ -10,11 +10,13 @@ import '../../../bloc/instructor/lesson_review/instructor_lesson_review_state.da
 import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_bloc.dart';
 import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_event.dart';
 import '../../../bloc/instructor/sub_topic_list/instructor_sub_topic_list_state.dart';
+import '../../../common/app_color.dart';
 import '../../../helper/loader_helper.dart';
 import '../../../model/RatingItem.dart';
 import '../../../model/instructor_topic/instructor_sub_topic_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_header.dart';
+import '../../../widgets/app_input_textfield.dart';
 import '../rating_guide_screen/rating_guide_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,11 +34,16 @@ class LessonGiveRatingScreen extends StatefulWidget {
 
 class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
   List<SubTopicData> apiSubTopics = [];
+  final _feedbackTextController = TextEditingController();
+
+  //Feedback Controllers
+  final Map<String, TextEditingController> feedbackControllers = {};
+
   @override
   void initState() {
     super.initState();
-    print("Topic id 🦖🦖🦖🦖 ${widget.topicId}");
-    print("Subtopic Names 🦖🦖🦖🦖 ${widget.subTopics}");
+    // print("Topic id 🦖🦖🦖🦖 ${widget.topicId}");
+    // print("Subtopic Names 🦖🦖🦖🦖 ${widget.subTopics}");
     context.read<InstructorSubTopicListBloc>().add(
       FetchInstructorSubTopicList(
         topicId: widget.topicId,
@@ -94,23 +101,26 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
             LoaderHelper.show(context);
           }
 
+          // if(state is InstructorSubTopicListSuccess) {
+          //   LoaderHelper.hide(context);
+          //   setState(() {
+          //     apiSubTopics = state.subTopicListResponse.data;
+          //   });
+          // }
+
           if(state is InstructorSubTopicListSuccess) {
             LoaderHelper.hide(context);
+
             setState(() {
               apiSubTopics = state.subTopicListResponse.data;
+
+              for (var item in widget.subTopics) {
+                feedbackControllers.putIfAbsent(
+                  item.title,
+                      () => TextEditingController(),
+                );
+              }
             });
-
-            print("========== UI SUBTOPICS ==========");
-            for (final item in widget.subTopics) {
-              print("UI Name -> ${item.title}");
-            }
-
-            print("========== API SUBTOPICS ==========");
-            for (final item in apiSubTopics) {
-              print("API Name -> ${item.name}");
-              print("API Slug -> ${item.slug}");
-              print("-------------------");
-            }
           }
 
           if(state is InstructorSubTopicListFailure) {
@@ -153,33 +163,6 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
                   text: "SUBMIT",
                   onTap: () async {
                     //
-                    // /// VALIDATION
-                    // for (var item
-                    // in widget.subTopics) {
-                    //
-                    //   if(item.selected == 0) {
-                    //
-                    //     Helper.showToast(
-                    //
-                    //       context,
-                    //
-                    //       "Please rate ${item.title}",
-                    //     );
-                    //
-                    //     return;
-                    //   }
-                    // }
-                    //
-                    // /// CREATE RATINGS ARRAY
-                    // final ratingsData = List.generate(
-                    //   widget.subTopics.length,
-                    //       (index) => {
-                    //     "subtopicid": widget.subTopicIds[index].title,
-                    //     "rating": widget.subTopics[index].selected.toString(),
-                    //   },
-                    // );
-                    //
-                    // print("The Rating Data is ${ratingsData}");
 
                     final ratingsData = apiSubTopics
                         .where((apiItem) => widget.subTopics.any(
@@ -194,17 +177,12 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
                             apiItem.slug!.trim().toLowerCase(),
                       );
 
-                      // print("Matched -> UI: ${uiItem.title} | API Slug: ${apiItem.slug} | Rating: ${uiItem.selected}");
-
                       return {
                         "subtopicid": apiItem.id,
+                        "msg": feedbackControllers[uiItem.title]?.text.trim() ?? "",
                         "rating": uiItem.selected.toString(),
                       };
-                    })
-                        .toList();
-
-                    // print("Ratings Data 🦖🦖🦖🦖 $ratingsData");
-
+                    }).toList();
 
                     /// GET INSTRUCTOR ID
                     final prefs = await SharedPreferences.getInstance();
@@ -339,6 +317,52 @@ class _LessonGiveRatingScreenState extends State<LessonGiveRatingScreen> {
               );
             }),
           ),
+
+          const SizedBox(height: 10),
+
+          // AppInputField(
+          //   controller: _feedbackTextController,
+          //   hintText: "Feedback Course",
+          //   fillColor: AppColor.colorInputBg,
+          //   borderColor: AppColor.colorInputBorder,
+          //   focusedBorderColor: AppColor.colorInputFocusBorder,
+          //   hintColor: AppColor.colorInputHint,
+          //   iconPath: 'assets/app_icons/user_white.png',
+          //   borderRadius: 10,
+          //   obscureText: false,
+          //   keyboardType: TextInputType.text,
+          // ),
+
+          if (item.selected > 0)
+            Container(
+              height: 110,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: Colors.grey.shade300,
+                ),
+              ),
+              child: TextField(
+                controller: feedbackControllers[item.title],
+                maxLines: null,
+                expands: true,
+                textAlignVertical: TextAlignVertical.top,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: "Share your feedback (optional)",
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 14,
+                    fontFamily: "InterRegular",
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
