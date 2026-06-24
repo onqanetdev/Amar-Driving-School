@@ -39,6 +39,8 @@ import '../../../model/student_all_model/student_todays_lesson_list_model.dart';
 import '../../../model/student_all_model/student_todays_lesson_mocktest_list_model.dart';
 import '../../../widgets/app_button.dart';
 import '../../student/mock_test_screen/MockTestScreen.dart';
+import '../Todays_Mocktest_Lesson/StudentTodaysLessonScreen.dart';
+import '../Todays_Mocktest_Lesson/StudentTodaysMocktestScreen.dart';
 import '../lesson_screen/LessonScreen.dart';
 import '../mock_test_reports_screen/MockTestReportsScreen.dart';
 import 'package:shimmer/shimmer.dart';
@@ -1095,10 +1097,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   builder: (_) =>
                       MultiBlocProvider(providers: [
                     BlocProvider(
-                      create: (_) => StudentLessonListBloc(),
+                      create: (_) => StudentTodaysLessonListBloc(),
                     ),
                   ],
-                      child: LessonScreen(showBack: true,)
+                      //child: LessonScreen(showBack: true,)
+                        child: Studenttodayslessonscreen(showBack: true,),
                   ),
                 ),
               );
@@ -1110,9 +1113,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                       MultiBlocProvider(providers: [
                         BlocProvider(
                           create: (_) =>
-                              StudentMocktestListBloc(),
+                              StudentTodaysMocktestListBloc(),
                         ),
-                      ], child: MockTestScreen(showBack: true,)
+                      ],
+                          child: Studenttodaysmocktestscreen(showBack: true,)
                       ),
                 ),
               );
@@ -1149,99 +1153,116 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       height: 110,
       child: Row(
         children: [
-          /// Students Box
+          /// Lesson Screen
           Expanded(
-            child: Container(
-              // decoration: BoxDecoration(
-              //   color: Color.fromARGB(77, 158, 158, 158),
-              //   borderRadius: BorderRadius.circular(10),
-              // ),
-
-
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    colors: [
-                      Color.fromARGB(255, 54, 113, 232),
-                      Color.fromARGB(255, 3, 61, 175)
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Image.asset(
-                  //   'assets/app_icons/test_drive_steering.png',
-                  //   width: 40,
-                  //   color: HexColor(AppColor.colorOfAddStudent),
-                  // ),
-                  // SizedBox(width: 8),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text( totalLesson as String,
-                        style: TextStyle(
-                            fontSize: 22,
-                            fontFamily: 'InterBold',
-                            //color: HexColor(AppColor.colorOfAddStudent),
-                            color: Colors.white
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        MultiBlocProvider(providers: [
+                          BlocProvider(
+                            create: (_) => StudentLessonListBloc(),
+                          ),
+                        ],
+                            child: LessonScreen(showBack: true,)
                         ),
-                      ),
-                      Text('Lesson', style: TextStyle(
-                          color: Colors.white
-                      ),),
-                    ],
-                  )
-                ],
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 54, 113, 232),
+                        Color.fromARGB(255, 3, 61, 175)
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text( totalLesson as String,
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontFamily: 'InterBold',
+                              //color: HexColor(AppColor.colorOfAddStudent),
+                              color: Colors.white
+                          ),
+                        ),
+                        Text('Lesson', style: TextStyle(
+                            color: Colors.white
+                        ),),
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
           ),
 
           SizedBox(width: 10),
 
-          /// Revenue Box
+          /// MockTest Widget
           Expanded(
-            child: Container(
-              // decoration: BoxDecoration(
-              //   color: Color.fromARGB(77, 158, 158, 158),
-              //   borderRadius: BorderRadius.circular(10),
-              // ),
-
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    colors: [
-                      Color.fromARGB(255, 54, 113, 232),
-                      Color.fromARGB(255, 3, 61, 175)
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text( totalMocktest,
-                        style: TextStyle(
-                            fontSize: 22,
-                            fontFamily: 'InterBold',
-                            //color: HexColor(AppColor.colorOfAddStudent),
-                            color: Colors.white
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        MultiBlocProvider(providers: [
+                          BlocProvider(
+                            create: (_) =>
+                                StudentMocktestListBloc(),
+                          ),
+                        ], child: MockTestScreen(showBack: true,)
                         ),
-                      ),
-                      Text('Mocktest', style: TextStyle(
-                          color: Colors.white
-                      ),),
-                    ],
-                  )
-                ],
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 54, 113, 232),
+                        Color.fromARGB(255, 3, 61, 175)
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text( totalMocktest,
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontFamily: 'InterBold',
+                              //color: HexColor(AppColor.colorOfAddStudent),
+                              color: Colors.white
+                          ),
+                        ),
+                        Text('Mocktest', style: TextStyle(
+                            color: Colors.white
+                        ),),
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
           ),

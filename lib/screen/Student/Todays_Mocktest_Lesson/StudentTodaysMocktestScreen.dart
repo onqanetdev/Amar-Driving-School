@@ -1,26 +1,26 @@
 
-import 'package:amar_driving_school/bloc/instructor/todays_mocktest/instructor_todays_mocktest_bloc.dart';
-import 'package:amar_driving_school/bloc/instructor/todays_mocktest/instructor_todays_mocktest_state.dart';
 import 'package:flutter/material.dart';
-import '../../../bloc/instructor/todays_mocktest/instructor_todays_mocktest_event.dart';
-import '../../../helper/helper.dart';
-import '../../../helper/loader_helper.dart';
-import '../../../model/instructor_todays_mocktest_model/instructor_todays_mocktest_model.dart';
-import '../../../widgets/app_header.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class Todaysmocktestscreen extends StatefulWidget {
+import '../../../bloc/student/todays_mocktest_list/student_todays_mocktest_list_bloc.dart';
+import '../../../bloc/student/todays_mocktest_list/student_todays_mocktest_list_event.dart';
+import '../../../bloc/student/todays_mocktest_list/student_todays_mocktest_list_state.dart';
+import '../../../model/student_all_model/student_todays_lesson_mocktest_list_model.dart';
+import '../../../widgets/app_header.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
+
+class Studenttodaysmocktestscreen extends StatefulWidget {
   final bool showBack;
-  const Todaysmocktestscreen({super.key, this.showBack = false});
+  const Studenttodaysmocktestscreen({super.key, this.showBack = false});
 
   @override
-  State<Todaysmocktestscreen> createState() => _TodaysmocktestscreenState();
+  State<Studenttodaysmocktestscreen> createState() => _StudenttodaysmocktestscreenState();
 }
 
-class _TodaysmocktestscreenState extends State<Todaysmocktestscreen>  {
+class _StudenttodaysmocktestscreenState extends State<Studenttodaysmocktestscreen> {
 
-  final List<TodaysMocktestData> allMocktests = [
+   List<StudentTodaysMocktestData> allMocktests = [
 
   ];
 
@@ -35,7 +35,7 @@ class _TodaysmocktestscreenState extends State<Todaysmocktestscreen>  {
 
   bool hasMore = true;
 
-
+  bool isMockLoading = true;
 
   @override
   void initState() {
@@ -65,64 +65,40 @@ class _TodaysmocktestscreenState extends State<Todaysmocktestscreen>  {
 
       listeners: [
 
-        /// MOCKTEST LIST
-        BlocListener<
-            InstructorTodaysMocktestBloc,
-            InstructorTodaysMocktestState>(
+        /// TODAY'S MOCKTEST LIST
+        BlocListener<StudentTodaysMocktestListBloc, StudentTodaysMocktestListState>(
 
           listener: (context, state) {
 
             /// LOADING
-            if(state
-            is InstructorTodaysMocktestLoading
-                && offset == 0) {
+            if(state is StudentTodaysMocktestListLoading) {
 
-              LoaderHelper.show(context);
+              //LoaderHelper.show(context);
+              isMockLoading = true;
             }
 
             /// SUCCESS
-            if(state
-            is InstructorTodaysMocktestSuccess) {
+            if(state is StudentTodaysMocktestListSuccess) {
 
-              LoaderHelper.hide(context);
-
+              // LoaderHelper.hide(context);
+              isMockLoading = false;
               setState(() {
 
-                if(offset == 0) {
-
-                  allMocktests.clear();
-                }
-
-                allMocktests.addAll(
-
-                  //state.mocktestListResponse.data,
-                  state.todaysMocktestResponse.data
-                );
-
-                isLoadingMore = false;
-
-                if(state
-                    .todaysMocktestResponse
-                    .data
-                    .length < limit) {
-
-                  hasMore = false;
-                }
+                allMocktests = state.todaysMocktestListResponse
+                    .data;
               });
             }
 
             /// FAILURE
-            if(state
-            is InstructorTodaysMocktestFailure) {
-
-              LoaderHelper.hide(context);
-
-              //Helper.showToast(context, state.error,);
+            if(state is StudentTodaysMocktestListFailure) {
+              //LoaderHelper.hide(context);
+              isMockLoading = false;
+              print(state.error);
             }
           },
         ),
 
-        /// DELETE MOCKTEST
+
 
       ],
 
@@ -155,7 +131,9 @@ class _TodaysmocktestscreenState extends State<Todaysmocktestscreen>  {
               SizedBox(height: 10,),
               /// LIST
               Expanded(
-                child: allMocktests.isEmpty
+                child: isMockLoading
+                    ? _mocktestShimmer()
+                    : allMocktests.isEmpty
                     ? const Center(
                   child: Text(
                     "No Mocktest Found!",
@@ -173,7 +151,7 @@ class _TodaysmocktestscreenState extends State<Todaysmocktestscreen>  {
                     crossAxisCount: 3,
                     crossAxisSpacing: 15,
                     mainAxisSpacing: 20,
-                    childAspectRatio: 0.8,
+                    childAspectRatio: 0.65,
                   ),
                   itemCount: allMocktests.length,
                   itemBuilder: (context, index) {
@@ -213,7 +191,7 @@ class _TodaysmocktestscreenState extends State<Todaysmocktestscreen>  {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            item.name,
+                            item.name ?? '',
                             textAlign: TextAlign.center,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -236,23 +214,22 @@ class _TodaysmocktestscreenState extends State<Todaysmocktestscreen>  {
   }
 
 
-
   Future<void> fetchLessonList() async {
 
     final prefs = await SharedPreferences.getInstance();
 
-    final userId = prefs.getString('user_id');
+    final userId = prefs.getString('stud_user_id');
 
     offset = 0;
     hasMore = true;
 
 
     //bloc
-    context.read<InstructorTodaysMocktestBloc>().add(
+    context.read<StudentTodaysMocktestListBloc>().add(
 
-      FetchInstructorTodaysMocktest(
+      FetchStudentTodaysMocktestList(
 
-        instructorId: userId.toString(),
+        studentCode: userId.toString(),
 
         //limit: limit.toString(),
 
@@ -274,14 +251,14 @@ class _TodaysmocktestscreenState extends State<Todaysmocktestscreen>  {
 
     final prefs = await SharedPreferences.getInstance();
 
-    final userId = prefs.getString('user_id');
+    final userId = prefs.getString('stud_user_id');
 
     //bloc
-    context.read<InstructorTodaysMocktestBloc>().add(
+    context.read<StudentTodaysMocktestListBloc>().add(
 
-      FetchInstructorTodaysMocktest(
+      FetchStudentTodaysMocktestList(
 
-        instructorId: userId.toString(),
+         studentCode: userId!,
 
         //limit: limit.toString(),
 
@@ -290,4 +267,68 @@ class _TodaysmocktestscreenState extends State<Todaysmocktestscreen>  {
     );
   }
 
+   Widget _mocktestShimmer() {
+     return GridView.builder(
+         padding: const EdgeInsets.symmetric(horizontal: 12),
+         physics: const NeverScrollableScrollPhysics(),
+         itemCount: 6,
+         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+           crossAxisCount: 3,
+           crossAxisSpacing: 15,
+           mainAxisSpacing: 20,
+           childAspectRatio: 0.65,
+         ),
+         itemBuilder: (context, index) {
+           return Shimmer.fromColors(
+             baseColor: Colors.grey.shade300,
+             highlightColor: Colors.grey.shade100,
+             child: Container(
+                 decoration: BoxDecoration(
+                   color: Colors.white,
+                   borderRadius: BorderRadius.circular(12),
+                 ),
+                 padding: const EdgeInsets.symmetric(
+                   vertical: 12,
+                   horizontal: 8,
+                 ),
+                 child: Column(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   children: [
+                   Container(
+                   height: 60,
+                   width: 60,
+                   decoration: const BoxDecoration(
+                     color: Colors.white,
+                     shape: BoxShape.circle,
+                   ),
+                 ),
+
+                 const SizedBox(height: 12),
+
+             Container(
+               height: 12,
+               width: 70,
+               decoration: BoxDecoration(
+                 color: Colors.white,
+                 borderRadius: BorderRadius.circular(4),
+               ),
+             ),
+
+             const SizedBox(height: 8),
+
+             Container(
+               height: 12,
+               width: 50,
+               decoration: BoxDecoration(
+                 color: Colors.white,
+                 borderRadius: BorderRadius.circular(4),
+               ),
+             ),
+             ],
+           ),
+           ),
+           );
+         },
+     );
+   }
 }
